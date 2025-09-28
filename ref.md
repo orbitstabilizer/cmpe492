@@ -10,6 +10,8 @@ Tue Sep 23 17:52:33 +03 2025
 - The result is that anyone can swap tokens, list a token, or provide liquidity in a pool to earn fees. ( can enlist any token??)
 To incentivize pooling liquidity, there is compensation for liquidity providers. The incentivization of providing liquidity is different in v2, v3, and v4. ( HOW?)
 - v1 November 2018
+- concentrated liquidity model (v3)
+- flash loans ~~ flash accounting
 
 
 - Uniswap pool contract.
