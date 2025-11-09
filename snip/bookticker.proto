@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "./pb";
+
+message BookTicker {
+    string channel = 1;
+    PublicAggreBookTickerV3Api publicbookticker = 315;
+    string symbol = 3;
+    uint64 sendtime = 6;
+}
+
+message PublicAggreBookTickerV3Api {
+    string bidPrice = 1;
+    string bidQuantity = 2;
+    string askPrice = 3;
+    string askQuantity = 4;
+}
