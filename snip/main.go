@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"exchange/pb"
 	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
@@ -28,196 +27,33 @@ var (
 	OKX_WS_URL      = "wss://ws.okx.com:8443/ws/v5/public"
 )
 
-type SubscribeBinanceTicker struct {
-	Method string   `json:"method"`
-	Params []string `json:"params"`
-	ID     int      `json:"id"`
+type Exchange int
+
+const (
+	Binance Exchange = iota
+	Bybit
+	Coinbase
+	Gateio
+	HTX
+	Kucoin
+	Mexc
+	OKX
+	NUM_EXCHANGES
+)
+
+func (e Exchange) String() string {
+	return [...]string{"Binance", "Bybit", "Coinbase", "Gateio", "HTX", "Kucoin", "Mexc", "OKX"}[e]
 }
 
-type BinanceTicker struct {
-	U    int64  `json:"u"`
-	S    string `json:"s"`
-	B    string `json:"b"`
-	BQty string `json:"B"`
-	A    string `json:"a"`
-	AQty string `json:"A"`
-}
+const NUM_SYMBOLS = 3
 
-func (b *BinanceTicker) String() string {
-	return fmt.Sprintf("[Binance] %s Bid: %s Ask: %s", b.S, b.B, b.A)
+type TickerData struct {
+	Bid float64
+	Ask float64
 }
+type TickerBuffer = [NUM_EXCHANGES][NUM_SYMBOLS]TickerData
 
-type SubscribeBybitTicker struct {
-	Op   string   `json:"op"`
-	Args []string `json:"args"`
-}
-
-type BybitTicker struct {
-	Topic string `json:"topic"`
-	Ts    int64  `json:"ts"`
-	Type  string `json:"type"`
-	Data  struct {
-		S   string     `json:"s"`
-		B   [][]string `json:"b"`
-		A   [][]string `json:"a"`
-		U   int64      `json:"u"`
-		Seq int64      `json:"seq"`
-	} `json:"data"`
-	Cts int64 `json:"cts"`
-}
-
-func (b *BybitTicker) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("[Bybit] ")
-	sb.WriteString(b.Data.S)
-	sb.WriteString(" Bid: ")
-	if len(b.Data.B) > 0 {
-		sb.WriteString(b.Data.B[0][0])
-	} else {
-		sb.WriteString("N/A")
-	}
-	sb.WriteString(" Ask: ")
-	if len(b.Data.A) > 0 {
-		sb.WriteString(b.Data.A[0][0])
-	} else {
-		sb.WriteString("N/A")
-	}
-	return sb.String()
-}
-
-type CoinbaseTicker struct {
-	Type        string `json:"type"`
-	Sequence    int64  `json:"sequence"`
-	ProductID   string `json:"product_id"`
-	Price       string `json:"price"`
-	Open24h     string `json:"open_24h"`
-	Volume24h   string `json:"volume_24h"`
-	Low24h      string `json:"low_24h"`
-	High24h     string `json:"high_24h"`
-	BestBid     string `json:"best_bid"`
-	BestBidSize string `json:"best_bid_size"`
-	BestAsk     string `json:"best_ask"`
-	BestAskSize string `json:"best_ask_size"`
-	Side        string `json:"side"`
-	Time        string `json:"time"`
-	TradeID     int64  `json:"trade_id"`
-	LastSize    string `json:"last_size"`
-}
-
-func (c *CoinbaseTicker) String() string {
-	return fmt.Sprintf("[Coinbase] %s Bid: %s Ask: %s", c.ProductID, c.BestBid, c.BestAsk)
-}
-
-type GateioTicker struct {
-	Time    int64  `json:"time"`
-	TimeMs  int64  `json:"time_ms"`
-	Channel string `json:"channel"`
-	Event   string `json:"event"`
-	Result  struct {
-		T  int64  `json:"t"`
-		U  int64  `json:"u"`
-		S  string `json:"s"`
-		B  string `json:"b"`
-		BQ string `json:"B"`
-		A  string `json:"a"`
-		AQ string `json:"A"`
-	} `json:"result"`
-}
-
-func (g *GateioTicker) String() string {
-	return fmt.Sprintf("[Gateio] %s Bid: %s Ask: %s", g.Result.S, g.Result.B, g.Result.A)
-}
-
-type HTXTicker struct {
-	Ch   string `json:"ch"`
-	Ts   int64  `json:"ts"`
-	Tick struct {
-		SeqId     int64   `json:"seqId"`
-		Ask       float64 `json:"ask"`
-		AskSize   float64 `json:"askSize"`
-		Bid       float64 `json:"bid"`
-		BidSize   float64 `json:"bidSize"`
-		QuoteTime int64   `json:"quoteTime"`
-		Symbol    string  `json:"symbol"`
-	} `json:"tick"`
-}
-
-func (h *HTXTicker) String() string {
-	return fmt.Sprintf("[HTX] %s Bid: %f Ask: %f", strings.ToUpper(h.Tick.Symbol), h.Tick.Bid, h.Tick.Ask)
-}
-
-type SubscribeKucoinTicker struct {
-	ID             string `json:"id"`
-	Type           string `json:"type"`
-	Topic          string `json:"topic"`
-	PrivateChannel bool   `json:"privateChannel"`
-	Response       bool   `json:"response"`
-}
-
-type KucoinTicker struct {
-	Topic   string `json:"topic"`
-	Type    string `json:"type"`
-	Subject string `json:"subject"`
-	Data    struct {
-		BestAsk     string `json:"bestAsk"`
-		BestAskSize string `json:"bestAskSize"`
-		BestBid     string `json:"bestBid"`
-		BestBidSize string `json:"bestBidSize"`
-		Price       string `json:"price"`
-		Sequence    string `json:"sequence"`
-		Size        string `json:"size"`
-		Time        int64  `json:"time"`
-	} `json:"data"`
-}
-
-func (k *KucoinTicker) String() string {
-	symbol := strings.Split(k.Topic, ":")[1]
-	return fmt.Sprintf("[Kucoin] %s Bid: %s Ask: %s", symbol, k.Data.BestBid, k.Data.BestAsk)
-}
-
-type SubscribeMexcTicker struct {
-	Method string   `json:"method"`
-	Params []string `json:"params"`
-}
-
-type MexcTicker struct {
-	pb.BookTicker
-}
-
-func (m *MexcTicker) String() string {
-	data := m.Publicbookticker
-	return fmt.Sprintf("[Mexc] %s Bid: %s Ask: %s", m.Symbol, data.BidPrice, data.AskPrice)
-}
-
-type OKXArg struct {
-	Channel string `json:"channel"`
-	InstId  string `json:"instId"`
-}
-
-type SubscribeOKXTicker struct {
-	Op   string   `json:"op"`
-	Args []OKXArg `json:"args"`
-}
-
-type OKXTicker struct {
-	Arg struct {
-		Channel string `json:"channel"`
-		InstId  string `json:"instId"`
-	} `json:"arg"`
-	Data []struct {
-		Asks  [][]string `json:"asks"`
-		Bids  [][]string `json:"bids"`
-		Ts    string     `json:"ts"`
-		SeqId int64      `json:"seqId"`
-	} `json:"data"`
-}
-
-func (o *OKXTicker) String() string {
-	symbol := strings.ReplaceAll(o.Arg.InstId, "-", "")
-	bid := o.Data[0].Bids[0][0]
-	ask := o.Data[0].Asks[0][0]
-	return fmt.Sprintf("[OKX] %s Bid: %s Ask: %s", symbol, bid, ask)
-}
+var tickerBuffer *TickerBuffer
 
 func connectOKX(shouldClose *bool) {
 	conn, _, err := websocket.DefaultDialer.Dial(OKX_WS_URL, nil)
@@ -256,7 +92,17 @@ func connectOKX(shouldClose *bool) {
 			continue
 		}
 		if len(ticker.Data) > 0 {
-			println(ticker.String())
+			// println(ticker.String())
+			tickId := -1
+			for i, symbol := range symbols {
+				if ticker.Arg.InstId == symbol {
+					tickId = i
+					break
+				}
+			}
+			if tickId != -1 {
+				ticker.save(tickId)
+			}
 		}
 	}
 }
@@ -295,7 +141,17 @@ func connectMexc(shouldClose *bool) {
 			// This might fail on non-data messages like heartbeat
 			continue
 		}
-		println(ticker.String())
+		// println(ticker.String())
+		tickId := -1
+		for i, symbol := range symbols {
+			if ticker.Symbol == symbol {
+				tickId = i
+				break
+			}
+		}
+		if tickId != -1 {
+			ticker.save(tickId)
+		}
 	}
 }
 func connectKucoin(shouldClose *bool) {
@@ -377,7 +233,17 @@ func connectKucoin(shouldClose *bool) {
 
 		var ticker KucoinTicker
 		if err := json.Unmarshal(msg, &ticker); err == nil && ticker.Type == "message" {
-			println(ticker.String())
+			// println(ticker.String())
+			tickId := -1
+			for i, symbol := range symbols {
+				if ticker.Topic == "/market/ticker:"+symbol {
+					tickId = i
+					break
+				}
+			}
+			if tickId != -1 {
+				ticker.save(tickId)
+			}
 		}
 	}
 }
@@ -438,7 +304,17 @@ func connectHTX(shouldClose *bool) {
 			continue
 		}
 		if ticker.Ch != "" {
-			fmt.Println(ticker.String())
+			// fmt.Println(ticker.String())
+			tickId := -1
+			for i, symbol := range symbols {
+				if ticker.Tick.Symbol == symbol {
+					tickId = i
+					break
+				}
+			}
+			if tickId != -1 {
+				ticker.save(tickId)
+			}
 		}
 	}
 }
@@ -474,7 +350,17 @@ func connectGateio(shouldClose *bool) {
 		}
 		ticker := GateioTicker{}
 		json.Unmarshal(message, &ticker)
-		println(ticker.String())
+		// println(ticker.String())
+		tickId := -1
+		for i, symbol := range symbols {
+			if ticker.Result.S == symbol {
+				tickId = i
+				break
+			}
+		}
+		if tickId != -1 {
+			ticker.save(tickId)
+		}
 	}
 }
 
@@ -515,7 +401,17 @@ func connectCoinbase(shouldClose *bool) {
 		ticker := CoinbaseTicker{}
 		json.Unmarshal(message, &ticker)
 		if ticker.Type == "ticker" {
-			println(ticker.ProductID + " Bid: " + ticker.BestBid + " Ask: " + ticker.BestAsk)
+			// println(ticker.ProductID + " Bid: " + ticker.BestBid + " Ask: " + ticker.BestAsk)
+			tickId := -1
+			for i, symbol := range symbols {
+				if ticker.ProductID == symbol {
+					tickId = i
+					break
+				}
+			}
+			if tickId != -1 {
+				ticker.save(tickId)
+			}
 		}
 	}
 }
@@ -556,7 +452,18 @@ func connectBinance(shouldClose *bool) {
 		if err != nil {
 			panic(err)
 		}
-		println(ticker.String())
+		// println(ticker.String())
+		tickId := -1
+		for i, symbol := range symbols {
+			// ticker.S is upper case
+			if ticker.S == strings.ToUpper(symbol) {
+				tickId = i
+				break
+			}
+		}
+		if tickId != -1 {
+			ticker.save(tickId)
+		}
 	}
 }
 
@@ -595,7 +502,17 @@ func connectBybit(shouldClose *bool) {
 		}
 		ticker := BybitTicker{}
 		json.Unmarshal(message, &ticker)
-		println(ticker.String())
+		// println(ticker.String())
+		tickId := -1
+		for i, symbol := range symbols {
+			if ticker.Data.S == symbol {
+				tickId = i
+				break
+			}
+		}
+		if tickId != -1 {
+			ticker.save(tickId)
+		}
 
 	}
 }
@@ -604,6 +521,14 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 	shouldClose := false
+
+	w, err := NewSHMWriter[TickerBuffer](".ticker.data")
+	defer w.Close()
+	if err != nil {
+		panic(err)
+	}
+	tickerBuffer = w.Data
+
 	go connectBinance(&shouldClose)
 	go connectBybit(&shouldClose)
 	go connectCoinbase(&shouldClose)

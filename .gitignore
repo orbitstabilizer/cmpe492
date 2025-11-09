@@ -2,3 +2,4 @@
 venv
 *PYCACHE*
 .DS_Store
+snip/.ticker.data
