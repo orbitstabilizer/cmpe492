@@ -6,6 +6,11 @@ shm_path = ".ticker.data"
 data = load_data(shm_path)
 
 
+symbol_to_value = {
+    sym.name: sym.value
+    for sym in
+    Symbols
+}
     
 
 def main():
@@ -22,9 +27,10 @@ def main():
     st.title("Dashboard")
 
     # choose symbol index
-    symbol_index = st.sidebar.selectbox("Select Symbol Index", options=[0, 1, 2], index=0)
-    st.subheader(f"{Symbols(symbol_index).name}")
-    df = get_symol_df(data, symbol_index)
+    symbol_name = st.sidebar.selectbox("Select Symbol Index", options=[sym.name for sym in Symbols], index=0)
+    st.subheader(f"{symbol_name}")
+
+    df = get_symol_df(data, symbol_to_value[symbol_name])
     st.dataframe(df)
 
 

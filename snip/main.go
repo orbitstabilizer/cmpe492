@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -56,6 +57,7 @@ type TickerBuffer = [NUM_EXCHANGES][NUM_SYMBOLS]TickerData
 var tickerBuffer *TickerBuffer
 
 func connectOKX(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(OKX_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -84,7 +86,8 @@ func connectOKX(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("OKX read error:", err)
+			goto RECONNECT
 		}
 		ticker := OKXTicker{}
 		if err := json.Unmarshal(message, &ticker); err != nil {
@@ -108,6 +111,7 @@ func connectOKX(shouldClose *bool) {
 }
 
 func connectMexc(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(MEXC_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -134,7 +138,8 @@ func connectMexc(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("Mexc read error:", err)
+			goto RECONNECT
 		}
 		var ticker MexcTicker
 		if err := proto.Unmarshal(message, &ticker); err != nil {
@@ -155,7 +160,8 @@ func connectMexc(shouldClose *bool) {
 	}
 }
 func connectKucoin(shouldClose *bool) {
-	// 1. Request WS token
+RECONNECT:
+	//  request WS token
 	resp, err := http.Post("https://api.kucoin.com/api/v1/bullet-public", "application/json", nil)
 	if err != nil {
 		panic(err)
@@ -183,14 +189,12 @@ func connectKucoin(shouldClose *bool) {
 	pingInterval := time.Duration(serverInfo["pingInterval"].(float64)) * time.Millisecond
 	wsUrl := serverInfo["endpoint"].(string) + "?token=" + token
 
-	// 2. Connect to WS
 	conn, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close()
 
-	// 3. Subscribe to tickers
 	symbols := []string{"BTC-USDT", "ETH-USDT", "BNB-USDT"}
 	for _, symbol := range symbols {
 		subMsg := SubscribeKucoinTicker{
@@ -206,7 +210,7 @@ func connectKucoin(shouldClose *bool) {
 		time.Sleep(200 * time.Millisecond) // avoid rate limits
 	}
 
-	// 4. Start ping loop in background
+	//  start ping loop in background
 	go func() {
 		ticker := time.NewTicker(time.Duration(float64(pingInterval) * 0.9))
 		defer ticker.Stop()
@@ -223,12 +227,11 @@ func connectKucoin(shouldClose *bool) {
 		}
 	}()
 
-	// 5. Read loop
 	for !*shouldClose {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("Read error:", err)
-			return
+			log.Println("Kucoin read error:", err)
+			goto RECONNECT
 		}
 
 		var ticker KucoinTicker
@@ -248,6 +251,7 @@ func connectKucoin(shouldClose *bool) {
 	}
 }
 func connectHTX(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(HTX_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -272,7 +276,8 @@ func connectHTX(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("HTX read error:", err)
+			goto RECONNECT
 		}
 
 		// Decompress gzip payload
@@ -319,6 +324,7 @@ func connectHTX(shouldClose *bool) {
 	}
 }
 func connectGateio(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(GATEIO_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -346,7 +352,8 @@ func connectGateio(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("Gateio read error:", err)
+			goto RECONNECT
 		}
 		ticker := GateioTicker{}
 		json.Unmarshal(message, &ticker)
@@ -365,6 +372,7 @@ func connectGateio(shouldClose *bool) {
 }
 
 func connectCoinbase(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(COINBASE_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -396,7 +404,9 @@ func connectCoinbase(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("Coinbase read error:", err)
+			goto RECONNECT
+
 		}
 		ticker := CoinbaseTicker{}
 		json.Unmarshal(message, &ticker)
@@ -417,6 +427,7 @@ func connectCoinbase(shouldClose *bool) {
 }
 
 func connectBinance(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(BINANCE_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -450,7 +461,8 @@ func connectBinance(shouldClose *bool) {
 		ticker := BinanceTicker{}
 		json.Unmarshal(message, &ticker)
 		if err != nil {
-			panic(err)
+			log.Println("Binance read error:", err)
+			goto RECONNECT
 		}
 		// println(ticker.String())
 		tickId := -1
@@ -468,6 +480,7 @@ func connectBinance(shouldClose *bool) {
 }
 
 func connectBybit(shouldClose *bool) {
+RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(BYBIT_WS_URL, nil)
 	if err != nil {
 		panic(err)
@@ -498,7 +511,8 @@ func connectBybit(shouldClose *bool) {
 	for !*shouldClose {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			log.Println("Bybit read error:", err)
+			goto RECONNECT
 		}
 		ticker := BybitTicker{}
 		json.Unmarshal(message, &ticker)
