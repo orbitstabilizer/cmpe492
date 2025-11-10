@@ -15,7 +15,7 @@ symbol_to_value = {
 
 def main():
     refresh_interval = st.sidebar.number_input(
-        "Auto-Refresh Interval (seconds/10)", min_value=5, max_value=600, value=10, step=1
+        "Auto-Refresh Interval (seconds/10)", min_value=1, max_value=600, value=1, step=1
     ) * 100  # Convert to milliseconds
     st.markdown("""
         <style>

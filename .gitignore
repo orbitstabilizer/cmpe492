@@ -3,3 +3,4 @@ venv
 *PYCACHE*
 .DS_Store
 snip/.ticker.data
+price-index/.ticker.data
