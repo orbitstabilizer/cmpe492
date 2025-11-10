@@ -1,0 +1,1602 @@
+{
+  "v3_0xd35EFAE4097d005720608Eaf37E42a5936C94B44": {
+    "address": "0xd35EFAE4097d005720608Eaf37E42a5936C94B44",
+    "version": "V3",
+    "token0": "0x111111111117dC0aa78b770fA6A738034120C302",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x111111111117dC0aa78b770fA6A738034120C302",
+      "symbol": "1INCH",
+      "name": "1INCH Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x629D22E6eEaC46A11dBC96be93b90aee9309Be4c": {
+    "address": "0x629D22E6eEaC46A11dBC96be93b90aee9309Be4c",
+    "version": "V2",
+    "token0": "0xAaAAAA20D9E0e2461697782ef11675f668207961",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xAaAAAA20D9E0e2461697782ef11675f668207961",
+      "symbol": "AURORA",
+      "name": "Aurora",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x60594a405d53811d3BC4766596EFD80fd545A270": {
+    "address": "0x60594a405d53811d3BC4766596EFD80fd545A270",
+    "version": "V3",
+    "token0": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      "symbol": "DAI",
+      "name": "Dai Stablecoin",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "0x7F517657496C09c43CC28D0cA131E35dCD557E02": {
+    "address": "0x7F517657496C09c43CC28D0cA131E35dCD557E02",
+    "version": "V2",
+    "token0": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "token1": "0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D",
+    "token0_info": {
+      "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      "symbol": "DAI",
+      "name": "Dai Stablecoin",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D",
+      "symbol": "RAIL",
+      "name": "Rail",
+      "decimals": 18
+    }
+  },
+  "v3_0xE0554a476A092703abdB3Ef35c80e0D76d32939F": {
+    "address": "0xE0554a476A092703abdB3Ef35c80e0D76d32939F",
+    "version": "V3",
+    "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 100,
+    "fee_percent": 0.01
+  },
+  "v3_0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640": {
+    "address": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
+    "version": "V3",
+    "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "0x169a19B8603102f1DF095e3EE3B15e66629d5bA0": {
+    "address": "0x169a19B8603102f1DF095e3EE3B15e66629d5bA0",
+    "version": "V2",
+    "token0": "0xAcBF265d834C25993D6836d8555bE62d3742E5c0",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xAcBF265d834C25993D6836d8555bE62d3742E5c0",
+      "symbol": "GORO",
+      "name": "Goro by Matt Furie",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x32992B8b9B85C7b8474D02E428F03ccd52E3BC7D": {
+    "address": "0x32992B8b9B85C7b8474D02E428F03ccd52E3BC7D",
+    "version": "V2",
+    "token0": "0x6DCC10DB1b1A7F7A49F6cD3669114aff053295fc",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x6DCC10DB1b1A7F7A49F6cD3669114aff053295fc",
+      "symbol": "VALENTINE",
+      "name": "Valentine",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0xE5d5F8f61B1555f1a27488a122fB3cDE2EE16F2b": {
+    "address": "0xE5d5F8f61B1555f1a27488a122fB3cDE2EE16F2b",
+    "version": "V2",
+    "token0": "0x4385328cc4D643Ca98DfEA734360C0F596C83449",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x4385328cc4D643Ca98DfEA734360C0F596C83449",
+      "symbol": "TOMI",
+      "name": "tomi Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    }
+  },
+  "0x356Ffe9a7710B3Ea79BCC1b01ECf4E5C856F95b5": {
+    "address": "0x356Ffe9a7710B3Ea79BCC1b01ECf4E5C856F95b5",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    }
+  },
+  "0x8C1c499b1796D7F3C2521AC37186B52De024e58c": {
+    "address": "0x8C1c499b1796D7F3C2521AC37186B52De024e58c",
+    "version": "V2",
+    "token0": "0x31c8EAcBFFdD875c74b94b077895Bd78CF1E64A3",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x31c8EAcBFFdD875c74b94b077895Bd78CF1E64A3",
+      "symbol": "RAD",
+      "name": "Radicle",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    }
+  },
+  "v3_0x360acF12e72044ba3eaAA654E51E4725c699DcB1": {
+    "address": "0x360acF12e72044ba3eaAA654E51E4725c699DcB1",
+    "version": "V3",
+    "token0": "0x6985884C4392D348587B19cb9eAAf157F13271cd",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x6985884C4392D348587B19cb9eAAf157F13271cd",
+      "symbol": "ZRO",
+      "name": "LayerZero",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0xc7bBeC68d12a0d1830360F8Ec58fA599bA1b0e9b": {
+    "address": "0xc7bBeC68d12a0d1830360F8Ec58fA599bA1b0e9b",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 100,
+    "fee_percent": 0.01
+  },
+  "0x454954e9aFC59FAD90ae04068691304D2F5E249F": {
+    "address": "0x454954e9aFC59FAD90ae04068691304D2F5E249F",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xf477AC7719e2e659001455cDDA0cc8f3aD10b604",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xf477AC7719e2e659001455cDDA0cc8f3aD10b604",
+      "symbol": "AUTOS",
+      "name": "CryptoAutos",
+      "decimals": 18
+    }
+  },
+  "0x16aC64ddFaCca437bE7FE0dA0c45Bcd97227588a": {
+    "address": "0x16aC64ddFaCca437bE7FE0dA0c45Bcd97227588a",
+    "version": "V2",
+    "token0": "0x240D6FAF8c3B1A7394e371792A3bf9D28DD65515",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x240D6FAF8c3B1A7394e371792A3bf9D28DD65515",
+      "symbol": "BRETT",
+      "name": "Brett",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x94391eEcd76D9cB35013d7F263b64921e31842c8": {
+    "address": "0x94391eEcd76D9cB35013d7F263b64921e31842c8",
+    "version": "V3",
+    "token0": "0x40FD72257597aA14C7231A7B1aaa29Fce868F677",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x40FD72257597aA14C7231A7B1aaa29Fce868F677",
+      "symbol": "XOR",
+      "name": "Sora Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x8878Df9E1A7c87dcBf6d3999D997f262C05D8C70": {
+    "address": "0x8878Df9E1A7c87dcBf6d3999D997f262C05D8C70",
+    "version": "V2",
+    "token0": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xBBbbCA6A901c926F240b89EacB641d8Aec7AEafD",
+      "symbol": "LRC",
+      "name": "LoopringCoin V2",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x42D52847BE255eacEE8c3f96b3B223c0B3cC0438": {
+    "address": "0x42D52847BE255eacEE8c3f96b3B223c0B3cC0438",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xD13c7342e1ef687C5ad21b27c2b65D772cAb5C8c",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xD13c7342e1ef687C5ad21b27c2b65D772cAb5C8c",
+      "symbol": "UOS",
+      "name": "Ultra Token",
+      "decimals": 4
+    }
+  },
+  "0x5E3B6903b10387042e234543E87a14e4A40dBD95": {
+    "address": "0x5E3B6903b10387042e234543E87a14e4A40dBD95",
+    "version": "V2",
+    "token0": "0x2F20262108D50ec9c914c7aFcbCef6f80bAf3E7e",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x2F20262108D50ec9c914c7aFcbCef6f80bAf3E7e",
+      "symbol": "ANTIGRAV",
+      "name": "AntiGravity",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x704aD8d95C12D7FEA531738faA94402725acB035": {
+    "address": "0x704aD8d95C12D7FEA531738faA94402725acB035",
+    "version": "V2",
+    "token0": "0x76e222b07C53D28b89b0bAc18602810Fc22B49A8",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x76e222b07C53D28b89b0bAc18602810Fc22B49A8",
+      "symbol": "JOE",
+      "name": "Joe Coin",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0xCb2286d9471cc185281c4f763d34A962ED212962": {
+    "address": "0xCb2286d9471cc185281c4f763d34A962ED212962",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
+      "symbol": "AMPL",
+      "name": "Ampleforth",
+      "decimals": 9
+    }
+  },
+  "0xc5be99A02C6857f9Eac67BbCE58DF5572498F40c": {
+    "address": "0xc5be99A02C6857f9Eac67BbCE58DF5572498F40c",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
+      "symbol": "AMPL",
+      "name": "Ampleforth",
+      "decimals": 9
+    }
+  },
+  "v3_0x27941A235804f33D81aDaBb2d56589c5f6Ea6556": {
+    "address": "0x27941A235804f33D81aDaBb2d56589c5f6Ea6556",
+    "version": "V3",
+    "token0": "0x643C4E15d7d62Ad0aBeC4a9BD4b001aA3Ef52d66",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x643C4E15d7d62Ad0aBeC4a9BD4b001aA3Ef52d66",
+      "symbol": "SYRUP",
+      "name": "Syrup Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0xF12533a96712133d9Bb97C24de5BCf52F48851BD": {
+    "address": "0xF12533a96712133d9Bb97C24de5BCf52F48851BD",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdd3B11eF34cd511a2DA159034a05fcb94D806686",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdd3B11eF34cd511a2DA159034a05fcb94D806686",
+      "symbol": "REKT",
+      "name": "Rekt",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x318Ba85CA49a3B12d3cf9c72cc72b29316971802": {
+    "address": "0x318Ba85CA49a3B12d3cf9c72cc72b29316971802",
+    "version": "V2",
+    "token0": "0x42069026EAC8Eee0Fd9b5f7aDFa4f6E6D69a2B39",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x42069026EAC8Eee0Fd9b5f7aDFa4f6E6D69a2B39",
+      "symbol": "MSTR",
+      "name": "MSTR2100",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x28028CB848361930d2dc1F502439050A6EE5E4c2": {
+    "address": "0x28028CB848361930d2dc1F502439050A6EE5E4c2",
+    "version": "V3",
+    "token0": "0x111111111117dC0aa78b770fA6A738034120C302",
+    "token1": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    "token0_info": {
+      "address": "0x111111111117dC0aa78b770fA6A738034120C302",
+      "symbol": "1INCH",
+      "name": "1INCH Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      "symbol": "LINK",
+      "name": "ChainLink Token",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x877E453c453132f3f812984184A20241bBA8dC39": {
+    "address": "0x877E453c453132f3f812984184A20241bBA8dC39",
+    "version": "V2",
+    "token0": "0x61e24Ce4efe61EB2efd6AC804445df65f8032955",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x61e24Ce4efe61EB2efd6AC804445df65f8032955",
+      "symbol": "RTV",
+      "name": "Revolution Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36": {
+    "address": "0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x69c66BeAfB06674Db41b22CFC50c34A93b8d82a2": {
+    "address": "0x69c66BeAfB06674Db41b22CFC50c34A93b8d82a2",
+    "version": "V2",
+    "token0": "0x8390a1DA07E376ef7aDd4Be859BA74Fb83aA02D5",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x8390a1DA07E376ef7aDd4Be859BA74Fb83aA02D5",
+      "symbol": "GROK",
+      "name": "GROK",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x11b815efB8f581194ae79006d24E0d814B7697F6": {
+    "address": "0x11b815efB8f581194ae79006d24E0d814B7697F6",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "v3_0x56534741CD8B152df6d48AdF7ac51f75169A83b2": {
+    "address": "0x56534741CD8B152df6d48AdF7ac51f75169A83b2",
+    "version": "V3",
+    "token0": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "symbol": "WBTC",
+      "name": "Wrapped BTC",
+      "decimals": 8
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "v3_0x54E58c986818903d2d86dAfE03f5F5E6C2cA6710": {
+    "address": "0x54E58c986818903d2d86dAfE03f5F5E6C2cA6710",
+    "version": "V3",
+    "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token1": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    "token0_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+      "symbol": "cbBTC",
+      "name": "Coinbase Wrapped BTC",
+      "decimals": 8
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "v3_0xD0fC8bA7E267f2bc56044A7715A489d851dC6D78": {
+    "address": "0xD0fC8bA7E267f2bc56044A7715A489d851dC6D78",
+    "version": "V3",
+    "token0": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "symbol": "UNI",
+      "name": "Uniswap",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0x9a772018FbD77fcD2d25657e5C547BAfF3Fd7D16": {
+    "address": "0x9a772018FbD77fcD2d25657e5C547BAfF3Fd7D16",
+    "version": "V3",
+    "token0": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "symbol": "WBTC",
+      "name": "Wrapped BTC",
+      "decimals": 8
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "0x60031819a16266d896268cfEa5d5be0b6c2B5D75": {
+    "address": "0x60031819a16266d896268cfEa5d5be0b6c2B5D75",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+      "symbol": "VRA",
+      "name": "VERA",
+      "decimals": 18
+    }
+  },
+  "0xE0Dfd3E456c28DC1bE6cf8886C70f9C2C6c378Bd": {
+    "address": "0xE0Dfd3E456c28DC1bE6cf8886C70f9C2C6c378Bd",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xd18199527eD322dbD42866A46bbfd9f8506b4D07",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xd18199527eD322dbD42866A46bbfd9f8506b4D07",
+      "symbol": "FINE",
+      "name": "EVERYTHING IS FINE NOBODY IS HAPPY",
+      "decimals": 9
+    }
+  },
+  "0xe0a0De6a56a79F45669f15B467DbeB4649ae67E2": {
+    "address": "0xe0a0De6a56a79F45669f15B467DbeB4649ae67E2",
+    "version": "V2",
+    "token0": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+      "symbol": "DRGN",
+      "name": "Dragon",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x4f9FcdAE3950A033074b93e269B6C382109Fae71": {
+    "address": "0x4f9FcdAE3950A033074b93e269B6C382109Fae71",
+    "version": "V2",
+    "token0": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+      "symbol": "DRGN",
+      "name": "Dragon",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x44f9469D0d5393d3a01A0D4Fa14FE7713c1aD1f7": {
+    "address": "0x44f9469D0d5393d3a01A0D4Fa14FE7713c1aD1f7",
+    "version": "V3",
+    "token0": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x419c4dB4B9e25d6Db2AD9691ccb832C8D9fDA05E",
+      "symbol": "DRGN",
+      "name": "Dragon",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0xf8e349d1d827a6EdF17eE673664CFAd4ca78C533": {
+    "address": "0xf8e349d1d827a6EdF17eE673664CFAd4ca78C533",
+    "version": "V3",
+    "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token1": "0xbdF43ecAdC5ceF51B7D1772F722E40596BC1788B",
+    "token0_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xbdF43ecAdC5ceF51B7D1772F722E40596BC1788B",
+      "symbol": "SEI",
+      "name": "SEI",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0xA2b04F8133fC25887A436812eaE384e32A8A84F2": {
+    "address": "0xA2b04F8133fC25887A436812eaE384e32A8A84F2",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xDDB3422497E61e13543BeA06989C0789117555c5",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xDDB3422497E61e13543BeA06989C0789117555c5",
+      "symbol": "COTI",
+      "name": "COTI Token",
+      "decimals": 18
+    }
+  },
+  "0xB480D8e20217045955fF936A1339C0972e524C0E": {
+    "address": "0xB480D8e20217045955fF936A1339C0972e524C0E",
+    "version": "V2",
+    "token0": "0x7AaD0869C041e6173d451c3B055A4473c99e4cfd",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x7AaD0869C041e6173d451c3B055A4473c99e4cfd",
+      "symbol": "BUTT BIRD",
+      "name": "Butt Bird",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x03785DeF8168E6bA99c06eb4D1dec29657e0AE6c": {
+    "address": "0x03785DeF8168E6bA99c06eb4D1dec29657e0AE6c",
+    "version": "V2",
+    "token0": "0x76b6F7bD8857195c5165a49a6fF75F84A3F081cA",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x76b6F7bD8857195c5165a49a6fF75F84A3F081cA",
+      "symbol": "BLOCKYBOY",
+      "name": "Blockyboy by Matt Furie",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x519854dD32B4f34F9a407874b0b69218465972D6": {
+    "address": "0x519854dD32B4f34F9a407874b0b69218465972D6",
+    "version": "V2",
+    "token0": "0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D",
+    "token1": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+    "token0_info": {
+      "address": "0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D",
+      "symbol": "RAIL",
+      "name": "Rail",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+      "symbol": "renBTC",
+      "name": "renBTC",
+      "decimals": 8
+    }
+  },
+  "0xe46935aE80E05cdEbD4a4008B6ccaA36d2845370": {
+    "address": "0xe46935aE80E05cdEbD4a4008B6ccaA36d2845370",
+    "version": "V2",
+    "token0": "0x3593D125a4f7849a1B059E64F4517A86Dd60c95d",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x3593D125a4f7849a1B059E64F4517A86Dd60c95d",
+      "symbol": "OM",
+      "name": "MANTRA DAO",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0xff62388c39F4A5C4D58B0E5B7f07438E59A0cF8F": {
+    "address": "0xff62388c39F4A5C4D58B0E5B7f07438E59A0cF8F",
+    "version": "V2",
+    "token0": "0x3593D125a4f7849a1B059E64F4517A86Dd60c95d",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x3593D125a4f7849a1B059E64F4517A86Dd60c95d",
+      "symbol": "OM",
+      "name": "MANTRA DAO",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x1921B852f38bc68430780242B2628d0cA14CEf83": {
+    "address": "0x1921B852f38bc68430780242B2628d0cA14CEf83",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xE0C8b298db4cfFE05d1bEA0bb1BA414522B33C1B",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xE0C8b298db4cfFE05d1bEA0bb1BA414522B33C1B",
+      "symbol": "NCDT",
+      "name": "NCDToken",
+      "decimals": 18
+    }
+  },
+  "v3_0xc6360A062aD0cEB937198a6E23FE33494F9c80a8": {
+    "address": "0xc6360A062aD0cEB937198a6E23FE33494F9c80a8",
+    "version": "V3",
+    "token0": "0x1789e0043623282D5DCc7F213d703C6D8BAfBB04",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x1789e0043623282D5DCc7F213d703C6D8BAfBB04",
+      "symbol": "LINEA",
+      "name": "Linea",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "fee": 100,
+    "fee_percent": 0.01
+  },
+  "0x4F9Fc4E0b79C1cBf16E68863ad5e9De6A94A346C": {
+    "address": "0x4F9Fc4E0b79C1cBf16E68863ad5e9De6A94A346C",
+    "version": "V2",
+    "token0": "0x9ff58067Bd8D239000010c154C6983A325Df138E",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x9ff58067Bd8D239000010c154C6983A325Df138E",
+      "symbol": "PROPC",
+      "name": "Propchain Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    }
+  },
+  "0xE96C108Da71dbDb2aa1056bc55C3a073061a2FA1": {
+    "address": "0xE96C108Da71dbDb2aa1056bc55C3a073061a2FA1",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xd9Fcd98c322942075A5C3860693e9f4f03AAE07b",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xd9Fcd98c322942075A5C3860693e9f4f03AAE07b",
+      "symbol": "EUL",
+      "name": "Euler",
+      "decimals": 18
+    }
+  },
+  "0x717385e1a702F90B6Eb8Cd23150702Ca7217b626": {
+    "address": "0x717385e1a702F90B6Eb8Cd23150702Ca7217b626",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xDDB3422497E61e13543BeA06989C0789117555c5",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xDDB3422497E61e13543BeA06989C0789117555c5",
+      "symbol": "COTI",
+      "name": "COTI Token",
+      "decimals": 18
+    }
+  },
+  "0x0b02428E7c2C24CCf64426e637aeE0C879bd1860": {
+    "address": "0x0b02428E7c2C24CCf64426e637aeE0C879bd1860",
+    "version": "V2",
+    "token0": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token1": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+    "token0_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+      "symbol": "VRA",
+      "name": "VERA",
+      "decimals": 18
+    }
+  },
+  "v3_0x98409d8CA9629FBE01Ab1b914EbF304175e384C8": {
+    "address": "0x98409d8CA9629FBE01Ab1b914EbF304175e384C8",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xF411903cbC70a74d22900a5DE66A2dda66507255",
+      "symbol": "VRA",
+      "name": "VERA",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x5b670A54Cd8C4e6f03d5BBbEdcBaa68C8b2CA2d9": {
+    "address": "0x5b670A54Cd8C4e6f03d5BBbEdcBaa68C8b2CA2d9",
+    "version": "V2",
+    "token0": "0x13d074303C95a34d304F29928dC8A16dEc797e9E",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x13d074303C95a34d304F29928dC8A16dEc797e9E",
+      "symbol": "LAK3",
+      "name": "LAKE",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x88ada7b1dd1C728ea87404CEa7a0780139EB35d1": {
+    "address": "0x88ada7b1dd1C728ea87404CEa7a0780139EB35d1",
+    "version": "V3",
+    "token0": "0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6",
+      "symbol": "POL",
+      "name": "Polygon Ecosystem Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0x38c0E310345D54E8068D236f0923bB5480bA1188": {
+    "address": "0x38c0E310345D54E8068D236f0923bB5480bA1188",
+    "version": "V3",
+    "token0": "0x66a1E37c9b0eAddca17d3662D6c05F4DECf3e110",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x66a1E37c9b0eAddca17d3662D6c05F4DECf3e110",
+      "symbol": "USR",
+      "name": "Resolv USD",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "fee": 100,
+    "fee_percent": 0.01
+  },
+  "0xbe8BC29765E11894f803906Ee1055a344fDf2511": {
+    "address": "0xbe8BC29765E11894f803906Ee1055a344fDf2511",
+    "version": "V2",
+    "token0": "0x7D8146cf21e8D7cbe46054e01588207b51198729",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x7D8146cf21e8D7cbe46054e01588207b51198729",
+      "symbol": "BOB",
+      "name": "BOB",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x2b2e08192b3576c8dcCc27550ec441CFF08aE7BF": {
+    "address": "0x2b2e08192b3576c8dcCc27550ec441CFF08aE7BF",
+    "version": "V2",
+    "token0": "0x3e8D1bF51a5094b6E6c6BBa1b4c1C52fd71D9290",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x3e8D1bF51a5094b6E6c6BBa1b4c1C52fd71D9290",
+      "symbol": "SMOG",
+      "name": "Smog by \ud835\udcdc\ud835\udcea\ud835\udcfd\ud835\udcfd \ud835\udcd5\ud835\udcfe\ud835\udcfb\ud835\udcf2\ud835\udcee",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x6546055f46e866a4B9a4A13e81273e3152BAE5dA": {
+    "address": "0x6546055f46e866a4B9a4A13e81273e3152BAE5dA",
+    "version": "V3",
+    "token0": "0x68749665FF8D2d112Fa859AA293F07A622782F38",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x68749665FF8D2d112Fa859AA293F07A622782F38",
+      "symbol": "XAUt",
+      "name": "Tether Gold",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 500,
+    "fee_percent": 0.05
+  },
+  "0xd3d2E2692501A5c9Ca623199D38826e513033a17": {
+    "address": "0xd3d2E2692501A5c9Ca623199D38826e513033a17",
+    "version": "V2",
+    "token0": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "symbol": "UNI",
+      "name": "Uniswap",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x811beEd0119b4AfCE20D2583EB608C6F7AF1954f": {
+    "address": "0x811beEd0119b4AfCE20D2583EB608C6F7AF1954f",
+    "version": "V2",
+    "token0": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+      "symbol": "SHIB",
+      "name": "SHIBA INU",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x9f2EbE69A86c079f3d4C3B94a11932b676B72f74": {
+    "address": "0x9f2EbE69A86c079f3d4C3B94a11932b676B72f74",
+    "version": "V3",
+    "token0": "0xAC57De9C1A09FeC648E93EB98875B212DB0d460B",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xAC57De9C1A09FeC648E93EB98875B212DB0d460B",
+      "symbol": "BabyDoge",
+      "name": "Baby Doge Coin",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0xc3Db44ADC1fCdFd5671f555236eae49f4A8EEa18": {
+    "address": "0xc3Db44ADC1fCdFd5671f555236eae49f4A8EEa18",
+    "version": "V3",
+    "token0": "0x57e114B691Db790C35207b2e685D4A43181e6061",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x57e114B691Db790C35207b2e685D4A43181e6061",
+      "symbol": "ENA",
+      "name": "ENA",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0xCF6dAAB95c476106ECa715D48DE4b13287ffDEAa": {
+    "address": "0xCF6dAAB95c476106ECa715D48DE4b13287ffDEAa",
+    "version": "V2",
+    "token0": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+      "symbol": "SHIB",
+      "name": "SHIBA INU",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x17C1Ae82D99379240059940093762c5e4539aba5": {
+    "address": "0x17C1Ae82D99379240059940093762c5e4539aba5",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    }
+  },
+  "0xD57d861620210AD8452268d16229f8eDEb86BcB0": {
+    "address": "0xD57d861620210AD8452268d16229f8eDEb86BcB0",
+    "version": "V2",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xDa2E903b0B67F30BF26bD3464f9EE1a383BbbE5F",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xDa2E903b0B67F30BF26bD3464f9EE1a383BbbE5F",
+      "symbol": "MAGA",
+      "name": "PEPE MAGA",
+      "decimals": 18
+    }
+  },
+  "0xe945683B3462D2603a18BDfBB19261C6a4f03aD1": {
+    "address": "0xe945683B3462D2603a18BDfBB19261C6a4f03aD1",
+    "version": "V2",
+    "token0": "0xB90B2A35C65dBC466b04240097Ca756ad2005295",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xB90B2A35C65dBC466b04240097Ca756ad2005295",
+      "symbol": "BOBO",
+      "name": "BOBO",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0xE931b03260B2854e77e8dA8378A1BC017b13cb97": {
+    "address": "0xE931b03260B2854e77e8dA8378A1BC017b13cb97",
+    "version": "V3",
+    "token0": "0x111111111117dC0aa78b770fA6A738034120C302",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x111111111117dC0aa78b770fA6A738034120C302",
+      "symbol": "1INCH",
+      "name": "1INCH Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0xC2C390c6CD3C4e6c2b70727d35a45e8a072F18cA": {
+    "address": "0xC2C390c6CD3C4e6c2b70727d35a45e8a072F18cA",
+    "version": "V3",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83",
+    "token0_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83",
+      "symbol": "EIGEN",
+      "name": "Eigen",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0x948b54A93f5aD1df6B8bFF6Dc249D99CA2EcA052": {
+    "address": "0x948b54A93f5aD1df6B8bFF6Dc249D99CA2EcA052",
+    "version": "V3",
+    "token0": "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+      "symbol": "FET",
+      "name": "Fetch",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0x2a8Ff49323d42Be0Af7a1b2f3005b67da55E0c6b": {
+    "address": "0x2a8Ff49323d42Be0Af7a1b2f3005b67da55E0c6b",
+    "version": "V3",
+    "token0": "0x8e729198d1C59B82bd6bBa579310C40d740A11C2",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x8e729198d1C59B82bd6bBa579310C40d740A11C2",
+      "symbol": "ALVA",
+      "name": "Alvara",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0xda976F3766E032d1A51e0064147F911c1b9DBc4c": {
+    "address": "0xda976F3766E032d1A51e0064147F911c1b9DBc4c",
+    "version": "V2",
+    "token0": "0x8e729198d1C59B82bd6bBa579310C40d740A11C2",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x8e729198d1C59B82bd6bBa579310C40d740A11C2",
+      "symbol": "ALVA",
+      "name": "Alvara",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x684B00a5773679f88598A19976fBeb25a68E9a5f": {
+    "address": "0x684B00a5773679f88598A19976fBeb25a68E9a5f",
+    "version": "V2",
+    "token0": "0x6468e79A80C0eaB0F9A2B574c8d5bC374Af59414",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token0_info": {
+      "address": "0x6468e79A80C0eaB0F9A2B574c8d5bC374Af59414",
+      "symbol": "eXRD",
+      "name": "E-RADIX",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    }
+  },
+  "v3_0xFf29D3E552155180809ea3A877408A4620058086": {
+    "address": "0xFf29D3E552155180809ea3A877408A4620058086",
+    "version": "V3",
+    "token0": "0x940a2dB1B7008B6C776d4faaCa729d6d4A4AA551",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x940a2dB1B7008B6C776d4faaCa729d6d4A4AA551",
+      "symbol": "DUSK",
+      "name": "Dusk Network",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0xD7625BF2F170de004053876f93a82F542402F5Bb": {
+    "address": "0xD7625BF2F170de004053876f93a82F542402F5Bb",
+    "version": "V2",
+    "token0": "0x74C00c26E0aCe673313aEbF749a1a9644EEeFdea",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x74C00c26E0aCe673313aEbF749a1a9644EEeFdea",
+      "symbol": "SPURDO",
+      "name": "SPURDO",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0x3150B450F8325ac4AFbfA52f33EcF00232F1294E": {
+    "address": "0x3150B450F8325ac4AFbfA52f33EcF00232F1294E",
+    "version": "V3",
+    "token0": "0x643C4E15d7d62Ad0aBeC4a9BD4b001aA3Ef52d66",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x643C4E15d7d62Ad0aBeC4a9BD4b001aA3Ef52d66",
+      "symbol": "SYRUP",
+      "name": "Syrup Token",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0x95A45A87Dd4d3A1803039072f37E075F37B23D75": {
+    "address": "0x95A45A87Dd4d3A1803039072f37E075F37B23D75",
+    "version": "V3",
+    "token0": "0x44ff8620b8cA30902395A7bD3F2407e1A091BF73",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x44ff8620b8cA30902395A7bD3F2407e1A091BF73",
+      "symbol": "VIRTUAL",
+      "name": "Virtual Protocol",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  },
+  "v3_0xCba27C8e7115b4Eb50Aa14999BC0866674a96eCB": {
+    "address": "0xCba27C8e7115b4Eb50Aa14999BC0866674a96eCB",
+    "version": "V3",
+    "token0": "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      "symbol": "FLUID",
+      "name": "Fluid",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "v3_0x2404bb21C430C022fDd6f2D84281A933969d64D7": {
+    "address": "0x2404bb21C430C022fDd6f2D84281A933969d64D7",
+    "version": "V3",
+    "token0": "0x3E985250CB137fc1Ff55922116934C5982d29F85",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x3E985250CB137fc1Ff55922116934C5982d29F85",
+      "symbol": "ZENT",
+      "name": "Zentu",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    },
+    "fee": 3000,
+    "fee_percent": 0.3
+  },
+  "0x135A410F1d6384aC86A448DB8c1EACA4Be02e6C2": {
+    "address": "0x135A410F1d6384aC86A448DB8c1EACA4Be02e6C2",
+    "version": "V2",
+    "token0": "0x3E985250CB137fc1Ff55922116934C5982d29F85",
+    "token1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "token0_info": {
+      "address": "0x3E985250CB137fc1Ff55922116934C5982d29F85",
+      "symbol": "ZENT",
+      "name": "Zentu",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6
+    }
+  },
+  "0xb36ec83D844c0579Ec2493f10b2087E96Bb65460": {
+    "address": "0xb36ec83D844c0579Ec2493f10b2087E96Bb65460",
+    "version": "V2",
+    "token0": "0xb2617246d0c6c0087f18703d576831899ca94f01",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0xb2617246d0c6c0087f18703d576831899ca94f01",
+      "symbol": "ZIG",
+      "name": "ZigCoin",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0xB6EA8453C172D0843D9AEa2C34157Ff5D624caF8": {
+    "address": "0xB6EA8453C172D0843D9AEa2C34157Ff5D624caF8",
+    "version": "V2",
+    "token0": "0x27A7dD4aBC130e0DE363e72C29304f274f1436Ea",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x27A7dD4aBC130e0DE363e72C29304f274f1436Ea",
+      "symbol": "BANGERS",
+      "name": "X Bangers",
+      "decimals": 9
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x394Cb9E147B8B288E38615ae04F442A037bCB99F": {
+    "address": "0x394Cb9E147B8B288E38615ae04F442A037bCB99F",
+    "version": "V2",
+    "token0": "0x4521C9aD6A3D4230803aB752Ed238BE11F8B342F",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x4521C9aD6A3D4230803aB752Ed238BE11F8B342F",
+      "symbol": "SANI",
+      "name": "Sanin Inu",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "0x07CE5889D2EB681Af3bD61db24Ab2602c502Bd1B": {
+    "address": "0x07CE5889D2EB681Af3bD61db24Ab2602c502Bd1B",
+    "version": "V2",
+    "token0": "0x0a26c80Be4E060e688d7C23aDdB92cBb5D2C9eCA",
+    "token1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token0_info": {
+      "address": "0x0a26c80Be4E060e688d7C23aDdB92cBb5D2C9eCA",
+      "symbol": "NOX",
+      "name": "NONOS",
+      "decimals": 18
+    },
+    "token1_info": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  },
+  "v3_0xc931D9fEFd06A8361d8057501F1EC522cF69c573": {
+    "address": "0xc931D9fEFd06A8361d8057501F1EC522cF69c573",
+    "version": "V3",
+    "token0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "token1": "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+    "token0_info": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    "token1_info": {
+      "address": "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+      "symbol": "FET",
+      "name": "Fetch",
+      "decimals": 18
+    },
+    "fee": 10000,
+    "fee_percent": 1.0
+  }
+}
