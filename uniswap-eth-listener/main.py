@@ -609,8 +609,12 @@ class AlchemyListener(picows.WSListener):
                         
                         if swaps:
                             for swap in swaps:
-                                if swap.get('pool_address','').lower() not in FILTER_POOLS and swap.get('pair_address','').lower() not in FILTER_POOLS:
-                                    continue
+                                # Apply pool filter if specified
+                                if FILTER_POOLS:
+                                    pool_addr = swap.get('pool_address', '').lower()
+                                    pair_addr = swap.get('pair_address', '').lower()
+                                    if pool_addr not in FILTER_POOLS and pair_addr not in FILTER_POOLS:
+                                        continue
                                 print(self.decoder.format_swap(swap))
 
         except json.JSONDecodeError:
