@@ -463,8 +463,9 @@ func (d *SwapDecoder) printV4Swap(event *V4SwapEvent, receipt *types.Receipt) {
 		amountOut.String(),
 		tokenOut,
 		event.Sender.Hex()[:10]+"...",
-		receipt.TxHash.Hex()[:10]+"...")
-		receipt.TxHash.Hex()[:10]+"...")
+		receipt.TxHash.Hex()[:10]+"...",
+		receipt.TxHash.Hex()[:10]+"...",
+	)
 }
 
 func formatAmount(amount *big.Int, decimals uint8) string {
