@@ -399,6 +399,7 @@ func (l *EVMListener) getTokenInfo(address common.Address) (TokenInfo, error) {
 
 	// Get token symbol
 	var symbol string
+	symbolSuccess := false
 	symbolOut := []interface{}{&symbol}
 	if err := contract.Call(opts, &symbolOut, "symbol"); err != nil {
 		// Some older tokens use bytes32 instead of string
@@ -406,27 +407,37 @@ func (l *EVMListener) getTokenInfo(address common.Address) (TokenInfo, error) {
 		symbolBytes32Out := []interface{}{&symbolBytes32}
 		if err := contract.Call(opts, &symbolBytes32Out, "symbol"); err == nil {
 			symbol = strings.TrimRight(string(symbolBytes32[:]), "\x00")
+			symbolSuccess = true
 		} else {
 			log.Printf("[%s] ⚠ Failed to get symbol for token %s: %v", l.config.Name, addrStr, err)
 			symbol = "UNKNOWN"
 		}
+	} else {
+		symbolSuccess = true
 	}
 
 	// Get token decimals
 	var decimals uint8
+	decimalsSuccess := false
 	decimalsOut := []interface{}{&decimals}
 	if err := contract.Call(opts, &decimalsOut, "decimals"); err != nil {
 		log.Printf("[%s] ⚠ Failed to get decimals for token %s, using default 18: %v", l.config.Name, addrStr, err)
 		decimals = 18
+	} else {
+		decimalsSuccess = true
 	}
 
-	// Cache and return
 	token := TokenInfo{
 		Address:  addrStr,
 		Symbol:   symbol,
 		Decimals: decimals,
 	}
-	l.cache.SetToken(addrStr, token)
+
+	// Only cache if both symbol and decimals were retrieved successfully
+	if symbolSuccess && decimalsSuccess {
+		l.cache.SetToken(addrStr, token)
+	}
+
 	return token, nil
 }
 
