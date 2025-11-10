@@ -1,5 +1,7 @@
 .venv
 venv
+*.env
+*cache.json
 *PYCACHE*
 .DS_Store
 snip/.ticker.data
