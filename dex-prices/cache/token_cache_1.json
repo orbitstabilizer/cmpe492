@@ -1,0 +1,72 @@
+{
+  "0x0706ad473518e94c7e9f378b25c4a2bb985c37f4": {
+    "address": "0x0706ad473518e94c7e9f378b25c4a2bb985c37f4",
+    "symbol": "SOGNI",
+    "decimals": 18
+  },
+  "0x3506424f91fd33084466f402d5d97f05f8e3b4af": {
+    "address": "0x3506424f91fd33084466f402d5d97f05f8e3b4af",
+    "symbol": "CHZ",
+    "decimals": 18
+  },
+  "0x3f80b1c54ae920be41a77f8b902259d48cf24ccf": {
+    "address": "0x3f80b1c54ae920be41a77f8b902259d48cf24ccf",
+    "symbol": "KERNEL",
+    "decimals": 18
+  },
+  "0x430ef9263e76dae63c84292c3409d61c598e9682": {
+    "address": "0x430ef9263e76dae63c84292c3409d61c598e9682",
+    "symbol": "PYR",
+    "decimals": 18
+  },
+  "0x4fdba1d7a46fddfdc5ed552eeb62f335c726ef85": {
+    "address": "0x4fdba1d7a46fddfdc5ed552eeb62f335c726ef85",
+    "symbol": "SALAMI",
+    "decimals": 18
+  },
+  "0x64aa3364f17a4d01c6f1751fd97c2bd3d7e7f1d5": {
+    "address": "0x64aa3364f17a4d01c6f1751fd97c2bd3d7e7f1d5",
+    "symbol": "OHM",
+    "decimals": 9
+  },
+  "0x971c1fc94cd89d65243fa76d8b554412d5f18c3f": {
+    "address": "0x971c1fc94cd89d65243fa76d8b554412d5f18c3f",
+    "symbol": "fwENS",
+    "decimals": 18
+  },
+  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "symbol": "USDC",
+    "decimals": 6
+  },
+  "0xa250cc729bb3323e7933022a67b52200fe354767": {
+    "address": "0xa250cc729bb3323e7933022a67b52200fe354767",
+    "symbol": "fwWETH",
+    "decimals": 18
+  },
+  "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "symbol": "WETH",
+    "decimals": 18
+  },
+  "0xceb67a66c2c8a90980da3a50a3f96c07525a26cb": {
+    "address": "0xceb67a66c2c8a90980da3a50a3f96c07525a26cb",
+    "symbol": "KABOSU",
+    "decimals": 9
+  },
+  "0xd533a949740bb3306d119cc777fa900ba034cd52": {
+    "address": "0xd533a949740bb3306d119cc777fa900ba034cd52",
+    "symbol": "CRV",
+    "decimals": 18
+  },
+  "0xdac17f958d2ee523a2206206994597c13d831ec7": {
+    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "symbol": "USDT",
+    "decimals": 6
+  },
+  "0xddb3422497e61e13543bea06989c0789117555c5": {
+    "address": "0xddb3422497e61e13543bea06989c0789117555c5",
+    "symbol": "COTI",
+    "decimals": 18
+  }
+}

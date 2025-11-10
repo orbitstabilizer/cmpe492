@@ -1,0 +1,174 @@
+{
+  "chains": [
+    {
+      "chainId": 56,
+      "name": "BSC",
+      "chainType": "evm",
+      "rpcWs": "wss://bsc-rpc.publicnode.com",
+      "rpcHttp": "https://bsc-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "symbol": "WBNB",
+        "decimals": 18
+      },
+      "enabled": true
+    },
+    {
+      "chainId": 1,
+      "name": "Ethereum",
+      "chainType": "evm",
+      "rpcWs": "wss://ethereum-rpc.publicnode.com",
+      "rpcHttp": "https://ethereum-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "symbol": "ETH",
+        "decimals": 18
+      },
+      "enabled": true,
+      "filterAddresses": []
+    },
+    {
+      "chainId": 137,
+      "name": "Polygon",
+      "chainType": "evm",
+      "rpcWs": "wss://polygon-bor-rpc.publicnode.com",
+      "rpcHttp": "https://polygon-bor-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+        "symbol": "WMATIC",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 42161,
+      "name": "Arbitrum",
+      "chainType": "evm",
+      "rpcWs": "wss://arbitrum-one-rpc.publicnode.com",
+      "rpcHttp": "https://arbitrum-one-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 10,
+      "name": "Optimism",
+      "chainType": "evm",
+      "rpcWs": "wss://optimism-rpc.publicnode.com",
+      "rpcHttp": "https://optimism-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 8453,
+      "name": "Base",
+      "chainType": "evm",
+      "rpcWs": "wss://base-rpc.publicnode.com",
+      "rpcHttp": "https://base-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 43114,
+      "name": "Avalanche",
+      "chainType": "evm",
+      "rpcWs": "wss://avalanche.drpc.org",
+      "rpcHttp": "https://avalanche.drpc.org",
+      "nativeToken": {
+        "address": "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+        "symbol": "WAVAX",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 250,
+      "name": "Fantom",
+      "chainType": "evm",
+      "rpcWs": "wss://fantom-rpc.publicnode.com",
+      "rpcHttp": "https://fantom-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
+        "symbol": "WFTM",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 25,
+      "name": "Cronos",
+      "chainType": "evm",
+      "rpcWs": "wss://cronos-evm-rpc.publicnode.com",
+      "rpcHttp": "https://cronos-evm-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23",
+        "symbol": "WCRO",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 324,
+      "name": "zkSync",
+      "chainType": "evm",
+      "rpcWs": "wss://mainnet.era.zksync.io/ws",
+      "rpcHttp": "https://mainnet.era.zksync.io",
+      "nativeToken": {
+        "address": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 1101,
+      "name": "Polygon zkEVM",
+      "chainType": "evm",
+      "rpcWs": "wss://polygon-zkevm-rpc.publicnode.com",
+      "rpcHttp": "https://polygon-zkevm-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 42220,
+      "name": "Celo",
+      "chainType": "evm",
+      "rpcWs": "wss://celo-mainnet-rpc.publicnode.com",
+      "rpcHttp": "https://celo-mainnet-rpc.publicnode.com",
+      "nativeToken": {
+        "address": "0x471EcE3750Da237f93B8E339c536989b8978a438",
+        "symbol": "CELO",
+        "decimals": 18
+      },
+      "enabled": false
+    },
+    {
+      "chainId": 0,
+      "name": "Solana",
+      "chainType": "solana",
+      "rpcWs": "wss://api.mainnet-beta.solana.com",
+      "rpcHttp": "https://api.mainnet-beta.solana.com",
+      "nativeToken": {
+        "address": "So11111111111111111111111111111111111111112",
+        "symbol": "SOL",
+        "decimals": 9
+      },
+      "enabled": false
+    }
+  ]
+}
