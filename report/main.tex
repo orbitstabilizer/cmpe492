@@ -1,0 +1,1844 @@
+\documentclass[a4paper,12pt]{report}
+% \usepackage{styles/fbe_tez}
+\usepackage[utf8]{inputenc} % To use Unicode (e.g. Turkish) characters
+\renewcommand{\labelenumi}{(\roman{enumi})}
+\usepackage{amsmath, amsthm, amssymb}
+ % Some extra symbols
+\usepackage[bottom]{footmisc}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{longtable}
+\graphicspath{{figures/}} % Graphics will be here
+
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{float}
+\usepackage{microtype} % Better typography and line breaking
+\emergencystretch=1em % Allow more spacing to avoid overfull boxes
+\hfuzz=0.5pt % Suppress warnings for overfull hbox less than 0.5pt
+\begin{document}
+
+% Title Page
+\title{CMPE 492 \\ Analysis of Market Dynamics of Crypto Exchanges: \\ A Comparative Study of CEX and DEX Markets}
+\author{
+Yusuf Akin \\
+Halil Utku Çelik \\
+Cenk Yilmaz \\
+\textbf{Advisor}:  Can Özturan
+}
+\date{November 2025}
+\maketitle{}
+\pagenumbering{roman}
+\tableofcontents
+
+\chapter{INTRODUCTION}
+\pagenumbering{arabic}
+
+\section{Background: Centralized Exchange Market Structure}
+
+\subsection{Traditional CEX Orderbook Mechanics}
+
+Centralized exchanges (CEXs) such as Binance, Coinbase, and Bybit operate using a traditional \textbf{orderbook model} that has been the foundation of financial markets for decades. Understanding this model is essential for comparing CEX and DEX market dynamics.
+
+\textbf{Orderbook Structure:}
+
+An orderbook is a real-time electronic list of buy (bid) and sell (ask) orders for a specific trading pair, organized by price level. Each entry contains:
+
+\begin{itemize}
+    \item \textbf{Price}: The limit price at which a trader is willing to buy or sell
+    \item \textbf{Quantity}: The amount of the asset available at that price
+    \item \textbf{Side}: Whether the order is a bid (buy) or ask (sell)
+    \item \textbf{Timestamp}: Order arrival time for time-priority matching
+\end{itemize}
+
+\textbf{Order Matching Engine:}
+
+The matching engine operates on a \textbf{price-time priority} algorithm:
+
+\begin{enumerate}
+    \item \textbf{Price Priority}: Orders with better prices are matched first
+    \begin{itemize}
+        \item For bids: Higher prices have priority
+        \item For asks: Lower prices have priority
+    \end{itemize}
+    \item \textbf{Time Priority}: Among orders at the same price, earlier orders are filled first
+\end{enumerate}
+
+When a market order arrives, it immediately executes against the best available limit orders on the opposite side. For example, a market buy order will match with the lowest ask prices until the order is completely filled.
+
+\textbf{Liquidity and Market Depth:}
+
+Market depth refers to the orderbook's ability to absorb large orders without significant price impact. Deep markets have:
+
+\begin{itemize}
+    \item Large volumes of orders at multiple price levels
+    \item Tight bid-ask spreads (small difference between best bid and best ask)
+    \item High liquidity concentration near the current market price
+\end{itemize}
+
+CEXs achieve deep liquidity through:
+\begin{itemize}
+    \item Professional market makers providing continuous two-sided quotes
+    \item High trading volumes attracting more participants
+    \item Low latency infrastructure (sub-millisecond order execution)
+    \item Institutional-grade matching engines processing millions of orders per second
+\end{itemize}
+
+\textbf{Advantages of CEX Orderbooks:}
+
+\begin{itemize}
+    \item \textbf{Efficient Price Discovery}: Continuous order flow enables real-time price formation
+    \item \textbf{Minimal Slippage}: Deep liquidity reduces price impact for large trades
+    \item \textbf{Advanced Order Types}: Support for limit orders, stop-loss, take-profit, iceberg orders
+    \item \textbf{High Throughput}: Capable of handling hundreds of thousands of orders per second
+\end{itemize}
+
+\subsection{Binance and Modern CEX Infrastructure}
+
+Binance, as the world's largest cryptocurrency exchange by trading volume, exemplifies the sophistication of modern CEX infrastructure. Understanding its operational model provides insight into how centralized exchanges achieve their performance characteristics.
+
+\textbf{System Architecture:}
+
+Modern CEXs like Binance employ a highly optimized multi-tier architecture:
+
+\begin{enumerate}
+    \item \textbf{Order Gateway Layer}:
+    \begin{itemize}
+        \item Receives orders via REST API and WebSocket connections
+        \item Performs initial validation (balance checks, rate limiting, authentication)
+        \item Distributes load across multiple matching engine instances
+        \item Latency: Typically 1-10 milliseconds for order acceptance
+    \end{itemize}
+    
+    \item \textbf{Matching Engine Core}:
+    \begin{itemize}
+        \item Maintains in-memory orderbook for each trading pair
+        \item Executes price-time priority matching algorithm
+        \item Processes 1.4 million orders per second (Binance's reported capacity)
+        \item Written in low-latency languages (C++, Java with GC optimization)
+        \item Uses lock-free data structures for concurrent access
+    \end{itemize}
+    
+    \item \textbf{Market Data Distribution}:
+    \begin{itemize}
+        \item Broadcasts orderbook updates via WebSocket to millions of subscribers
+        \item Publishes trade data with microsecond timestamps
+        \item Maintains historical data for charting and analysis
+        \item Supports multiple data feed levels (aggregated vs. raw tick data)
+    \end{itemize}
+    
+    \item \textbf{Settlement and Custody Layer}:
+    \begin{itemize}
+        \item Updates user balances in real-time post-trade
+        \item Manages hot and cold wallet segregation for security
+        \item Handles deposits and withdrawals to blockchain networks
+        \item Implements multi-signature schemes and security protocols
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Market Making Ecosystem:}
+
+CEXs rely heavily on professional market makers to provide liquidity:
+
+\begin{itemize}
+    \item \textbf{Designated Market Makers}: Firms with formal agreements to maintain tight spreads
+    \begin{itemize}
+        \item Typical spread requirement: 0.05-0.1\% for major pairs
+        \item Minimum quote size requirements (e.g., \$10k-100k per side)
+        \item Receive fee rebates or discounts (maker fees often near zero or negative)
+    \end{itemize}
+    
+    \item \textbf{High-Frequency Trading Firms}: Algorithmic traders providing passive liquidity
+    \begin{itemize}
+        \item Co-located servers for minimum latency (sub-millisecond response)
+        \item Sophisticated inventory management and risk controls
+        \item Cross-exchange arbitrage to maintain price alignment
+    \end{itemize}
+    
+    \item \textbf{Retail Limit Orders}: Individual traders placing limit orders
+    \begin{itemize}
+        \item Contribute to overall market depth
+        \item Often provide liquidity at wider spreads
+    \end{itemize}
+\end{itemize}
+
+\textbf{Fee Structure and Incentives:}
+
+Binance's fee model encourages liquidity provision through a tiered VIP system:
+
+\begin{table}[h]
+\begin{center}
+\tiny
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{VIP Level} & \textbf{30-Day Volume (USD)} & \textbf{BNB Balance} & \textbf{Maker Fee} & \textbf{Taker Fee} \\ \hline
+Regular User & $<$ 1M & $\geq$ 0 BNB & 0.1000\% & 0.1000\% \\ \hline
+VIP 1 & $\geq$ 1M & $\geq$ 25 BNB & 0.0900\% & 0.1000\% \\ \hline
+VIP 2 & $\geq$ 5M & $\geq$ 100 BNB & 0.0800\% & 0.1000\% \\ \hline
+VIP 3 & $\geq$ 20M & $\geq$ 250 BNB & 0.0400\% & 0.0600\% \\ \hline
+VIP 4 & $\geq$ 75M & $\geq$ 500 BNB & 0.0400\% & 0.0520\% \\ \hline
+VIP 5 & $\geq$ 150M & $\geq$ 1,000 BNB & 0.0250\% & 0.0310\% \\ \hline
+VIP 6 & $\geq$ 400M & $\geq$ 1,750 BNB & 0.0200\% & 0.0290\% \\ \hline
+VIP 7 & $\geq$ 800M & $\geq$ 3,000 BNB & 0.0190\% & 0.0280\% \\ \hline
+VIP 8 & $\geq$ 2B & $\geq$ 4,500 BNB & 0.0160\% & 0.0250\% \\ \hline
+VIP 9 & $\geq$ 4B & $\geq$ 5,500 BNB & 0.0110\% & 0.0230\% \\ \hline
+\end{tabular}
+\end{center}
+\caption{Binance VIP fee structure (standard spot trading)}
+\end{table}
+
+\textbf{Spot Maker Program:}
+
+For professional market makers, Binance offers additional incentives:
+
+\begin{table}[h]
+\begin{center}
+\small
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Tier} & \textbf{Maker Volume \%} & \textbf{Weekly Volume (USD)} & \textbf{Maker Fee} & \textbf{Taker Fee} \\ \hline
+Tier 1 & 0.05\% & Or 25M & 0.0000\% & Standard VIP \\ \hline
+Tier 2 & 0.15\% & - & -0.0040\% (rebate) & Standard VIP \\ \hline
+Tier 3 & 0.50\% & - & -0.0060\% (rebate) & Standard VIP \\ \hline
+Tier 4 & 1.00\% & - & -0.0080\% (rebate) & Standard VIP \\ \hline
+\end{tabular}
+\end{center}
+\caption{Binance Spot Maker Program (negative fees = rebates earned)}
+\end{table}
+
+The maker-taker model incentivizes liquidity provision:
+\begin{itemize}
+    \item \textbf{Makers} add liquidity by placing limit orders that rest in the orderbook
+    \item \textbf{Takers} remove liquidity by executing against existing orders
+    \item Lower maker fees (or rebates) encourage traders to provide liquidity
+    \item This creates competitive spreads and deep orderbooks
+\end{itemize}
+
+\textbf{Order Types and Advanced Features:}
+
+Professional trading requires sophisticated order types:
+
+\begin{itemize}
+    \item \textbf{Limit Orders}: Buy/sell at specified price or better
+    \item \textbf{Market Orders}: Execute immediately at best available price
+    \item \textbf{Stop-Loss / Take-Profit}: Trigger orders at specific price levels
+    \item \textbf{Iceberg Orders}: Display only partial quantity, hiding total size
+    \item \textbf{Fill-or-Kill (FOK)}: Execute entire order immediately or cancel
+    \item \textbf{Immediate-or-Cancel (IOC)}: Execute partial order immediately, cancel remainder
+    \item \textbf{Post-Only}: Ensure order adds liquidity (cancel if would match immediately)
+    \item \textbf{Trailing Stop}: Dynamic stop price that follows market movement
+\end{itemize}
+
+\textbf{API Infrastructure:}
+
+Modern CEXs provide extensive API access~\cite{binance2024api}:
+
+\begin{itemize}
+    \item \textbf{REST API}:
+    \begin{itemize}
+        \item Query account information, balances, order history
+        \item Place, cancel, and modify orders
+        \item Rate limits: typically 1,200-6,000 requests per minute
+    \end{itemize}
+    
+    \item \textbf{WebSocket Streams}:
+    \begin{itemize}
+        \item Real-time orderbook updates (full depth or top N levels)
+        \item Trade stream with microsecond timestamps
+        \item User data stream for private order/balance updates
+        \item Aggregate trade data for lower-frequency consumers
+    \end{itemize}
+    
+    \item \textbf{FIX Protocol} (for institutional clients):
+    \begin{itemize}
+        \item Industry-standard financial protocol
+        \item Lower latency than REST/WebSocket
+        \item Dedicated connections for high-frequency traders
+    \end{itemize}
+\end{itemize}
+
+\textbf{Security and Risk Management:}
+
+CEXs implement multiple layers of security:
+
+\begin{itemize}
+    \item \textbf{Custody Security}:
+    \begin{itemize}
+        \item Cold wallet storage for 95\%+ of assets
+        \item Multi-signature authorization for withdrawals
+        \item Hardware security modules (HSMs) for key management
+        \item Regular security audits and penetration testing
+    \end{itemize}
+    
+    \item \textbf{Trading Risk Controls}:
+    \begin{itemize}
+        \item Position limits to prevent excessive concentration
+        \item Auto-deleveraging in perpetual futures markets
+        \item Circuit breakers to halt trading during extreme volatility
+        \item Margin call and liquidation systems
+    \end{itemize}
+    
+    \item \textbf{Compliance and KYC}:
+    \begin{itemize}
+        \item Know Your Customer (KYC) verification requirements
+        \item Anti-Money Laundering (AML) transaction monitoring
+        \item Withdrawal limits based on verification level
+        \item Geographic restrictions based on regulatory requirements
+    \end{itemize}
+\end{itemize}
+
+\textbf{Performance Metrics:}
+
+Binance's publicly reported statistics demonstrate CEX capabilities:
+
+\begin{itemize}
+    \item \textbf{Peak Capacity}: 1.4 million orders per second
+    \item \textbf{Average Latency}: 5-10ms from order submission to confirmation
+    \item \textbf{Orderbook Depth}: \$50M+ within 0.5\% for BTC/USDT
+    \item \textbf{Daily Volume}: \$50-100B across all pairs
+    \item \textbf{Available Pairs}: 1,500+ trading pairs
+    \item \textbf{Uptime}: 99.95\%+ (excluding scheduled maintenance)
+\end{itemize}
+
+\textbf{Centralization Trade-offs:}
+
+While CEXs offer superior performance, they require trust in the platform:
+
+\begin{itemize}
+    \item \textbf{Custody Risk}: Users must trust exchange with asset custody
+    \item \textbf{Counterparty Risk}: Exchange insolvency affects all users (e.g., FTX collapse)
+    \item \textbf{Censorship Risk}: Exchanges can freeze accounts or restrict trading
+    \item \textbf{Privacy Concerns}: KYC requirements and transaction surveillance
+    \item \textbf{Single Point of Failure}: Technical issues or attacks affect all users
+\end{itemize}
+
+These trade-offs motivate the development of decentralized alternatives, though DEXs face their own challenges in matching CEX performance and user experience.
+
+\subsection{On-Chain Orderbook Implementations}
+
+While traditional DEXs like Uniswap use Automated Market Makers (AMMs) with liquidity pools, recent innovations have brought orderbook-based trading to blockchain systems. \textbf{Hyperliquid} represents a breakthrough in this space, demonstrating that on-chain orderbooks can achieve performance comparable to centralized exchanges.
+
+\subsubsection{Hyperliquid: A Deep Dive}
+
+Hyperliquid is a Layer-1 blockchain purpose-built for high-performance decentralized trading~\cite{hyperliquid2024docs,yan2024hyperliquid}. Founded by Jeff Yan and Iliensinc (Harvard alumni with backgrounds at Google and high-frequency trading firms), Hyperliquid addresses fundamental limitations of existing DeFi platforms while maintaining full decentralization and transparency.
+
+\textbf{Core Architecture:}
+
+Hyperliquid's technology stack consists of two main layers:
+
+\begin{enumerate}
+    \item \textbf{HyperCore (L1 Blockchain)}:
+    \begin{itemize}
+        \item Custom blockchain designed specifically for trading operations
+        \item HyperBFT consensus algorithm (Byzantine Fault Tolerant variant)
+        \item Optimized for order matching rather than general computation
+        \item Processes over 100,000 orders per second
+        \item Median block time: 0.2 seconds (sub-second finality)
+        \item Deterministic order execution at consensus level
+    \end{itemize}
+    
+    \item \textbf{HyperEVM (Execution Layer)}:
+    \begin{itemize}
+        \item Ethereum Virtual Machine compatible smart contract platform
+        \item Allows developers to build DApps on Hyperliquid
+        \item Seamlessly integrates with the trading engine
+        \item Enables composability with trading primitives
+        \item Lower gas fees compared to Ethereum mainnet
+    \end{itemize}
+\end{enumerate}
+
+\textbf{On-Chain Orderbook Design:}
+
+Unlike traditional DEXs where transactions are broadcast to a mempool and subject to MEV (Maximal Extractable Value) exploitation, Hyperliquid's orderbook operates fundamentally differently:
+
+\begin{enumerate}
+    \item \textbf{Order Submission}:
+    \begin{itemize}
+        \item Orders sent directly to validators via authenticated API
+        \item No public mempool exposure (eliminates front-running)
+        \item Orders included in the next block (~200ms)
+        \item No need to sign each individual transaction after initial setup
+    \end{itemize}
+    
+    \item \textbf{Consensus-Level Matching}:
+    \begin{itemize}
+        \item Matching engine runs as part of block validation
+        \item All validators execute identical matching logic
+        \item Deterministic execution ensures consensus
+        \item Price-time priority strictly enforced on-chain
+    \end{itemize}
+    
+    \item \textbf{State Management}:
+    \begin{itemize}
+        \item Full orderbook state maintained on-chain
+        \item Every order, trade, and cancellation permanently recorded
+        \item Complete transparency and auditability
+        \item Historical data queryable via blockchain explorer
+    \end{itemize}
+    
+    \item \textbf{One-Click Trading Experience}:
+    \begin{itemize}
+        \item Initial wallet signature authorizes trading session
+        \item Subsequent orders submitted without per-transaction signatures
+        \item User experience comparable to centralized exchanges
+        \item Security maintained through session management
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Technical Innovations:}
+
+Several key innovations enable Hyperliquid's performance:
+
+\begin{itemize}
+    \item \textbf{Zero Gas Fees for Trading}:
+    \begin{itemize}
+        \item Users pay only trading fees (0.01\% maker, 0.035\% taker)
+        \item No gas fees for orders, cancellations, or trades
+        \item Protocol subsidizes validator costs through trading revenue
+        \item Removes friction for high-frequency trading strategies
+    \end{itemize}
+    
+    \item \textbf{Efficient State Representation}:
+    \begin{itemize}
+        \item Compressed orderbook encoding to minimize storage
+        \item Incremental state updates rather than full snapshots
+        \item Pruning of filled/cancelled orders
+        \item Optimized data structures for fast order matching
+    \end{itemize}
+    
+    \item \textbf{MEV Protection}:
+    \begin{itemize}
+        \item No public mempool eliminates traditional sandwich attacks
+        \item Consensus-level matching prevents validator manipulation
+        \item Fair ordering based on arrival time at validators
+        \item Transparent execution visible post-trade
+    \end{itemize}
+    
+    \item \textbf{Cross-Chain Bridge}:
+    \begin{itemize}
+        \item Native bridge to Arbitrum (Ethereum L2)
+        \item Supports deposits of USDC, BTC, ETH, SOL
+        \item \$1 flat withdrawal fee (no gas costs)
+        \item Bridge processed by validator set for security
+    \end{itemize}
+\end{itemize}
+
+\textbf{Trading Features:}
+
+Hyperliquid offers professional-grade trading capabilities:
+
+\begin{itemize}
+    \item \textbf{Perpetual Futures}:
+    \begin{itemize}
+        \item Primary trading product with 100+ markets
+        \item Leverage up to 50x (varies by asset)
+        \item USDC-margined positions
+        \item Funding rate mechanism for price anchoring
+        \item Liquidation engine with insurance fund
+    \end{itemize}
+    
+    \item \textbf{Spot Trading}:
+    \begin{itemize}
+        \item Direct buy/sell of cryptocurrencies
+        \item Native support for multiple assets
+        \item Shared liquidity with perpetual markets
+        \item Settlement in traded asset
+    \end{itemize}
+    
+    \item \textbf{Advanced Order Types}:
+    \begin{itemize}
+        \item Limit orders (post-only, reduce-only options)
+        \item Market orders with slippage protection
+        \item Stop-loss and take-profit orders
+        \item Trailing stops for dynamic risk management
+        \item Time-in-force options (GTC, IOC, FOK)
+    \end{itemize}
+    
+    \item \textbf{Portfolio Margin}:
+    \begin{itemize}
+        \item Cross-margining across positions
+        \item Offsetting long/short exposure
+        \item More capital efficient than isolated margin
+        \item Real-time margin calculation
+    \end{itemize}
+\end{itemize}
+
+\textbf{Liquidity Mechanisms:}
+
+Hyperliquid employs multiple mechanisms to ensure deep liquidity:
+
+\begin{enumerate}
+    \item \textbf{HLP Vault (Hyperliquidity Provider)}:
+    \begin{itemize}
+        \item Protocol-owned market making vault
+        \item Community-owned with no management fees
+        \item Provides liquidity across all trading pairs
+        \item Earns from spreads and trading fees
+        \item 46\% of protocol revenue allocated to HLP
+        \item 4-day withdrawal lockup period
+    \end{itemize}
+    
+    \item \textbf{User Vaults}:
+    \begin{itemize}
+        \item Individual traders can create trading vaults
+        \item Other users deposit funds to follow strategies
+        \item Vault creators earn 10\% of profits
+        \item 1-day withdrawal lockup
+        \item Transparent performance metrics
+    \end{itemize}
+    
+    \item \textbf{Direct Market Making}:
+    \begin{itemize}
+        \item Professional market makers can connect via API
+        \item Earn maker rebates (negative fees)
+        \item Compete with HLP vault for best spreads
+        \item Contribute to overall market depth
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Tokenomics and Governance:}
+
+The HYPE token plays a central role in the protocol:
+
+\begin{itemize}
+    \item \textbf{Total Supply}: 1 billion HYPE tokens (fixed)
+    
+    \item \textbf{Distribution}:
+    \begin{itemize}
+        \item 38.9\%: Future emissions and community rewards
+        \item 31.0\%: Genesis airdrop to early users (fully circulating)
+        \item 23.8\%: Core contributors (locked until 2027-2028)
+        \item 6.0\%: Hyper Foundation
+        \item 0.3\%: Community grants
+    \end{itemize}
+    
+    \item \textbf{Utility}:
+    \begin{itemize}
+        \item Staking for network security (~2.5\% APY)
+        \item Governance voting on protocol upgrades
+        \item Fee payments on HyperEVM
+        \item Value accrual through buyback mechanism
+    \end{itemize}
+    
+    \item \textbf{Revenue Distribution}:
+    \begin{itemize}
+        \item 46\%: HLP vault participants
+        \item 54\%: Assistance Fund for HYPE buybacks
+        \item \$1M+ daily revenue at peak
+        \item Creates buy pressure for token
+    \end{itemize}
+\end{itemize}
+
+\textbf{Validator Network:}
+
+Hyperliquid's security relies on a validator set:
+
+\begin{itemize}
+    \item Currently ~16 active validators
+    \item Proof-of-Stake with HYPE staking
+    \item 1-day delegation period, 8-day unstaking (1+7 queue)
+    \item Validators earn portion of transaction fees
+    \item Slashing for byzantine behavior or downtime
+    \item Planned expansion of validator set over time
+\end{itemize}
+
+\textbf{Performance Comparison with CEXs:}
+
+Hyperliquid achieves performance metrics approaching centralized exchanges:
+
+\begin{table}[h]
+\begin{center}
+\small
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Metric} & \textbf{Binance (CEX)} & \textbf{Hyperliquid (DEX)} \\ \hline
+Order Latency & 5-10ms & 200ms (median) \\ \hline
+Throughput & 1.4M orders/sec & 100K orders/sec \\ \hline
+Trading Fees (Taker) & 0.10\% & 0.035\% \\ \hline
+Gas Fees & N/A & \$0 \\ \hline
+Custody & Centralized & Self-custody \\ \hline
+KYC Required & Yes & No \\ \hline
+Transparency & Opaque & Fully on-chain \\ \hline
+Uptime & 99.95\% & 99.9\%+ \\ \hline
+\end{tabular}
+\end{center}
+\caption{Hyperliquid vs. traditional CEX performance}
+\end{table}
+
+\textbf{Comparison with Traditional DEXs:}
+
+\begin{table}[h]
+\begin{center}
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Characteristic} & \textbf{AMM DEXs (Uniswap)} & \textbf{On-Chain Orderbook (Hyperliquid)} \\ \hline
+Liquidity Model & Pooled (AMM) & Orderbook with individual orders \\ \hline
+Price Discovery & Algorithmic (x*y=k) & Continuous bid/ask matching \\ \hline
+Execution Speed & 12+ seconds (Ethereum) & 0.2 seconds median \\ \hline
+Slippage & Proportional to pool depth & Depends on orderbook depth \\ \hline
+Order Types & Market swaps only & Limit, market, stop-loss, etc. \\ \hline
+MEV Exposure & High (sandwich attacks) & Low (consensus-level matching) \\ \hline
+Transaction Fees & High gas + trading fee & Zero gas, low trading fee \\ \hline
+\end{tabular}
+\end{center}
+\caption{Comparison of DEX liquidity models}
+\end{table}
+
+\textbf{Challenges of On-Chain Orderbooks:}
+
+Despite advantages, on-chain orderbooks face technical challenges:
+
+\begin{itemize}
+    \item \textbf{State Growth}: Orderbooks generate massive state updates requiring efficient storage
+    \item \textbf{Validator Requirements}: High-performance nodes needed for fast order matching
+    \item \textbf{Decentralization Trade-offs}: Currently only ~16 validators secure Hyperliquid (compared to 1000s for Ethereum)
+    \item \textbf{Network Effect}: Requires critical mass of traders to achieve competitive liquidity
+\end{itemize}
+
+\subsection{Market Volume and Depth: CEX vs DEX}
+
+Understanding the scale difference between CEX and DEX markets is crucial for contextualizing this research.
+
+\textbf{Volume Comparison:}
+
+According to recent market data (2024):
+
+\begin{itemize}
+    \item \textbf{CEX Monthly Volume}: Approximately \$3-4 trillion across major exchanges
+    \item \textbf{DEX Monthly Volume}: Approximately \$90-120 billion (3-4\% of CEX volume)
+    \item \textbf{Historical Peak}: DEX volume reached 10\% of CEX volume during DeFi peak in 2020-2021
+\end{itemize}
+
+\textbf{Volume Distribution by Exchange Type:}
+
+\begin{itemize}
+    \item Top 5 CEXs (Binance, Coinbase, Bybit, OKX, Kraken): ~80\% of total CEX volume
+    \item Top 5 DEXs (Uniswap, PancakeSwap, Curve, dYdX, Sushiswap): ~75\% of total DEX volume
+    \item Long tail: Hundreds of smaller exchanges with minimal liquidity
+\end{itemize}
+
+\textbf{Asset-Specific Patterns:}
+
+Market share varies dramatically by asset type:
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Asset Type} & \textbf{CEX Share} & \textbf{DEX Share} \\ \hline
+Major Pairs (BTC/USDT, ETH/USDT) & ~97\% & ~3\% \\ \hline
+Stablecoins (DAI, USDC swaps) & ~20\% & ~80\% \\ \hline
+Long-tail Altcoins & ~40-60\% & ~40-60\% \\ \hline
+New Token Launches & ~10\% & ~90\% \\ \hline
+\end{tabular}
+\end{center}
+\caption{Market share by asset category (approximate)}
+\end{table}
+
+Key observations:
+\begin{itemize}
+    \item DEXs dominate trading for decentralized stablecoins like DAI
+    \item New tokens launch on DEXs first, often migrating to CEXs after gaining traction
+    \item When tokens get CEX listings, volume typically increases 70x while DEX volume decreases
+    \item Major assets remain heavily CEX-dominated due to deeper liquidity
+\end{itemize}
+
+\textbf{Liquidity Depth Analysis:}
+
+For highly liquid pairs like ETH-USDT:
+
+\begin{itemize}
+    \item \textbf{Binance Orderbook}: Typically maintains \$20-50M liquidity within $\pm 0.5\%$ of mid-price
+    \item \textbf{Uniswap V3 Single Pool}: Typically \$5-15M liquidity within $\pm 0.5\%$ (single fee tier)
+    \item \textbf{Uniswap V3 All Pools}: Combining multiple fee tiers brings total to \$15-30M
+    \item \textbf{Liquidity Ratio}: CEXs maintain approximately 2-4x deeper liquidity than DEXs for major pairs
+\end{itemize}
+
+\textbf{Implications for This Research:}
+
+These volume and liquidity disparities have important implications:
+
+\begin{enumerate}
+    \item \textbf{Price Discovery}: CEXs likely lead price formation for major assets due to higher volume
+    \item \textbf{Execution Costs}: DEX trades should experience higher slippage on average
+    \item \textbf{Market Efficiency}: Larger CEX-DEX price deviations expected for less liquid pairs
+    \item \textbf{Arbitrage Opportunities}: Persistent inefficiencies may exist where DEX liquidity is thin
+\end{enumerate}
+
+Our research aims to quantify these relationships and provide empirical evidence for market microstructure differences between exchange types.
+
+\section{Broad Impact}
+
+This project provides a rigorous empirical analysis of decentralized exchange market microstructure in comparison with centralized exchanges. The DeFi space, despite significant growth in total value locked and trading volume, lacks comprehensive real-time analysis tools that compare operational characteristics between CEX and DEX venues.
+
+\textbf{Technical Contributions:}
+\begin{itemize}
+    \item \textbf{Empirical Market Analysis}: Systematic measurement of price discovery mechanisms, liquidity characteristics, and execution quality across exchange types
+    \item \textbf{Comparative Framework}: Direct comparison of orderbook-based CEX markets versus AMM-based DEX markets using consistent metrics
+    \item \textbf{Real-time Monitoring Infrastructure}: Development of data collection and analysis pipeline for continuous market observation
+\end{itemize}
+
+\textbf{Research Value}: Understanding how DEX markets function relative to established CEX infrastructure is essential for anyone working in crypto trading, liquidity provision, or protocol development. This analysis provides quantitative data on questions that are currently answered mostly through intuition or limited sampling.
+
+\section{Ethical Considerations}
+
+\textbf{Research Transparency}: Our analysis may reveal exploitable price discrepancies between venues. We view this as acceptable because:
+\begin{itemize}
+    \item Price inefficiencies in public markets are discoverable by anyone with sufficient technical capability
+    \item Arbitrage activity improves price alignment across venues, benefiting all market participants
+    \item Publishing research findings contributes to understanding of market structure
+\end{itemize}
+
+\textbf{Market Impact}: We acknowledge that systematic arbitrage can affect DEX liquidity providers through adverse selection. However, understanding these dynamics is necessary for protocol improvement and informed participation in DeFi markets.
+
+\chapter{PROJECT DEFINITION AND PLANNING}
+
+\section{Project Definition}
+
+\textbf{Research Objectives:}
+
+This project conducts a systematic analysis of DeFi exchange markets, specifically examining:
+
+\begin{enumerate}
+    \item \textbf{Price Discovery Dynamics}: 
+    \begin{itemize}
+        \item Measure temporal relationship between CEX and DEX price movements
+        \item Quantify lag times using cross-correlation analysis
+        \item Determine conditions under which DEX prices lead or lag CEX prices
+    \end{itemize}
+    
+    \item \textbf{Volume Distribution}:
+    \begin{itemize}
+        \item Compare absolute trading volumes across CEX and DEX venues
+        \item Analyze volume distribution by trade size
+        \item Characterize market share across different asset pairs
+    \end{itemize}
+    
+    \item \textbf{Liquidity Structure}:
+    \begin{itemize}
+        \item Measure available liquidity at various price levels on CEXs (orderbook depth)
+        \item Calculate effective liquidity in AMM pools (considering pool reserves and concentrated liquidity)
+        \item Compare capital efficiency between exchange types
+    \end{itemize}
+    
+    \item \textbf{Execution Cost Analysis}:
+    \begin{itemize}
+        \item Model slippage as a function of trade size for DEXs
+        \item Calculate empirical slippage distributions from historical trades
+        \item Compare execution costs between CEX and DEX for equivalent trade sizes
+    \end{itemize}
+    
+    \item \textbf{Infrastructure Development}:
+    \begin{itemize}
+        \item Build data collection pipeline for real-time CEX and DEX monitoring
+        \item Implement price index calculation from multiple CEX sources
+        \item Create analysis and visualization dashboard
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Technical Scope:}
+\begin{itemize}
+    \item \textbf{CEXs}: 5-10 major exchanges for price index (Binance, Coinbase, Bybit, OKX, Gate.io, HTX, KuCoin, MEXC)
+    \item \textbf{DEXs}: Uniswap V2/V3 primary focus; potential expansion to Sushiswap, PancakeSwap, Hyperliquid
+    \item \textbf{Pairs}: BTC/USDT, ETH/USDT initially; expand to additional liquid pairs
+    \item \textbf{Networks}: Ethereum mainnet, BSC
+\end{itemize}
+
+\section{Project Planning}
+
+\subsection{Project Time and Resource Estimation}
+
+\textbf{Development Timeline:}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|p{5cm}|l|}
+\hline
+\textbf{Phase} & \textbf{Weeks} & \textbf{Deliverables} & \textbf{Status} \\ \hline
+Infrastructure Setup & 1-4 & CEX websocket consumers, DEX transaction listeners & Complete \\ \hline
+Data Pipeline & 5-8 & Price index calculation, data storage, stream processing & In Progress \\ \hline
+Analysis Implementation & 9-12 & Statistical analysis, backtesting, slippage modeling & Planned \\ \hline
+Visualization & 13-15 & Dashboard development (Streamlit), real-time monitoring & Planned \\ \hline
+Documentation & 16 & Final report, system documentation & Planned \\ \hline
+\end{tabular}
+\end{center}
+\caption{Project timeline and deliverables}
+\end{table}
+
+\textbf{Technical Resources:}
+\begin{itemize}
+    \item RPC access (Alchemy/Infura/QuickNode) for blockchain data
+    \item WebSocket connections to 8+ CEX APIs
+    \item Database/filesystem for OHLC aggregates
+    \item The Graph API for historical DEX pool data
+    \item Computing resources for stream processing
+\end{itemize}
+
+\textbf{Estimated Effort}: 15-20 hours per team member per week
+
+\subsection{Success Criteria}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Criterion} & \textbf{Metric} & \textbf{Target} \\ \hline
+Data Coverage & CEX sources monitored & $\geq 5$ exchanges \\ \hline
+DEX Monitoring & Chains supported & $\geq 2$ (Ethereum, BSC) \\ \hline
+Price Index & Update frequency & $\leq 1$ second lag \\ \hline
+Historical Data & Analysis period & $\geq 30$ days continuous \\ \hline
+Price Deviation & Measurement precision & $\leq 0.01\%$ accuracy \\ \hline
+Slippage Model & Prediction accuracy & $R^2 \geq 0.8$ for major pairs \\ \hline
+System Uptime & Monitoring availability & $\geq 95\%$ during test period \\ \hline
+Statistical Significance & Sample size per pair & $\geq 10{,}000$ DEX trades \\ \hline
+\end{tabular}
+\end{center}
+\caption{Project success criteria and targets}
+\end{table}
+
+\subsection{Risk Analysis}
+
+\begin{table}[h]
+\begin{center}
+\small
+\begin{tabular}{|p{3cm}|l|l|p{5cm}|}
+\hline
+\textbf{Risk} & \textbf{Impact} & \textbf{Likelihood} & \textbf{Mitigation Strategy} \\ \hline
+RPC Rate Limits & High & Medium & Multiple providers, request optimization, local node backup \\ \hline
+CEX API Downtime & Medium & Medium & 8+ redundant sources, fallback logic, data validation \\ \hline
+Data Quality Issues & Medium & Medium & Outlier detection, cross-validation, manual QA \\ \hline
+Blockchain Congestion & Low & Low & Archive node queries for gap filling \\ \hline
+Insufficient Data Volume & Low & Low & Extended collection period, multiple pairs \\ \hline
+Technical Complexity & Medium & High & MVP approach, modular design, clear milestones \\ \hline
+Infrastructure Costs & Low & Low & Free tier maximization, efficient queries \\ \hline
+\end{tabular}
+\end{center}
+\caption{Risk analysis and mitigation strategies}
+\end{table}
+
+\subsection{Team Work}
+
+\textbf{Team Structure} (3 members):
+
+\textbf{Division of Responsibilities:}
+\begin{itemize}
+    \item \textbf{CEX Infrastructure}: WebSocket management, orderbook aggregation, price index calculation, volume analysis
+    \item \textbf{DEX Infrastructure}: On-chain monitoring, The Graph integration, transaction parsing, pool state tracking
+    \item \textbf{Analysis \& Visualization}: Statistical analysis, backtesting framework, slippage modeling, dashboard development
+\end{itemize}
+
+\textbf{Collaboration Methods:}
+\begin{itemize}
+    \item Shared Git repository with defined module interfaces
+    \item Daily standups for blocking issues
+    \item Code review for critical data processing logic
+    \item Shared documentation for data schemas and API contracts
+\end{itemize}
+
+\chapter{RELATED WORK}
+
+\section{Price Discovery Between CEX and DEX}
+
+Recent research has examined the price formation mechanisms between centralized and decentralized exchanges. Alexander et al. (2025) analyzed price discovery and efficiency between Uniswap liquidity pools and major centralized exchanges, finding that DEXs play a role in price formation rather than simply following CEX prices, though their efficiency varies by trading conditions~\cite{alexander2025uniswap}. The study revealed that informed traders adjust their DEX usage based on market uncertainty, switching between different fee tiers and pool versions.
+
+Work on CEX-DEX arbitrage by Wu et al. (2025) highlights how arbitrageurs capitalize on temporary price discrepancies arising from asynchronous price discovery across venues~\cite{wu2025cex}. Centralized exchanges provide high liquidity and near-instantaneous execution while decentralized exchanges experience inherent latency due to blockchain consensus mechanisms~\cite{buterin2014ethereum}. This temporal asymmetry creates systematic arbitrage opportunities.
+
+\section{DEX Market Structure and Liquidity}
+
+Research by Lehar and Parlour (2021) demonstrates that while DEXs trade significantly more unique tokens than major CEXs, they handle substantially lower volumes for established assets~\cite{lehar2021dex}. Their findings show that when tokens migrate from DEX-only trading to CEX listing, trading volume increases dramatically (approximately 70x) while DEX volume drops, indicating clear market segmentation between the two venue types.
+
+Market analysis from Kaiko Research (2024) reveals that DEX monthly trade volume represents approximately 3\% of CEX volume in recent periods, down from historical peaks of 10\% during peak DeFi enthusiasm in 2020~\cite{kaiko2024dex}. However, for specific tokens—particularly stablecoins like DAI—DEXs account for over 80\% of trading volume, demonstrating that market share varies significantly by asset type.
+
+\section{Liquidity and Slippage Analysis}
+
+Empirica's liquidity analysis framework provides a methodology for ranking Uniswap pools by slippage and market depth metrics~\cite{empirica2024liquidity}. Their research shows that only pools with sufficient liquidity concentrated around current prices can support meaningful trading without excessive price impact. The concentration level—the share of Total Value Locked within a narrow price range—emerges as a critical metric for assessing pool quality.
+
+Comparative analysis between Uniswap V3 and major CEXs by Kaiko Research demonstrates that concentrated liquidity DEXs can be modeled similarly to orderbooks, with liquidity distributed across discrete price ranges~\cite{kaiko2024dex,adams2021uniswap}. However, for highly liquid pairs like ETH-USDT, Binance typically maintains 4x deeper liquidity at most price levels compared to individual Uniswap V3 pools, though combining multiple Uniswap pools with different fee tiers narrows this gap.
+
+\section{MEV and Transaction Costs}
+
+Capponi et al. (2024) provide comprehensive analysis of transaction costs on Uniswap V3, breaking down slippage into benign and adversarial components~\cite{capponi2024slippage}. Their findings reveal that cost composition varies dramatically with trade characteristics: gas costs dominate for small swaps (under \$1,000), while price impact and slippage account for the majority of costs on large swaps (over \$100,000). The research introduces the concept of ``reordering slippage'' to quantify costs from adversarial transaction ordering.
+
+Recent work by Wu et al. (2025) on CEX-DEX extracted value shows increasing centralization in arbitrage markets, with three major searchers affiliated with top block builders dominating CEX-DEX arbitrage opportunities~\cite{wu2025cex}. Exclusive searcher-builder arrangements amplify centralization pressures both downstream and upstream of the MEV supply chain, raising concerns about Ethereum's decentralization guarantees.
+
+\section{Existing Tools and Platforms}
+
+\textbf{Industry Analytics Platforms:}
+\begin{itemize}
+    \item \textbf{Kaiko}: Provides comprehensive market depth data across CEXs and DEXs through unified API, enabling direct comparison of liquidity metrics~\cite{kaiko2024dex}
+    \item \textbf{Dune Analytics}: Offers SQL-based interface for on-chain analytics, allowing custom queries on DEX activity
+    \item \textbf{DefiLlama}: Aggregates total value locked and volume data across DeFi protocols~\cite{defillama2024tvl}
+\end{itemize}
+
+\textbf{Open-Source Tools:}
+
+GitHub repositories such as solidquant's CEX-DEX arbitrage template demonstrate technical feasibility of real-time data streaming from multiple exchanges and orderbook aggregation techniques~\cite{solidquant2024arbitrage}. These tools provide baseline implementations for WebSocket management and multi-venue data collection.
+
+\section{Gap in Current Research}
+
+While existing research examines price efficiency and arbitrage opportunities, there is limited work providing \textbf{real-time, comprehensive comparison} of market microstructure between CEXs and DEXs with:
+
+\begin{itemize}
+    \item Live price index calculation from multiple CEXs with volume weighting
+    \item On-chain DEX monitoring at individual transaction level
+    \item Empirical slippage modeling calibrated to actual trade size distributions
+    \item Integrated dashboard for continuous monitoring and analysis
+    \item Statistical testing of lead-lag relationships across trading conditions
+\end{itemize}
+
+Our project addresses this gap by building an end-to-end system that combines real-time data collection, rigorous statistical analysis, and accessible visualization for comprehensive market dynamics analysis. The system enables researchers and practitioners to move beyond retrospective studies to continuous market monitoring and hypothesis testing.
+
+\chapter{METHODOLOGY}
+
+\section{CEX Price Index Calculation}
+
+\textbf{Objective}: Derive a robust reference price from multiple CEX sources that represents consensus market price.
+
+\textbf{Approach}:
+
+\textbf{Exchange Selection}: Query top N exchanges (N=5-10) for each trading pair based on 24-hour volume. Use REST APIs to retrieve volume rankings and filter exchanges with $>1\%$ market share for the pair.
+
+\textbf{Price Collection}: Subscribe to WebSocket ticker streams for each selected exchange, collecting bid/ask prices with timestamps. Maintain real-time orderbook snapshots (top 5 levels) for validation.
+
+\textbf{Price Index Formula}: For each pair at time $t$, calculate volume-weighted average:
+
+\begin{equation}
+\text{price\_index}(t) = \frac{\sum_{i=1}^{N} \text{mid\_price}_i(t) \times \text{volume}_i}{\sum_{i=1}^{N} \text{volume}_i}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\text{mid\_price}_i(t) = \frac{\text{bid}_i(t) + \text{ask}_i(t)}{2}$
+    \item $\text{volume}_i$ = 24-hour trading volume on exchange $i$
+    \item Sum over all selected exchanges
+\end{itemize}
+
+\textbf{Data Validation}:
+\begin{itemize}
+    \item Reject prices deviating $>5\%$ from median across exchanges (outlier detection)
+    \item Require minimum 3 valid exchange prices for price index calculation
+    \item Log anomalies for investigation
+\end{itemize}
+
+\textbf{Update Frequency}: Recalculate on every ticker update from any exchange. Typical latency: 100-500ms from exchange timestamp.
+
+\section{DEX Trade Monitoring}
+
+\textbf{Objective}: Capture all DEX trades at transaction level with accurate execution prices.
+
+\textbf{Uniswap V2/V3 Monitoring}:
+
+\textbf{Data Source}: Primary real-time RPC connection to Ethereum/BSC nodes, subscribing to Swap events from target pool contracts. The Graph API provides backup for historical data and gap filling.
+
+\textbf{Event Parsing}: Extract parameters from Swap events:
+\begin{itemize}
+    \item \texttt{amount0In}, \texttt{amount1In}: Input token amounts
+    \item \texttt{amount0Out}, \texttt{amount1Out}: Output token amounts
+    \item \texttt{sender}: Transaction initiator
+    \item \texttt{to}: Recipient address
+    \item Block timestamp, transaction hash
+\end{itemize}
+
+\textbf{Execution Price Calculation}: For a swap from token0 to token1:
+
+\begin{equation}
+\text{execution\_price} = \frac{\text{amount1Out}}{\text{amount0In}}
+\end{equation}
+
+Convert to USD terms using token prices from CEX price index.
+
+\textbf{Pool State Tracking}: Maintain reserve balances $(R_0, R_1)$ for each pool. For Uniswap V3, track current tick and liquidity within active price range. Calculate theoretical slippage from pool state.
+
+\textbf{Trade Classification}:
+\begin{itemize}
+    \item Size bins: $<$\$1k, \$1k-\$10k, \$10k-\$100k, $>$\$100k
+    \item Direction: Buy vs Sell relative to quote token
+    \item MEV identification: Check if part of sandwich/arbitrage bundle
+\end{itemize}
+
+\section{Price Deviation Measurement}
+
+\textbf{Objective}: Quantify deviation between DEX execution prices and CEX price index.
+
+\textbf{Per-Trade Deviation}:
+
+\begin{equation}
+\text{deviation}_i = \frac{\text{DEX\_price}_i - \text{CEX\_price\_index}_i}{\text{CEX\_price\_index}_i} \times 100\%
+\end{equation}
+
+where DEX\_price$_i$ is the execution price of trade $i$ on DEX, and CEX\_price\_index$_i$ is the price index at trade $i$ timestamp ($\pm 1$ second window).
+
+\textbf{Aggregate Metrics}:
+
+\textbf{Mean Absolute Deviation (MAD)}:
+\begin{equation}
+\text{MAD} = \frac{1}{N} \sum_{i=1}^{N} |\text{deviation}_i|
+\end{equation}
+
+\textbf{Standard Deviation}:
+\begin{equation}
+\sigma_{\text{deviation}} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (\text{deviation}_i - \mu)^2}
+\end{equation}
+
+\textbf{Percentile Analysis}: Compute P50 (median), P90, P95, P99 deviations. Separate analysis for buy/sell directions.
+
+\textbf{Time-Series Analysis}: Calculate rolling window statistics (1min, 5min, 15min intervals) to identify periods of persistent deviation.
+
+\section{Lead-Lag Correlation Analysis}
+
+\textbf{Objective}: Determine temporal relationship between CEX and DEX price movements.
+
+\textbf{Method}: Cross-Correlation Function (CCF)
+
+\textbf{Price Return Series}:
+\begin{align}
+\text{CEX\_return}(t) &= \log(\text{CEX\_price\_index}(t)) - \log(\text{CEX\_price\_index}(t-1)) \\
+\text{DEX\_return}(t) &= \log(\text{DEX\_price}(t)) - \log(\text{DEX\_price}(t-1))
+\end{align}
+
+\textbf{Cross-Correlation}:
+\begin{equation}
+\text{CCF}(\tau) = \text{Corr}(\text{CEX\_return}(t), \text{DEX\_return}(t + \tau))
+\end{equation}
+
+for lag $\tau \in [-60s, +60s]$ with 1-second intervals.
+
+\textbf{Interpretation}:
+\begin{itemize}
+    \item If max CCF at $\tau < 0$: CEX leads DEX by $|\tau|$ seconds
+    \item If max CCF at $\tau > 0$: DEX leads CEX by $\tau$ seconds
+    \item If max CCF at $\tau = 0$: Synchronous movement
+\end{itemize}
+
+\textbf{Statistical Testing}: Granger causality test to determine if CEX price changes help predict DEX price changes~\cite{granger1969causality}. Null hypothesis: CEX price changes do not Granger-cause DEX price changes. Significance level: $\alpha = 0.05$.
+
+\section{Slippage Modeling}
+
+\textbf{Objective}: Predict slippage for arbitrary trade sizes based on pool state and empirical distributions.
+
+\textbf{Two-Component Model}:
+
+\textbf{Component 1: Theoretical AMM Slippage}
+
+For Uniswap V2 constant product AMM with reserves $(x, y)$ and input amount $\Delta x$:
+
+\begin{equation}
+\Delta y = y - \frac{xy}{x + \Delta x}
+\end{equation}
+
+\begin{equation}
+\text{slippage}_{\text{theoretical}} = \left|1 - \frac{\Delta y / \Delta x}{y / x}\right|
+\end{equation}
+
+For Uniswap V3 concentrated liquidity: Use SDK or on-chain quoter contract to integrate liquidity across active tick ranges.
+
+\textbf{Component 2: Empirical Slippage Distribution}
+
+\begin{enumerate}
+    \item Collect $N$ trades ($N > 10{,}000$) over analysis period
+    \item Calculate actual slippage for each trade
+    \item Group by trade size bins
+    \item Build probability distribution: $P(\text{slippage} \mid \text{trade\_size})$
+\end{enumerate}
+
+\textbf{Slippage Prediction}: For a hypothetical trade of size $S$:
+
+\begin{equation}
+\text{predicted\_slippage} = \alpha \times \text{slippage}_{\text{theoretical}}(S) + \beta \times \text{slippage}_{\text{empirical}}(S)
+\end{equation}
+
+where $\alpha, \beta$ are weights fit via regression on historical data.
+
+\section{Liquidity Depth Comparison}
+
+\textbf{CEX Orderbook Depth}:
+\begin{equation}
+\text{depth}_{\text{CEX}}(\Delta p) = \sum_{\text{prices within } \Delta p} \text{volume at price level}
+\end{equation}
+
+Example: depth within $\pm 0.5\%$ = sum of bid/ask volumes between current\_price $\times 0.995$ and current\_price $\times 1.005$.
+
+\textbf{DEX Pool Depth}:
+
+For V2 pools: Calculate the amount that can be traded to achieve $X\%$ price impact using the constant product formula.
+
+For V3 pools:
+\begin{equation}
+\text{depth}_{\text{DEX}}(\Delta p) = \sum_{\text{ticks within } \Delta p} L_{\text{tick}} \times \Delta p_{\text{tick}}
+\end{equation}
+
+where $L_{\text{tick}}$ is liquidity in each tick and $\Delta p_{\text{tick}}$ is the price difference per tick.
+
+\textbf{Comparison Metric}:
+\begin{equation}
+\text{liquidity\_ratio}(\pm X\%) = \frac{\text{depth}_{\text{DEX}}(\pm X\%)}{\sum_{i} \text{depth}_{\text{CEX}_i}(\pm X\%)}
+\end{equation}
+
+\section{Statistical Validation}
+
+\textbf{Backtesting Framework}:
+
+\begin{enumerate}
+    \item \textbf{Historical Simulation}: Use collected historical data to simulate price index calculation as it would have occurred in real-time. Compare predicted vs actual deviations.
+    
+    \item \textbf{Cross-Validation}: Train slippage models on 70\% of data, test on held-out 30\%. Report $R^2$, MAE (Mean Absolute Error), RMSE (Root Mean Square Error).
+    
+    \item \textbf{Robustness Checks}: 
+    \begin{itemize}
+        \item Analyze performance across different market conditions (high/low volatility)
+        \item Test sensitivity to exchange selection for price index
+        \item Evaluate impact of missing data
+    \end{itemize}
+\end{enumerate}
+
+\chapter{REQUIREMENTS SPECIFICATION}
+
+\section{Functional Requirements}
+
+\subsection{FR1: CEX Data Collection}
+\begin{itemize}
+    \item \textbf{FR1.1}: System shall connect to minimum 5 CEX WebSocket APIs simultaneously
+    \item \textbf{FR1.2}: System shall collect bid/ask prices with $<1$ second latency
+    \item \textbf{FR1.3}: System shall retrieve 24h volume data via REST APIs every 5 minutes
+    \item \textbf{FR1.4}: System shall handle WebSocket disconnections and reconnect automatically
+    \item \textbf{FR1.5}: System shall validate price data and reject outliers $>5\sigma$ from median
+\end{itemize}
+
+\subsection{FR2: Price Index Calculation}
+\begin{itemize}
+    \item \textbf{FR2.1}: System shall calculate volume-weighted price index from selected exchanges
+    \item \textbf{FR2.2}: Price index shall update within 1 second of receiving new ticker data
+    \item \textbf{FR2.3}: System shall require minimum 3 valid exchanges for price index
+    \item \textbf{FR2.4}: System shall log price index with timestamp at 1-second intervals
+\end{itemize}
+
+\subsection{FR3: DEX Monitoring}
+\begin{itemize}
+    \item \textbf{FR3.1}: System shall monitor Uniswap V2/V3 swap events on Ethereum and BSC
+    \item \textbf{FR3.2}: System shall parse swap events and extract trade parameters
+    \item \textbf{FR3.3}: System shall calculate execution price for each trade in USD terms
+    \item \textbf{FR3.4}: System shall classify trades by size, direction, and type
+    \item \textbf{FR3.5}: System shall maintain pool state (reserves, liquidity) in real-time
+\end{itemize}
+
+\subsection{FR4: Price Deviation Analysis}
+\begin{itemize}
+    \item \textbf{FR4.1}: System shall calculate per-trade deviation between DEX and CEX prices
+    \item \textbf{FR4.2}: System shall compute aggregate statistics (mean, std, percentiles)
+    \item \textbf{FR4.3}: System shall generate time-series data with configurable windows
+    \item \textbf{FR4.4}: System shall alert when deviation exceeds configurable threshold
+\end{itemize}
+
+\subsection{FR5: Lead-Lag Analysis}
+\begin{itemize}
+    \item \textbf{FR5.1}: System shall compute cross-correlation function for price returns
+    \item \textbf{FR5.2}: System shall identify lag time of maximum correlation
+    \item \textbf{FR5.3}: System shall perform Granger causality tests
+    \item \textbf{FR5.4}: System shall report statistical significance (p-values)
+\end{itemize}
+
+\subsection{FR6: Slippage Analysis}
+\begin{itemize}
+    \item \textbf{FR6.1}: System shall calculate theoretical slippage from pool state
+    \item \textbf{FR6.2}: System shall build empirical slippage distributions from historical trades
+    \item \textbf{FR6.3}: System shall predict slippage for user-specified trade sizes
+    \item \textbf{FR6.4}: System shall compare actual vs predicted slippage for validation
+\end{itemize}
+
+\subsection{FR7: Liquidity Analysis}
+\begin{itemize}
+    \item \textbf{FR7.1}: System shall measure orderbook depth on CEXs at multiple price levels
+    \item \textbf{FR7.2}: System shall calculate available liquidity in DEX pools
+    \item \textbf{FR7.3}: System shall compute liquidity ratios between CEX and DEX
+    \item \textbf{FR7.4}: System shall track liquidity changes over time
+\end{itemize}
+
+\subsection{FR8: Data Storage}
+\begin{itemize}
+    \item \textbf{FR8.1}: System shall store OHLC data at 1-minute intervals
+    \item \textbf{FR8.2}: System shall store individual DEX trades with full details
+    \item \textbf{FR8.3}: System shall store price indexs at 1-second intervals
+    \item \textbf{FR8.4}: System shall support queries for historical data analysis
+\end{itemize}
+
+\subsection{FR9: Dashboard Visualization}
+\begin{itemize}
+    \item \textbf{FR9.1}: Dashboard shall display real-time price deviation charts
+    \item \textbf{FR9.2}: Dashboard shall show volume comparison between CEX and DEX
+    \item \textbf{FR9.3}: Dashboard shall visualize liquidity depth for selected pairs
+    \item \textbf{FR9.4}: Dashboard shall display slippage curves for different trade sizes
+    \item \textbf{FR9.5}: Dashboard shall show lead-lag correlation results
+    \item \textbf{FR9.6}: Dashboard shall allow selection of trading pairs and time ranges
+\end{itemize}
+
+\section{Non-Functional Requirements}
+
+\subsection{NFR1: Performance}
+\begin{itemize}
+    \item \textbf{NFR1.1}: System shall process 100+ trades per second
+    \item \textbf{NFR1.2}: Dashboard shall update visualizations within 2 seconds of new data
+    \item \textbf{NFR1.3}: Historical queries shall return results within 5 seconds for 30-day periods
+\end{itemize}
+
+\subsection{NFR2: Reliability}
+\begin{itemize}
+    \item \textbf{NFR2.1}: System uptime shall be $\geq 95\%$ during operational periods
+    \item \textbf{NFR2.2}: System shall recover from crashes within 1 minute
+    \item \textbf{NFR2.3}: Data collection gaps shall be $\leq 0.1\%$ of total time
+\end{itemize}
+
+\subsection{NFR3: Scalability}
+\begin{itemize}
+    \item \textbf{NFR3.1}: System shall support addition of new trading pairs without code changes
+    \item \textbf{NFR3.2}: System shall support addition of new CEXs via configuration
+    \item \textbf{NFR3.3}: System shall support addition of new blockchain networks
+\end{itemize}
+
+\subsection{NFR4: Maintainability}
+\begin{itemize}
+    \item \textbf{NFR4.1}: Code shall be modular with clear interfaces between components
+    \item \textbf{NFR4.2}: Configuration shall be externalized (no hardcoded parameters)
+    \item \textbf{NFR4.3}: System shall include comprehensive logging for debugging
+\end{itemize}
+
+\subsection{NFR5: Data Quality}
+\begin{itemize}
+    \item \textbf{NFR5.1}: All timestamps shall be in UTC with millisecond precision
+    \item \textbf{NFR5.2}: All prices shall be validated against reasonable ranges
+    \item \textbf{NFR5.3}: System shall detect and flag suspicious data patterns
+\end{itemize}
+
+\section{Use Cases}
+
+\subsection{UC1: Monitor Real-Time Price Deviation}
+
+\textbf{Primary Actor}: Research Analyst
+
+\textbf{Preconditions}: System is running and collecting data
+
+\textbf{Main Flow}:
+\begin{enumerate}
+    \item Analyst opens dashboard
+    \item Analyst selects trading pair (e.g., ETH/USDT)
+    \item System displays real-time price deviation chart
+    \item System shows current CEX price index and latest DEX trade price
+    \item System displays deviation statistics (current, 5min avg, 1hr avg)
+    \item Analyst observes deviation patterns
+\end{enumerate}
+
+\textbf{Postconditions}: Analyst understands current market state
+
+\textbf{Extensions}:
+\begin{itemize}
+    \item 3a. If insufficient data: System displays warning message
+    \item 5a. If deviation exceeds threshold: System highlights alert
+\end{itemize}
+
+\subsection{UC2: Analyze Historical Lead-Lag Relationship}
+
+\textbf{Primary Actor}: Research Analyst
+
+\textbf{Preconditions}: Minimum 7 days of historical data collected
+
+\textbf{Main Flow}:
+\begin{enumerate}
+    \item Analyst selects ``Lead-Lag Analysis'' module
+    \item Analyst specifies trading pair and date range
+    \item System computes cross-correlation function
+    \item System displays CCF plot with lag times on x-axis
+    \item System highlights maximum correlation and corresponding lag
+    \item System displays Granger causality test results
+    \item Analyst interprets whether CEX leads or lags DEX
+\end{enumerate}
+
+\textbf{Postconditions}: Analyst has quantitative measure of price discovery dynamics
+
+\subsection{UC3: Estimate Slippage for Planned Trade}
+
+\textbf{Primary Actor}: DEX Trader / Bot Designer
+
+\textbf{Preconditions}: Slippage model trained on historical data
+
+\textbf{Main Flow}:
+\begin{enumerate}
+    \item User enters trading pair and trade size
+    \item User specifies pool (e.g., Uniswap V3 ETH/USDT 0.05\%)
+    \item System retrieves current pool state
+    \item System calculates theoretical slippage from AMM formula
+    \item System retrieves empirical slippage distribution for similar trade sizes
+    \item System displays predicted slippage range (P50, P90, P99)
+    \item User decides whether to execute trade
+\end{enumerate}
+
+\textbf{Postconditions}: User has informed estimate of execution cost
+
+\subsection{UC4: Compare CEX vs DEX Liquidity}
+
+\textbf{Primary Actor}: Research Analyst / Liquidity Provider
+
+\textbf{Preconditions}: System collecting orderbook and pool data
+
+\textbf{Main Flow}:
+\begin{enumerate}
+    \item Analyst selects ``Liquidity Comparison'' module
+    \item Analyst specifies trading pair
+    \item System displays combined CEX orderbook depth chart
+    \item System displays DEX pool liquidity distribution
+    \item System calculates and displays liquidity ratios at $\pm 0.5\%$, $\pm 1\%$, $\pm 2\%$
+    \item System shows historical liquidity trends
+    \item Analyst compares capital efficiency between venues
+\end{enumerate}
+
+\textbf{Postconditions}: Analyst understands relative liquidity availability
+
+\chapter{DESIGN}
+
+\section{Information Structure}
+
+\subsection{Entity-Relationship Model}
+
+\textbf{Core Entities}:
+
+\textbf{Exchange}: Stores information about trading venues
+\begin{itemize}
+    \item \texttt{exchange\_id} (PK): Unique identifier
+    \item \texttt{exchange\_name}: Binance, Coinbase, etc.
+    \item \texttt{exchange\_type}: CEX or DEX
+    \item \texttt{api\_endpoint}: WebSocket/REST URL
+    \item \texttt{status}: Active/Inactive
+\end{itemize}
+
+\textbf{TradingPair}: Represents tradable asset pairs
+\begin{itemize}
+    \item \texttt{pair\_id} (PK): Unique identifier
+    \item \texttt{base\_token}: e.g., ETH
+    \item \texttt{quote\_token}: e.g., USDT
+    \item \texttt{pair\_symbol}: ETH/USDT
+    \item \texttt{active}: Boolean
+\end{itemize}
+
+\textbf{CEXTicker}: Real-time price data from centralized exchanges
+\begin{itemize}
+    \item \texttt{ticker\_id} (PK): Unique identifier
+    \item \texttt{exchange\_id} (FK): Reference to Exchange
+    \item \texttt{pair\_id} (FK): Reference to TradingPair
+    \item \texttt{timestamp}: UTC millisecond precision
+    \item \texttt{bid\_price}, \texttt{ask\_price}: Best bid/ask
+    \item \texttt{volume\_24h}: 24-hour volume
+\end{itemize}
+
+\textbf{PriceIndex}: Calculated reference price
+\begin{itemize}
+    \item \texttt{price\_index\_id} (PK): Unique identifier
+    \item \texttt{pair\_id} (FK): Reference to TradingPair
+    \item \texttt{timestamp}: UTC millisecond precision
+    \item \texttt{price}: Calculated price index
+    \item \texttt{num\_exchanges}: Number of exchanges used
+    \item \texttt{exchanges\_used}: Array of exchange\_ids
+\end{itemize}
+
+\textbf{DEXPool}: Liquidity pool information
+\begin{itemize}
+    \item \texttt{pool\_id} (PK): Pool contract address
+    \item \texttt{pair\_id} (FK): Reference to TradingPair
+    \item \texttt{dex\_protocol}: Uniswap-V2, Uniswap-V3, etc.
+    \item \texttt{blockchain}: Ethereum, BSC, etc.
+    \item \texttt{fee\_tier}: 0.05\%, 0.30\%, 1.00\%
+    \item \texttt{reserve0}, \texttt{reserve1}: Token reserves
+\end{itemize}
+
+\textbf{DEXTrade}: Individual DEX transactions
+\begin{itemize}
+    \item \texttt{trade\_id} (PK): Transaction hash + log index
+    \item \texttt{pool\_id} (FK): Reference to DEXPool
+    \item \texttt{timestamp}: Block timestamp
+    \item \texttt{block\_number}: Ethereum block
+    \item \texttt{sender}: Address initiating swap
+    \item \texttt{amount0\_in}, \texttt{amount1\_in}: Input amounts
+    \item \texttt{amount0\_out}, \texttt{amount1\_out}: Output amounts
+    \item \texttt{execution\_price}: Calculated price
+    \item \texttt{trade\_size\_usd}: USD value
+    \item \texttt{trade\_direction}: Buy/Sell
+\end{itemize}
+
+\textbf{PriceDeviation}: Deviation measurements
+\begin{itemize}
+    \item \texttt{deviation\_id} (PK): Unique identifier
+    \item \texttt{trade\_id} (FK): Reference to DEXTrade
+    \item \texttt{price\_index\_id} (FK): Reference to PriceIndex
+    \item \texttt{deviation\_pct}: Percentage deviation
+    \item \texttt{absolute\_deviation}: Absolute price difference
+\end{itemize}
+
+\textbf{SlippageModel}: Empirical slippage statistics
+\begin{itemize}
+    \item \texttt{model\_id} (PK): Unique identifier
+    \item \texttt{pool\_id} (FK): Reference to DEXPool
+    \item \texttt{trade\_size\_bin}: $<$1k, 1k-10k, etc.
+    \item \texttt{mean\_slippage}, \texttt{std\_slippage}: Statistics
+    \item \texttt{p50}, \texttt{p90}, \texttt{p99}: Percentile values
+    \item \texttt{sample\_size}: Number of trades
+\end{itemize}
+
+\textbf{Relationships}:
+\begin{itemize}
+    \item Exchange (1) $\rightarrow$ (*) CEXTicker
+    \item TradingPair (1) $\rightarrow$ (*) CEXTicker, PriceIndex, DEXPool
+    \item DEXPool (1) $\rightarrow$ (*) DEXTrade, SlippageModel
+    \item DEXTrade (1) $\rightarrow$ (1) PriceDeviation
+\end{itemize}
+
+\section{Information Flow}
+
+\subsection{Activity Diagram: Real-Time Price Deviation Monitoring}
+
+The system continuously monitors both CEX and DEX venues in parallel:
+
+\textbf{CEX Stream}:
+\begin{enumerate}
+    \item CEX Collectors receive ticker updates via WebSocket
+    \item Query 24h volumes every 5 minutes via REST API
+    \item Update PriceIndex calculation using volume-weighted average
+    \item Store PriceIndex in database with timestamp
+\end{enumerate}
+
+\textbf{DEX Stream} (concurrent):
+\begin{enumerate}
+    \item DEX Listener receives Swap event from blockchain
+    \item Parse trade parameters (amounts, addresses, timestamp)
+    \item Calculate execution price from swap amounts
+    \item Query PriceIndex at trade timestamp ($\pm 1$s window)
+    \item Calculate deviation percentage
+    \item Store DEXTrade and PriceDeviation records
+    \item Update real-time statistics
+    \item Push update to Dashboard for visualization
+\end{enumerate}
+
+\subsection{Sequence Diagram: Price Index Calculation}
+
+The price index calculation involves coordination between multiple components:
+
+\begin{enumerate}
+    \item Dashboard requests price index for ETH/USDT
+    \item PriceIndexService queries VolumeUpdater for 24h volume data
+    \item VolumeUpdater returns volume ranking across exchanges
+    \item PriceIndexService queries CEXCollector for latest tickers
+    \item Database returns recent ticker data from all exchanges
+    \item PriceIndexService filters outliers ($>5\sigma$ from median)
+    \item Calculate volume-weighted average price (VWAP)
+    \item Store calculated price index in database
+    \item Return price index to Dashboard for display
+\end{enumerate}
+
+\subsection{Sequence Diagram: DEX Trade Processing}
+
+Processing a DEX trade involves multiple stages:
+
+\begin{enumerate}
+    \item Blockchain emits Swap event
+    \item DEXListener captures and parses event
+    \item Query PoolStateTracker for current pool reserves
+    \item Calculate execution price from swap amounts
+    \item Query Database for price index at trade timestamp
+    \item DeviationCalculator computes price deviation
+    \item Store trade record in Database
+    \item Store deviation record in Database
+    \item Trigger analytics update
+\end{enumerate}
+
+\section{System Design}
+
+\subsection{High-Level Architecture}
+
+The system follows a layered architecture with four main tiers:
+
+\textbf{Presentation Layer}:
+\begin{itemize}
+    \item Streamlit Dashboard (Port 8501)
+    \item Price Deviation Charts
+    \item Volume Comparison Visualizations
+    \item Liquidity Analysis Interface
+    \item Lead-Lag Correlation Plots
+    \item Slippage Prediction Tool
+\end{itemize}
+
+\textbf{Application Layer}:
+\begin{itemize}
+    \item \textbf{Analysis Engine}: Statistical computations and aggregations
+    \item \textbf{Price Index Service}: VWAP calculation from multiple CEXs
+    \item \textbf{Deviation Calculator}: Per-trade deviation measurement
+    \item \textbf{Lead-Lag Analyzer}: Cross-correlation and Granger causality
+    \item \textbf{Slippage Model}: Empirical and theoretical predictions
+    \item \textbf{Liquidity Analyzer}: Depth comparison across venues
+\end{itemize}
+
+\textbf{Data Collection Layer}:
+
+CEX Data Collector:
+\begin{itemize}
+    \item WebSocket connections to 8+ exchanges (Binance, Coinbase, Bybit, OKX, etc.)
+    \item REST API for volume data
+    \item Ticker handler and price aggregator
+\end{itemize}
+
+DEX Data Collector:
+\begin{itemize}
+    \item Ethereum and BSC RPC connections
+    \item Event parser for Swap events
+    \item Pool state tracker for reserves
+    \item The Graph API client for historical data
+\end{itemize}
+
+\textbf{Data Storage Layer}:
+\begin{itemize}
+    \item \textbf{TimeSeries DB}: OHLC data, tick data (InfluxDB or similar)
+    \item \textbf{File Cache}: Raw data buffering
+    \item \textbf{PostgreSQL}: Metadata, configuration, aggregated statistics
+\end{itemize}
+
+\subsection{Component Details}
+
+\textbf{CEX Data Collector}:
+\begin{itemize}
+    \item \textbf{Technology}: Python asyncio with websockets library
+    \item \textbf{Components}:
+    \begin{itemize}
+        \item ExchangeConnector: Base class for WebSocket connections
+        \item TickerHandler: Processes incoming ticker messages
+        \item VolumeUpdater: Periodic REST API calls for volume
+        \item PriceIndexCalculator: Computes VWAP
+    \end{itemize}
+    \item \textbf{Threading}: One async task per exchange connection
+    \item \textbf{Error Handling}: Exponential backoff for reconnections
+\end{itemize}
+
+\textbf{DEX Data Collector}:
+\begin{itemize}
+    \item \textbf{Technology}: Python web3.py for RPC, async event filtering
+    \item \textbf{Components}:
+    \begin{itemize}
+        \item BlockchainListener: Subscribes to new blocks
+        \item EventParser: Decodes Swap events from logs
+        \item PoolStateManager: Maintains reserve state
+        \item TheGraphClient: Historical data queries
+    \end{itemize}
+    \item \textbf{Optimization}: Batch RPC requests, cache static pool data
+\end{itemize}
+
+\textbf{Analysis Engine}:
+\begin{itemize}
+    \item \textbf{Technology}: Python NumPy/Pandas for numerical computation
+    \item \textbf{Components}:
+    \begin{itemize}
+        \item DeviationAnalyzer: Per-trade and aggregate deviations
+        \item LeadLagCalculator: Cross-correlation and Granger tests
+        \item SlippagePredictor: Empirical + theoretical fusion
+        \item LiquidityMeasurer: Orderbook and pool depth
+    \end{itemize}
+    \item \textbf{Scheduling}: Runs on configurable intervals (e.g., every 5 minutes)
+\end{itemize}
+
+\textbf{Dashboard}:
+\begin{itemize}
+    \item \textbf{Technology}: Streamlit for rapid development
+    \item \textbf{Components}:
+    \begin{itemize}
+        \item RealTimeCharts: Plotly interactive visualizations
+        \item DataFetcher: Database queries for historical data
+        \item WebSocketClient: Receives live updates
+        \item ControlPanel: User inputs for selections
+    \end{itemize}
+\end{itemize}
+
+\subsection{Data Flow Patterns}
+
+\textbf{Stream Processing}:
+
+CEX Ticker $\rightarrow$ [Validation] $\rightarrow$ [Price Index Calc] $\rightarrow$ [Cache + DB]
+
+DEX Trade $\rightarrow$ [Parse] $\rightarrow$ [Price Calc] $\rightarrow$ [Match Price Index] $\rightarrow$ [Deviation] $\rightarrow$ [DB] $\rightarrow$ [Analytics Queue] $\rightarrow$ [Dashboard]
+
+\textbf{Batch Processing} (for historical analysis):
+
+[Load Historical Data] $\rightarrow$ [Compute Statistics] $\rightarrow$ [Generate Report] $\rightarrow$ [Store Results]
+
+\section{User Interface Design}
+
+\subsection{Dashboard Layout}
+
+\textbf{Header Section}:
+\begin{itemize}
+    \item Trading pair selector (dropdown)
+    \item Time range selector (1h, 6h, 24h, 7d, 30d, custom)
+    \item Network selector (Ethereum, BSC)
+    \item Status indicators (CEX connections, DEX listener, last update)
+\end{itemize}
+
+\textbf{Main Content Area} (Tabbed Interface):
+
+\textbf{Tab 1: Real-Time Monitoring}
+\begin{itemize}
+    \item Top row: Current price index, latest DEX trade, current deviation
+    \item Middle: Price deviation time series chart
+    \item Bottom: Volume comparison bar chart (CEX vs DEX)
+\end{itemize}
+
+\textbf{Tab 2: Lead-Lag Analysis}
+\begin{itemize}
+    \item Cross-correlation function plot
+    \item Summary statistics (optimal lag, correlation, p-value)
+    \item Interpretation text
+\end{itemize}
+
+\textbf{Tab 3: Liquidity Analysis}
+\begin{itemize}
+    \item Side-by-side charts: CEX depth vs DEX liquidity
+    \item Liquidity ratio table at different price levels
+    \item Historical liquidity trend
+\end{itemize}
+
+\textbf{Tab 4: Slippage Calculator}
+\begin{itemize}
+    \item Input fields: Trade size, direction, pool selection
+    \item Output: Predicted slippage (P50/P90/P99)
+    \item Slippage curve visualization
+\end{itemize}
+
+\textbf{Tab 5: Volume Analysis}
+\begin{itemize}
+    \item Daily volume time series (CEX vs DEX)
+    \item Trade size distribution histograms
+    \item Market share pie chart
+\end{itemize}
+
+\subsection{Interaction Patterns}
+
+\begin{itemize}
+    \item \textbf{Hovering}: Tooltips show exact values
+    \item \textbf{Clicking}: Selects time point, shows related data
+    \item \textbf{Dragging}: Zooms into time range
+    \item \textbf{Export}: Download data as CSV or charts as PNG
+    \item \textbf{Auto-refresh}: Toggle for real-time updates (default: ON, 5s interval)
+\end{itemize}
+
+\subsection{Visual Design Principles}
+
+\begin{itemize}
+    \item \textbf{Color scheme}: CEX data in blue, DEX in green, deviations in red/orange
+    \item \textbf{Typography}: Monospace for numbers, sans-serif for text
+    \item \textbf{Responsive layout}: Adapts to different screen sizes
+    \item \textbf{Minimal clutter}: Hide advanced options behind expandable sections
+\end{itemize}
+
+\chapter{IMPLEMENTATION AND TESTING}
+
+\section{Implementation}
+
+The implementation phase is currently in progress. The following components have been completed:
+
+\subsection{Completed Components}
+
+\textbf{CEX Data Collection Infrastructure}:
+\begin{itemize}
+    \item WebSocket connections to 8+ major centralized exchanges
+    \item Real-time ticker data streaming
+    \item Automatic reconnection handling
+    \item Data validation and outlier detection
+\end{itemize}
+
+\textbf{DEX Transaction Monitoring}:
+\begin{itemize}
+    \item RPC connections to Ethereum and BSC networks
+    \item Swap event listeners for Uniswap V2 and V3
+    \item Transaction parsing and data extraction
+    \item Pool state tracking
+\end{itemize}
+
+\textbf{Data Storage}:
+\begin{itemize}
+    \item File-based caching system for raw data
+    \item Database schema implementation
+    \item Data persistence layer
+\end{itemize}
+
+\subsection{Components in Development}
+
+\begin{itemize}
+    \item Price index calculation engine
+    \item Price deviation measurement system
+    \item Statistical analysis modules
+    \item Dashboard interface
+\end{itemize}
+
+\section{Testing}
+
+Testing strategy encompasses multiple levels:
+
+\subsection{Unit Testing}
+\begin{itemize}
+    \item Test individual components in isolation
+    \item Validate data parsing logic
+    \item Verify mathematical calculations
+    \item Test edge cases and error conditions
+\end{itemize}
+
+\subsection{Integration Testing}
+\begin{itemize}
+    \item Test component interactions
+    \item Validate data flow between modules
+    \item Test database operations
+    \item Verify WebSocket and RPC connections
+\end{itemize}
+
+\subsection{System Testing}
+\begin{itemize}
+    \item End-to-end workflow validation
+    \item Performance testing under load
+    \item Stress testing with high-frequency data
+    \item Failover and recovery testing
+\end{itemize}
+
+\subsection{Manual QA}
+\begin{itemize}
+    \item Validation against known market events
+    \item Cross-reference with established platforms
+    \item Leverage team's HFT experience for anomaly detection
+    \item Visual inspection of results
+\end{itemize}
+
+\section{Deployment}
+
+Deployment architecture is planned as follows:
+
+\subsection{Infrastructure Requirements}
+\begin{itemize}
+    \item Cloud compute instances for data collection
+    \item Database server for persistent storage
+    \item Web server for dashboard hosting
+    \item RPC node access or local blockchain nodes
+\end{itemize}
+
+\subsection{Deployment Configuration}
+\begin{itemize}
+    \item Containerization using Docker (if needed)
+    \item Configuration management for exchange endpoints
+    \item Environment-specific settings
+    \item Monitoring and logging setup
+\end{itemize}
+
+\subsection{Documentation}
+\begin{itemize}
+    \item System architecture documentation
+    \item API documentation
+    \item Configuration guide
+    \item User manual for dashboard
+    \item Troubleshooting guide
+\end{itemize}
+
+\chapter{RESULTS}
+
+Results will be presented upon completion of the implementation and data collection phases. The analysis will include:
+
+\subsection{Price Discovery Analysis}
+\begin{itemize}
+    \item Lead-lag correlation results between CEX and DEX
+    \item Statistical significance of temporal relationships
+    \item Variation across different market conditions
+    \item Comparison across multiple trading pairs
+\end{itemize}
+
+\subsection{Volume Comparison}
+\begin{itemize}
+    \item CEX vs DEX volume ratios
+    \item Volume distribution by trade size
+    \item Temporal trends in market share
+    \item Pair-specific analysis
+\end{itemize}
+
+\subsection{Liquidity Analysis}
+\begin{itemize}
+    \item Orderbook depth comparison
+    \item Pool liquidity measurements
+    \item Capital efficiency metrics
+    \item Liquidity concentration analysis
+\end{itemize}
+
+\subsection{Slippage Characterization}
+\begin{itemize}
+    \item Empirical slippage distributions
+    \item Model validation results
+    \item Comparison with theoretical predictions
+    \item Trade size impact analysis
+\end{itemize}
+
+\subsection{Price Deviation Measurements}
+\begin{itemize}
+    \item Statistical summary of deviations
+    \item Temporal patterns
+    \item Market condition dependencies
+    \item Outlier analysis
+\end{itemize}
+
+\chapter{CONCLUSION}
+
+This midterm report presents the design and planning for a comprehensive analysis of cryptocurrency exchange market dynamics, comparing centralized and decentralized venues.
+
+\subsection{Summary of Work Completed}
+
+We have successfully:
+\begin{itemize}
+    \item Defined clear research objectives focusing on price discovery, liquidity, volume, and execution costs
+    \item Developed detailed methodology for price index calculation, deviation measurement, and lead-lag analysis
+    \item Specified comprehensive functional and non-functional requirements
+    \item Designed system architecture with clear separation of concerns
+    \item Implemented core data collection infrastructure for both CEX and DEX monitoring
+\end{itemize}
+
+\subsection{Key Contributions}
+
+Our project addresses a gap in current DeFi research by providing:
+\begin{itemize}
+    \item Real-time comparative analysis framework
+    \item Integrated price index calculation from multiple CEX sources
+    \item Empirical slippage modeling based on actual trade distributions
+    \item Comprehensive monitoring and visualization system
+\end{itemize}
+
+\subsection{Next Steps}
+
+For the remainder of the semester, we will:
+\begin{enumerate}
+    \item Complete price index calculation engine implementation
+    \item Implement statistical analysis modules (lead-lag, deviation measurement)
+    \item Develop slippage prediction model
+    \item Build and deploy dashboard interface
+    \item Collect sufficient data for statistically significant analysis
+    \item Conduct comprehensive testing and validation
+    \item Generate final results and analysis
+\end{enumerate}
+
+\subsection{Expected Outcomes}
+
+Upon project completion, we expect to:
+\begin{itemize}
+    \item Quantify the extent to which DEX prices lag CEX prices
+    \item Characterize liquidity differences between exchange types
+    \item Provide empirical slippage predictions for DEX trades
+    \item Deliver a functional monitoring system for continued research
+\end{itemize}
+
+This work contributes to better understanding of DeFi market microstructure and provides practical tools for traders, researchers, and protocol developers working in the cryptocurrency space.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\appendix	
+\chapter{SAMPLE APPENDIX}
+Contents of the appendix.
+
+\end{document}
