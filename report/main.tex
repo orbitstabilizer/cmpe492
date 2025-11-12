@@ -20,6 +20,15 @@
 \usepackage{microtype} % Better typography and line breaking
 \emergencystretch=1em % Allow more spacing to avoid overfull boxes
 \hfuzz=0.5pt % Suppress warnings for overfull hbox less than 0.5pt
+\usepackage{hyperref} % Make TOC and references clickable
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdftitle={Analysis of Market Dynamics of Crypto Exchanges},
+    pdfauthor={Yusuf Akin, Halil Utku Çelik, Cenk Yilmaz}
+}
 \begin{document}
 
 % Title Page
@@ -745,6 +754,15 @@ This project conducts a systematic analysis of DeFi exchange markets, specifical
         \item Implement price index calculation from multiple CEX sources
         \item Create analysis and visualization dashboard
     \end{itemize}
+
+    \item \textbf{Predictive Analytics for Liquidity Management}:
+    \begin{itemize}
+        \item Develop empirical models for predicting price movements across Uniswap V3 tick ranges
+        \item Build probability distributions from historical trade data to estimate range transition likelihood
+        \item Integrate CEX price index as predictive signal for slippage estimation
+        \item Design automated liquidity rebalancing strategies based on predicted price movements
+        \item Evaluate performance of active rebalancing vs. passive positioning strategies
+    \end{itemize}
 \end{enumerate}
 
 \textbf{Technical Scope:}
@@ -1059,6 +1077,121 @@ For Uniswap V3 concentrated liquidity: Use SDK or on-chain quoter contract to in
 \end{equation}
 
 where $\alpha, \beta$ are weights fit via regression on historical data.
+
+\section{Predictive Models for Liquidity Rebalancing}
+
+\textbf{Objective}: Utilize empirical trade distributions to predict the probability of price movements across Uniswap V3 concentrated liquidity ranges, enabling automated liquidity rebalancing strategies.
+
+\textbf{Approach}:
+
+\textbf{Empirical Trade Distribution Analysis}:
+
+Collect historical DEX trades and build probability distributions for trade characteristics:
+
+\begin{enumerate}
+    \item \textbf{Trade Size Distribution}: For each pool, compute the empirical distribution of trade sizes:
+    \begin{equation}
+    P(\text{trade\_size} = s) = \frac{\text{count}(\text{trades with size } s)}{N_{\text{total}}}
+    \end{equation}
+
+    \item \textbf{Inter-Trade Time Distribution}: Model the time between consecutive trades:
+    \begin{equation}
+    P(\Delta t) = \text{empirical distribution of time gaps}
+    \end{equation}
+
+    \item \textbf{Price Impact Distribution}: For each trade size bin, measure the distribution of price movements:
+    \begin{equation}
+    P(\Delta p \mid \text{trade\_size} = s) = \text{empirical distribution of price changes}
+    \end{equation}
+\end{enumerate}
+
+\textbf{Probability of Range Transition}:
+
+For Uniswap V3 pools with concentrated liquidity positions, calculate the probability that the next trade will move the price from the current tick range to a different liquidity concentration level:
+
+\begin{equation}
+P(\text{tick}_{\text{new}} \in [\text{tick}_a, \text{tick}_b] \mid \text{tick}_{\text{current}}) = \sum_{s} P(\text{trade\_size} = s) \times P(\Delta p(s) \text{ crosses boundary})
+\end{equation}
+
+where the boundary crossing probability is determined by:
+\begin{itemize}
+    \item Current pool reserves and liquidity distribution
+    \item Required trade size to move price by $\Delta p$
+    \item Historical frequency of such trades
+\end{itemize}
+
+\textbf{Slippage Prediction with Price Index Integration}:
+
+Enhance the slippage prediction model by incorporating the CEX price index as an external signal:
+
+\begin{equation}
+\text{predicted\_slippage}(s, t) = f(\text{pool\_state}(t), \text{trade\_size} = s, \text{CEX\_DEX\_deviation}(t))
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\text{pool\_state}(t)$: Current reserves and liquidity distribution
+    \item $\text{CEX\_DEX\_deviation}(t) = \frac{\text{DEX\_price}(t) - \text{CEX\_price\_index}(t)}{\text{CEX\_price\_index}(t)}$
+    \item When $|\text{CEX\_DEX\_deviation}| > \theta$ (threshold), expect increased arbitrage activity
+\end{itemize}
+
+The model can predict higher slippage when:
+\begin{enumerate}
+    \item DEX price deviates significantly from CEX price index (arbitrage opportunity)
+    \item Recent trade velocity is high (estimated from inter-trade time distribution)
+    \item Current price is near concentrated liquidity boundaries
+\end{enumerate}
+
+\textbf{Automated Liquidity Rebalancing Logic}:
+
+Liquidity providers can use these predictions to optimize position management:
+
+\begin{algorithm}
+\caption{Automated Liquidity Rebalancing}
+\begin{algorithmic}
+\STATE \textbf{Input:} Current position $[\text{tick}_{\text{low}}, \text{tick}_{\text{high}}]$, threshold $p_{\text{threshold}}$
+\STATE Compute $P(\text{price exits range within } \Delta t)$ using empirical distributions
+\IF{$P(\text{exit}) > p_{\text{threshold}}$}
+    \STATE Identify new optimal range $[\text{tick}_{\text{new\_low}}, \text{tick}_{\text{new\_high}}]$ based on:
+    \STATE \quad - Predicted price target from CEX-DEX deviation
+    \STATE \quad - Trade size distribution (concentration around new range)
+    \STATE \quad - Expected fee revenue vs. gas costs
+    \STATE Execute rebalancing transaction
+\ENDIF
+\STATE Update position tracking
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Risk-Adjusted Positioning}:
+
+The model enables liquidity providers to make informed decisions:
+
+\begin{itemize}
+    \item \textbf{Wide Range Strategy}: When trade size distribution shows high variance and frequent large trades, use wider ranges to avoid frequent rebalancing
+
+    \item \textbf{Narrow Range Strategy}: When trades are small and predictable, concentrate liquidity tightly around current price for higher fee capture
+
+    \item \textbf{CEX-Aligned Strategy}: Monitor CEX price index deviation and proactively reposition before arbitrageurs force price convergence
+\end{itemize}
+
+\textbf{Performance Metrics}:
+
+Evaluate rebalancing strategy performance:
+
+\begin{equation}
+\text{Sharpe Ratio}_{\text{LP}} = \frac{\text{Fee Revenue} - \text{Gas Costs} - \text{Impermanent Loss}}{\sigma(\text{Returns})}
+\end{equation}
+
+Compare passive (no rebalancing) vs. active (predicted rebalancing) strategies over the analysis period.
+
+\textbf{Implementation Considerations}:
+
+\begin{itemize}
+    \item \textbf{Gas Cost Modeling}: Factor in Ethereum gas prices when deciding rebalancing frequency
+    \item \textbf{Slippage on Rebalancing}: Account for execution costs of position adjustments
+    \item \textbf{Market Impact}: Consider that rebalancing transactions themselves affect pool state
+    \item \textbf{Real-time Updates}: Model parameters should be updated continuously as new trades occur
+\end{itemize}
 
 \section{Liquidity Depth Comparison}
 
@@ -1760,6 +1893,17 @@ Results will be presented upon completion of the implementation and data collect
     \item Outlier analysis
 \end{itemize}
 
+\subsection{Predictive Modeling and Liquidity Rebalancing}
+\begin{itemize}
+    \item Empirical probability distributions for trade sizes and price impacts
+    \item Range transition probabilities for Uniswap V3 concentrated liquidity positions
+    \item Accuracy of slippage predictions incorporating CEX price index deviations
+    \item Performance comparison: passive vs. active rebalancing strategies
+    \item Risk-adjusted returns (Sharpe ratios) for different liquidity positioning strategies
+    \item Optimal rebalancing thresholds considering gas costs and expected fee revenue
+    \item Case studies of rebalancing decisions during high CEX-DEX deviation periods
+\end{itemize}
+
 \chapter{CONCLUSION}
 
 This midterm report presents the design and planning for a comprehensive analysis of cryptocurrency exchange market dynamics, comparing centralized and decentralized venues.
@@ -1805,6 +1949,8 @@ Upon project completion, we expect to:
     \item Quantify the extent to which DEX prices lag CEX prices
     \item Characterize liquidity differences between exchange types
     \item Provide empirical slippage predictions for DEX trades
+    \item Develop predictive models for price movement probabilities across Uniswap V3 concentrated liquidity ranges
+    \item Demonstrate automated liquidity rebalancing strategies informed by CEX price index deviations and empirical trade distributions
     \item Deliver a functional monitoring system for continued research
 \end{itemize}
 
