@@ -6,9 +6,9 @@ import numpy as np
 
 
 class Symbols(enum.IntEnum):
-    BTC_USD = 0
-    ETH_USD = 1
-    BNB_USD = 2
+    BTC_USDT = 0
+    ETH_USDT = 1
+    BNB_USDT = 2
 
 class TickerData(ctypes.Structure):
     _fields_ = [

@@ -1110,17 +1110,15 @@ where $L_{\text{tick}}$ is liquidity in each tick and $\Delta p_{\text{tick}}$ i
 \begin{itemize}
     \item \textbf{FR1.1}: System shall connect to minimum 5 CEX WebSocket APIs simultaneously
     \item \textbf{FR1.2}: System shall collect bid/ask prices with $<1$ second latency
-    \item \textbf{FR1.3}: System shall retrieve 24h volume data via REST APIs every 5 minutes
+    \item \textbf{FR1.3}: System shall sync 24h volume data via REST APIs
     \item \textbf{FR1.4}: System shall handle WebSocket disconnections and reconnect automatically
-    \item \textbf{FR1.5}: System shall validate price data and reject outliers $>5\sigma$ from median
 \end{itemize}
 
 \subsection{FR2: Price Index Calculation}
 \begin{itemize}
-    \item \textbf{FR2.1}: System shall calculate volume-weighted price index from selected exchanges
-    \item \textbf{FR2.2}: Price index shall update within 1 second of receiving new ticker data
+    \item \textbf{FR2.1}: System shall calculate volume-weighted price index from selected CEX'es
+    \item \textbf{FR2.2}: Price index shall update within 1ms of receiving new ticker data
     \item \textbf{FR2.3}: System shall require minimum 3 valid exchanges for price index
-    \item \textbf{FR2.4}: System shall log price index with timestamp at 1-second intervals
 \end{itemize}
 
 \subsection{FR3: DEX Monitoring}
@@ -1166,9 +1164,9 @@ where $L_{\text{tick}}$ is liquidity in each tick and $\Delta p_{\text{tick}}$ i
 
 \subsection{FR8: Data Storage}
 \begin{itemize}
-    \item \textbf{FR8.1}: System shall store OHLC data at 1-minute intervals
-    \item \textbf{FR8.2}: System shall store individual DEX trades with full details
-    \item \textbf{FR8.3}: System shall store price indexs at 1-second intervals
+    \item \textbf{FR8.1}: System shall store OHLC data at 24h intervals
+    \item \textbf{FR8.2}: System shall store individual DEX trades with pool size, amounts, and timestamp
+    \item \textbf{FR8.3}: System shall store price indexs as it changes 2bps or more as index and timestamp
     \item \textbf{FR8.4}: System shall support queries for historical data analysis
 \end{itemize}
 
@@ -1187,36 +1185,14 @@ where $L_{\text{tick}}$ is liquidity in each tick and $\Delta p_{\text{tick}}$ i
 \subsection{NFR1: Performance}
 \begin{itemize}
     \item \textbf{NFR1.1}: System shall process 100+ trades per second
-    \item \textbf{NFR1.2}: Dashboard shall update visualizations within 2 seconds of new data
-    \item \textbf{NFR1.3}: Historical queries shall return results within 5 seconds for 30-day periods
+    \item \textbf{NFR1.2}: Dashboard shall update visualizations within 500 ms of new data
 \end{itemize}
 
-\subsection{NFR2: Reliability}
-\begin{itemize}
-    \item \textbf{NFR2.1}: System uptime shall be $\geq 95\%$ during operational periods
-    \item \textbf{NFR2.2}: System shall recover from crashes within 1 minute
-    \item \textbf{NFR2.3}: Data collection gaps shall be $\leq 0.1\%$ of total time
-\end{itemize}
-
-\subsection{NFR3: Scalability}
+\subsection{NFR2: Scalability}
 \begin{itemize}
     \item \textbf{NFR3.1}: System shall support addition of new trading pairs without code changes
     \item \textbf{NFR3.2}: System shall support addition of new CEXs via configuration
     \item \textbf{NFR3.3}: System shall support addition of new blockchain networks
-\end{itemize}
-
-\subsection{NFR4: Maintainability}
-\begin{itemize}
-    \item \textbf{NFR4.1}: Code shall be modular with clear interfaces between components
-    \item \textbf{NFR4.2}: Configuration shall be externalized (no hardcoded parameters)
-    \item \textbf{NFR4.3}: System shall include comprehensive logging for debugging
-\end{itemize}
-
-\subsection{NFR5: Data Quality}
-\begin{itemize}
-    \item \textbf{NFR5.1}: All timestamps shall be in UTC with millisecond precision
-    \item \textbf{NFR5.2}: All prices shall be validated against reasonable ranges
-    \item \textbf{NFR5.3}: System shall detect and flag suspicious data patterns
 \end{itemize}
 
 \section{Use Cases}
@@ -1238,12 +1214,6 @@ where $L_{\text{tick}}$ is liquidity in each tick and $\Delta p_{\text{tick}}$ i
 \end{enumerate}
 
 \textbf{Postconditions}: Analyst understands current market state
-
-\textbf{Extensions}:
-\begin{itemize}
-    \item 3a. If insufficient data: System displays warning message
-    \item 5a. If deviation exceeds threshold: System highlights alert
-\end{itemize}
 
 \subsection{UC2: Analyze Historical Lead-Lag Relationship}
 
