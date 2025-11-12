@@ -672,6 +672,12 @@ These volume and liquidity disparities have important implications:
 
 Our research aims to quantify these relationships and provide empirical evidence for market microstructure differences between exchange types.
 
+\subsection{Maximal Extractable Value (MEV)}
+
+Maximal Extractable Value (MEV) refers to the profit that validators, miners, or specialized actors (searchers) can extract by strategically ordering, including, or excluding transactions within blocks. On blockchain networks like Ethereum, transactions submitted to the mempool are visible to all participants before being included in a block, creating opportunities for exploitation. MEV extraction manifests in several forms: front-running (placing a transaction ahead of a pending transaction to profit from known price movements), back-running (placing a transaction immediately after another to capitalize on resulting state changes), sandwich attacks (surrounding a victim's transaction with both a front-run and back-run to extract value), and liquidations (competing to be first to liquidate under-collateralized positions in DeFi protocols).
+
+DEX users are particularly vulnerable to MEV attacks due to the transparent nature of AMM pricing mechanisms and the deterministic execution of trades. In a sandwich attack—the most common form of MEV targeting DEXs—an attacker observes a large pending swap in the mempool, then submits two transactions: one that trades in the same direction as the victim (pushing the price unfavorably), and another that trades in the opposite direction after the victim's transaction executes (profiting from the price movement). This attack directly increases the victim's slippage beyond what the AMM formula predicts, effectively stealing value that would otherwise go to liquidity providers or remain with the trader.
+
 \section{Broad Impact}
 
 This project provides a rigorous empirical analysis of decentralized exchange market microstructure in comparison with centralized exchanges. The DeFi space, despite significant growth in total value locked and trading volume, lacks comprehensive real-time analysis tools that compare operational characteristics between CEX and DEX venues.
@@ -803,7 +809,7 @@ Statistical Significance & Sample size per pair & $\geq 10{,}000$ DEX trades \\ 
 
 \subsection{Risk Analysis}
 
-\begin{table}[h]
+\begin{table}[H]
 \begin{center}
 \small
 \begin{tabular}{|p{3cm}|l|l|p{5cm}|}
@@ -1459,7 +1465,7 @@ The system follows a layered architecture with four main tiers:
 
 \textbf{Presentation Layer}:
 \begin{itemize}
-    \item Streamlit Dashboard (Port 8501)
+    \item Streamlit Dashboard
     \item Price Deviation Charts
     \item Volume Comparison Visualizations
     \item Liquidity Analysis Interface
