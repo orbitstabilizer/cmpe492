@@ -1,0 +1,12 @@
+{
+  "symbols": [
+    ["btcusdt", "ethusdt", "bnbusdt"],
+    ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
+    ["BTC-USD", "ETH-USD", "BNB-USD"],
+    ["BTC_USDT", "ETH_USDT", "BNB_USDT"],
+    ["btcusdt", "ethusdt", "bnbusdt"],
+    ["BTC-USDT", "ETH-USDT", "BNB-USDT"],
+    ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
+    ["BTC-USDT", "ETH-USDT", "BNB-USDT"]
+  ]
+}

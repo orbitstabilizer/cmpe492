@@ -1,4 +1,4 @@
-module exchange
+module price-index
 
 go 1.23
 

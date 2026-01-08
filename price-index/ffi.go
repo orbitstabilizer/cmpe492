@@ -6,8 +6,6 @@ import (
 	"unsafe"
 )
 
-
-
 type SHMReader[T any] struct {
 	file       *os.File
 	mappedData []byte
