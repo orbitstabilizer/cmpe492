@@ -65,6 +65,7 @@ RECONNECT:
 		"topics": []interface{}{
 			[]string{
 				UniswapV2SwapTopic.Hex(),
+				UniswapV2SyncTopic.Hex(),
 				UniswapV3SwapTopic.Hex(),
 				UniswapV4SwapTopic.Hex(),
 				CurveTokenExchangeTopic.Hex(),
@@ -138,6 +139,8 @@ func (l *EVMListener) processLog(logData map[string]interface{}) {
 	switch eventSignature {
 	case UniswapV2SwapTopic:
 		l.decodeV2Swap(&logEntry, receipt)
+	case UniswapV2SyncTopic:
+		l.decodeV2Sync(&logEntry, receipt)
 	case UniswapV3SwapTopic:
 		l.decodeV3Swap(&logEntry, receipt)
 	case UniswapV4SwapTopic:
@@ -208,6 +211,34 @@ func (l *EVMListener) decodeV2Swap(logEntry *types.Log, receipt *types.Receipt) 
 	l.handler.HandleSwap(swapData)
 }
 
+// decodeV2Sync processes Uniswap V2 Sync events (Reserves update)
+func (l *EVMListener) decodeV2Sync(logEntry *types.Log, receipt *types.Receipt) {
+	// We need basic info to identify the DEX/Chain
+	// We can try getV2PairInfo, but if it fails, fallback to generic
+	_, err := l.getV2PairInfo(logEntry.Address)
+	dexName := "V2"
+	if err != nil {
+		// Log but proceed with generic name if pair info fails (unlikely if it's a valid pair)
+		// log.Printf("[%s] ⚠ Failed to get pair info for Sync event: %v", l.config.Name, err)
+	}
+
+	var event V2SyncEvent
+	if err := UniswapV2SyncEventABI.UnpackIntoInterface(&event, "Sync", logEntry.Data); err != nil {
+		log.Printf("[%s] ⚠ Failed to unpack V2 Sync event: %v", l.config.Name, err)
+		return
+	}
+
+	l.handler.HandlePoolState(
+		logEntry.Address.Hex(),
+		l.config.Name,
+		dexName,
+		receipt.BlockNumber.Uint64(),
+		receipt.TxHash.Hex(),
+		event.Reserve0,
+		event.Reserve1,
+	)
+}
+
 // decodeV3Swap processes Uniswap V3 swap events
 func (l *EVMListener) decodeV3Swap(logEntry *types.Log, receipt *types.Receipt) {
 	poolInfo, err := l.getV3PoolInfo(logEntry.Address)
@@ -245,21 +276,24 @@ func (l *EVMListener) decodeV3Swap(logEntry *types.Log, receipt *types.Receipt) 
 	feePercent := float64(poolInfo.Fee) / 10000.0
 
 	swapData := SwapData{
-		Protocol:    "V3",
-		ChainName:   l.config.Name,
-		ChainType:   "evm",
-		PoolAddress: logEntry.Address.Hex(),
-		Token0:      poolInfo.Token0Info,
-		Token1:      poolInfo.Token1Info,
-		TokenIn:     tokenIn,
-		TokenOut:    tokenOut,
-		AmountIn:    amountIn,
-		AmountOut:   amountOut,
-		Fee:         &feePercent,
-		Sender:      event.Sender.Hex(),
-		Recipient:   event.Recipient.Hex(),
-		TxHash:      receipt.TxHash.Hex(),
-		BlockNumber: receipt.BlockNumber.Uint64(),
+		Protocol:     "V3",
+		ChainName:    l.config.Name,
+		ChainType:    "evm",
+		PoolAddress:  logEntry.Address.Hex(),
+		Token0:       poolInfo.Token0Info,
+		Token1:       poolInfo.Token1Info,
+		TokenIn:      tokenIn,
+		TokenOut:     tokenOut,
+		AmountIn:     amountIn,
+		AmountOut:    amountOut,
+		Fee:          &feePercent,
+		Sender:       event.Sender.Hex(),
+		Recipient:    event.Recipient.Hex(),
+		TxHash:       receipt.TxHash.Hex(),
+		BlockNumber:  receipt.BlockNumber.Uint64(),
+		SqrtPriceX96: event.SqrtPriceX96,
+		Liquidity:    event.Liquidity,
+		Tick:         event.Tick,
 	}
 
 	l.handler.HandleSwap(swapData)
@@ -294,18 +328,21 @@ func (l *EVMListener) decodeV4Swap(logEntry *types.Log, receipt *types.Receipt) 
 	feePercent := float64(event.Fee.Uint64()) / 10000.0
 
 	swapData := SwapData{
-		Protocol:    "V4",
-		ChainName:   l.config.Name,
-		ChainType:   "evm",
-		PoolID:      poolIdHex,
-		PoolAddress: logEntry.Address.Hex(),
-		AmountIn:    amountIn,
-		AmountOut:   amountOut,
-		Fee:         &feePercent,
-		Sender:      event.Sender.Hex(),
-		Recipient:   event.Sender.Hex(),
-		TxHash:      receipt.TxHash.Hex(),
-		BlockNumber: receipt.BlockNumber.Uint64(),
+		Protocol:     "V4",
+		ChainName:    l.config.Name,
+		ChainType:    "evm",
+		PoolID:       poolIdHex,
+		PoolAddress:  logEntry.Address.Hex(),
+		AmountIn:     amountIn,
+		AmountOut:    amountOut,
+		Fee:          &feePercent,
+		Sender:       event.Sender.Hex(),
+		Recipient:    event.Sender.Hex(),
+		TxHash:       receipt.TxHash.Hex(),
+		BlockNumber:  receipt.BlockNumber.Uint64(),
+		SqrtPriceX96: event.SqrtPriceX96,
+		Liquidity:    event.Liquidity,
+		Tick:         event.Tick,
 	}
 
 	l.handler.HandleSwap(swapData)

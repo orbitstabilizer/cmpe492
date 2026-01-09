@@ -1,23 +1,6 @@
 -- Create TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
--- CEX Ticker data table (time-series)
-CREATE TABLE IF NOT EXISTS cex_tickers (
-    time TIMESTAMPTZ NOT NULL,
-    exchange VARCHAR(50) NOT NULL,
-    symbol VARCHAR(255) NOT NULL,
-    bid DECIMAL(20, 8) NOT NULL,
-    ask DECIMAL(20, 8) NOT NULL,
-    mid_price DECIMAL(20, 8) GENERATED ALWAYS AS ((bid + ask) / 2) STORED,
-    volume_24h DECIMAL(30, 8),
-    base_volume DECIMAL(30, 8),
-    quote_volume DECIMAL(30, 8)
-);
-
--- Create index for faster queries
-SELECT create_hypertable('cex_tickers', 'time', if_not_exists => TRUE);
-CREATE INDEX idx_cex_tickers_exchange_symbol_time ON cex_tickers (exchange, symbol, time DESC);
-
 -- Price Index table (aggregated CEX data)
 CREATE TABLE IF NOT EXISTS price_index (
     time TIMESTAMPTZ NOT NULL,
@@ -42,11 +25,7 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
     price DECIMAL(100, 18) NOT NULL,
     tx_hash VARCHAR(66),
     block_number BIGINT,
-    trade_size_usd DECIMAL(20, 8),
-    trade_size_bin VARCHAR(20),
-    swap_direction VARCHAR(10),
-    is_sandwich_victim BOOLEAN DEFAULT FALSE,
-    is_arbitrage BOOLEAN DEFAULT FALSE
+    trade_size_usd DECIMAL(20, 8)
 );
 
 SELECT create_hypertable('dex_swaps', 'time', if_not_exists => TRUE);
@@ -73,9 +52,7 @@ CREATE TABLE IF NOT EXISTS pools (
     dex VARCHAR(50) NOT NULL,
     token0_address VARCHAR(66) NOT NULL,
     token1_address VARCHAR(66) NOT NULL,
-    fee_tier INT,
-    tvl DECIMAL(30, 8),
-    volume_24h DECIMAL(30, 8),
+    fee_tier DECIMAL(10, 6),
     last_updated TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -151,7 +128,6 @@ CREATE TABLE IF NOT EXISTS dex_pool_state (
     sqrt_price_x96 NUMERIC(78, 0),
     tick INT,
     liquidity NUMERIC(78, 0),
-    tvl_usd DECIMAL(30, 8),
     price DECIMAL(20, 8),
     block_number BIGINT,
     triggered_by_tx VARCHAR(66)

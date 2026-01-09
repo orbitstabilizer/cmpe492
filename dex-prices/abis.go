@@ -20,6 +20,9 @@ var (
 
 	// Balancer V2 - Weighted/Stable/MetaStable pools
 	BalancerSwapTopic = crypto.Keccak256Hash([]byte("Swap(bytes32,address,address,uint256,uint256)"))
+
+	// Uniswap V2 Sync Event (for reserves)
+	UniswapV2SyncTopic = crypto.Keccak256Hash([]byte("Sync(uint112,uint112)"))
 )
 
 // Universal V2 Swap Event ABI (works for Uniswap, PancakeSwap, SushiSwap, etc.)
@@ -34,6 +37,17 @@ const uniswapV2SwapABIJSON = `[{
 		{"indexed": true, "name": "to", "type": "address"}
 	],
 	"name": "Swap",
+	"type": "event"
+}]`
+
+// Universal V2 Sync Event ABI
+const uniswapV2SyncABIJSON = `[{
+	"anonymous": false,
+	"inputs": [
+		{"indexed": false, "name": "reserve0", "type": "uint112"},
+		{"indexed": false, "name": "reserve1", "type": "uint112"}
+	],
+	"name": "Sync",
 	"type": "event"
 }]`
 
@@ -194,6 +208,7 @@ const erc20ABIJSON = `[
 
 var (
 	UniswapV2SwapEventABI abi.ABI
+	UniswapV2SyncEventABI abi.ABI
 	UniswapV3SwapEventABI abi.ABI
 	UniswapV4SwapEventABI abi.ABI
 	UniswapV2PairABI      abi.ABI
@@ -209,6 +224,11 @@ func init() {
 	var err error
 
 	UniswapV2SwapEventABI, err = abi.JSON(strings.NewReader(uniswapV2SwapABIJSON))
+	if err != nil {
+		panic(err)
+	}
+
+	UniswapV2SyncEventABI, err = abi.JSON(strings.NewReader(uniswapV2SyncABIJSON))
 	if err != nil {
 		panic(err)
 	}
@@ -257,6 +277,12 @@ type V2SwapEvent struct {
 	Amount0Out *big.Int
 	Amount1Out *big.Int
 	To         common.Address
+}
+
+// V2SyncEvent represents a Uniswap V2 Sync event
+type V2SyncEvent struct {
+	Reserve0 *big.Int
+	Reserve1 *big.Int
 }
 
 // V3SwapEvent represents a Uniswap V3 (and forks) swap event

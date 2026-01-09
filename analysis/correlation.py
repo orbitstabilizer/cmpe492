@@ -81,7 +81,7 @@ class LeadLagAnalyzer:
             cursor = self.db.conn.cursor()
             
             cursor.execute("""
-                SELECT time, price_index, std_dev
+                SELECT time, price_index
                 FROM price_index
                 WHERE symbol = %s 
                   AND time >= %s 
@@ -99,8 +99,7 @@ class LeadLagAnalyzer:
             # Aggregate by interval
             prices = {
                 'times': [row[0] for row in rows],
-                'prices': [row[1] for row in rows],
-                'std_devs': [row[2] for row in rows]
+                'prices': [row[1] for row in rows]
             }
             
             return prices
