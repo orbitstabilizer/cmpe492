@@ -134,7 +134,7 @@ func main() {
 			price := shmData.PriceIndices[symIx]
 			if !math.IsNaN(price) {
 				symbol := getSymbolName(symIx, exchangeInfo)
-				_ = dbWriter.InsertPriceIndex(symbol, price, getNumValidExchanges(shmData, symIx), 0.0)
+				_ = dbWriter.InsertPriceIndex(symbol, price, getNumValidExchanges(shmData, symIx))
 			}
 		}
 	}()

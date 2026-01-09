@@ -27,12 +27,12 @@ func NewDatabaseWriter(connStr string) (*DatabaseWriter, error) {
 	return &DatabaseWriter{db: db}, nil
 }
 
-func (w *DatabaseWriter) InsertPriceIndex(symbol string, price float64, numExchanges int, stdDev float64) error {
+func (w *DatabaseWriter) InsertPriceIndex(symbol string, price float64, numExchanges int) error {
 	query := `
-        INSERT INTO price_index (time, symbol, price_index, num_exchanges, std_dev)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO price_index (time, symbol, price_index, num_exchanges)
+        VALUES ($1, $2, $3, $4)
     `
-	_, err := w.db.Exec(query, time.Now(), symbol, price, numExchanges, stdDev)
+	_, err := w.db.Exec(query, time.Now(), symbol, price, numExchanges)
 	if err != nil {
 		return fmt.Errorf("failed to insert price index: %w", err)
 	}
