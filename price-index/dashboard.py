@@ -35,7 +35,7 @@ def main():
 
     with tab_price_index:
         st.title("Price Index Summary")
-        st.dataframe(df_price_index)
+        st.dataframe(df_price_index, height=1000)
 
 if __name__ == "__main__":
     main()

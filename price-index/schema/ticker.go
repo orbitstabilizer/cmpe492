@@ -8,13 +8,13 @@ import (
 type Exchange int
 
 const (
-	Binance Exchange = iota
-	Bybit
-	Coinbase
-	Gateio
+	BINANCE Exchange = iota
+	BYBIT
+	COINBASE
+	GATEIO
 	HTX
-	Kucoin
-	Mexc
+	KUCOIN
+	MEXC
 	OKX
 	NUM_EXCHANGES
 )

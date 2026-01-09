@@ -3,12 +3,29 @@ import ctypes
 import enum
 import pandas as pd
 import numpy as np
+import json
 
 
 class Symbols(enum.IntEnum):
-    BTC_USDT = 0
-    ETH_USDT = 1
-    BNB_USDT = 2
+    pass
+
+class Exchange(enum.IntEnum):
+    pass
+
+with open("exchange_info.json", "r") as f:
+    exchange_info = json.load(f)
+    pairs = exchange_info["symbols"][2]
+    sb = "class Symbols(enum.IntEnum):\n"
+    for i, pair in enumerate(pairs):
+        sb += f"    {pair.replace('-', '_')} = {i}\n"
+    exec(sb)
+
+    sb = "class Exchange(enum.IntEnum):\n"
+    exchanges = exchange_info["exchanges"]
+    for i, exchange in enumerate(exchanges):
+        sb += f"    {exchange} = {i}\n"
+    exec(sb)
+
 
 class TickerData(ctypes.Structure):
     _fields_ = [
@@ -19,23 +36,14 @@ class TickerData(ctypes.Structure):
     def __repr__(self):
         return f"TickerData(Bid={self.Bid}, Ask={self.Ask})"
 
-class Exchange(enum.IntEnum):
-    Binance = 0
-    Bybit = enum.auto()
-    Coinbase = enum.auto()
-    Gateio = enum.auto()
-    HTX = enum.auto()
-    Kucoin = enum.auto()
-    Mexc = enum.auto()
-    OKX = enum.auto()
-    NUM_EXCHANGES = enum.auto()
+
 
 
 
 NUM_SYMBOLS = 128 # preallocated number of symbols
 class ShmLayout(ctypes.Structure):
     _fields_ = [
-        ("tickers", TickerData * NUM_SYMBOLS * Exchange.NUM_EXCHANGES),
+        ("tickers", TickerData * NUM_SYMBOLS * len(Exchange)),
         ("price_indices", ctypes.c_double * len(Symbols)),
     ]
 
@@ -45,8 +53,6 @@ class ShmLayout(ctypes.Structure):
     def __repr__(self):
         repr_str = "TickerBuffer(\n"
         for exchange in Exchange:
-            if exchange == Exchange.NUM_EXCHANGES:
-                continue
             repr_str += f"  {exchange.name}: [\n"
             for symbol_index in range(NUM_SYMBOLS):
                 ticker_data = self.tickers[exchange][symbol_index]
@@ -69,12 +75,12 @@ def read_shm(path: str):
             )
         data = ShmLayout.from_buffer(mm)
         return {
-            "tickers": np.frombuffer(data.tickers, dtype=TickerData * NUM_SYMBOLS * Exchange.NUM_EXCHANGES)[:len(symbols)],
+            "tickers": np.frombuffer(data.tickers, dtype=TickerData * NUM_SYMBOLS * len(Exchange))[:len(symbols)],
             "price_indices": np.frombuffer(data.price_indices, dtype=ctypes.c_double * len(Symbols)).reshape(-1, 1),
 
         }
 
-exchanges = [e.name for e in Exchange if e != Exchange.NUM_EXCHANGES]
+exchanges = [e.name for e in Exchange]
 symbols = [s.name for s in Symbols]
 
 symbol_to_value = {

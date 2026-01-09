@@ -471,9 +471,26 @@ func connectBybit(
 	tickerConntainer []TickerData,
 	shouldClose *bool,
 ) {
+	const MAX_SYMBOLS_PER_CONN = 10
+	totalSymbols := len(symbols)
+	for offset := 0; offset < totalSymbols; offset += MAX_SYMBOLS_PER_CONN {
+		end := offset + MAX_SYMBOLS_PER_CONN
+		if end > totalSymbols {
+			end = totalSymbols
+		}
+		go connectBybitPartial(symbols[offset:end], tickerConntainer, shouldClose, offset)
+	}
+}
+
+func connectBybitPartial(
+	symbols []string,
+	tickerConntainer []TickerData,
+	shouldClose *bool,
+	offset int,
+) {
 	symbolToTick := map[string]int{}
 	for i, symbol := range symbols {
-		symbolToTick[symbol] = i
+		symbolToTick[symbol] = i + offset
 	}
 RECONNECT:
 	conn, _, err := websocket.DefaultDialer.Dial(BYBIT_WS_URL, nil)
@@ -527,19 +544,19 @@ func ConnectExchange(
 ) {
 	updateChan = updateChan_
 	switch exchange {
-	case Binance:
+	case BINANCE:
 		connectBinance(symbols, tickerContainer, shouldClose)
-	case Bybit:
+	case BYBIT:
 		connectBybit(symbols, tickerContainer, shouldClose)
-	case Coinbase:
+	case COINBASE:
 		connectCoinbase(symbols, tickerContainer, shouldClose)
-	case Gateio:
+	case GATEIO:
 		connectGateio(symbols, tickerContainer, shouldClose)
 	case HTX:
 		connectHTX(symbols, tickerContainer, shouldClose)
-	case Kucoin:
+	case KUCOIN:
 		connectKucoin(symbols, tickerContainer, shouldClose)
-	case Mexc:
+	case MEXC:
 		connectMexc(symbols, tickerContainer, shouldClose)
 	case OKX:
 		connectOKX(symbols, tickerContainer, shouldClose)

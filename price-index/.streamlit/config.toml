@@ -1,0 +1,26 @@
+[global]
+showWarningOnDirectExecution = false
+
+[server]
+# baseUrlPath = "/price-index/"
+headless           = true
+runOnSave          = false
+address            = "127.0.0.1"
+port               = 8080
+# If you’re reverse-proxying (e.g. nginx), disable CORS here
+enableCORS         = false
+enableXsrfProtection = false
+
+[client]
+# Hide the hamburger menu in production
+toolbarMode        = "minimal"
+# Don’t show full error details to end users
+showErrorDetails   = "none"
+
+[browser]
+gatherUsageStats = false
+
+
+[theme]
+base = "light"
+font = "sans serif"
