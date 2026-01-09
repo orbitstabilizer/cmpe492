@@ -46,10 +46,14 @@ psql -h localhost -U cmpe492 -d crypto_exchange
 
 ## Database Schema
 
+**Schema Version:** 1.1 (Enhanced for complete analysis)
+
 ### Core Tables
 
 #### `cex_tickers` (Time-series)
-Stores CEX ticker data (bid/ask prices) from all exchanges.
+Stores CEX ticker data (bid/ask prices + volume) from all exchanges.
+
+**New fields (v1.1):** `volume_24h`, `base_volume`, `quote_volume`
 
 ```sql
 SELECT * FROM cex_tickers 
@@ -59,7 +63,9 @@ ORDER BY time DESC;
 ```
 
 #### `dex_swaps` (Time-series)
-Stores DEX swap events with pricing information.
+Stores DEX swap events with pricing and trade classification.
+
+**New fields (v1.1):** `trade_size_usd`, `trade_size_bin`, `swap_direction`, `is_sandwich_victim`, `is_arbitrage`
 
 ```sql
 SELECT * FROM dex_swaps 
@@ -97,8 +103,50 @@ Lead-lag correlation results between CEX and DEX prices.
 #### `slippage_analysis`
 Slippage modeling results for different token amounts.
 
+#### `cex_liquidity_snapshot` (Time-series) **[NEW v1.1]**
+CEX orderbook depth at multiple price levels for liquidity comparison.
+
+```sql
+SELECT * FROM cex_liquidity_snapshot 
+WHERE exchange = 'binance' 
+AND symbol = 'BTC/USDT'
+ORDER BY time DESC LIMIT 10;
+```
+
+#### `dex_pool_state` (Time-series) **[NEW v1.1]**
+Historical snapshots of DEX pool state (reserves, liquidity, tick).
+
+```sql
+SELECT * FROM dex_pool_state 
+WHERE pool_address = '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640'
+ORDER BY time DESC LIMIT 10;
+```
+
 #### `data_ingestion_logs`
 Monitoring logs for data collection services.
+
+## Testing Schema
+
+Test that all database features work correctly:
+
+```bash
+cd database
+python test_schema.py
+```
+
+Or with uv:
+
+```bash
+cd database
+uv run test_schema.py
+```
+
+This verifies:
+- CEX volume tracking
+- DEX trade classification
+- CEX liquidity snapshots
+- DEX pool state history
+- Helper utility functions
 
 ## Python Client Usage
 
@@ -114,14 +162,17 @@ db = CryptoExchangeDB(
     password="password123"
 )
 
-# Insert CEX ticker data
+# Insert CEX ticker data (with volume)
 tickers = [
     {
         'time': datetime.now(),
         'exchange': 'binance',
         'symbol': 'BTC/USDT',
         'bid': 42500.50,
-        'ask': 42501.50
+        'ask': 42501.50,
+        'volume_24h': 15000000.0,  # Optional
+        'base_volume': 350.5,       # Optional
+        'quote_volume': 14900000.0  # Optional
     },
     # ...
 ]
@@ -134,7 +185,8 @@ print(f"Latest BTC price: {price['mid_price']}")
 # Get historical prices
 prices = db.get_cex_prices_range('ETH/USDT', hours=24)
 
-# Insert DEX swaps
+# Insert DEX swaps (with classification)
+trade_size_usd = 1800.5
 swaps = [
     {
         'time': datetime.now(),
@@ -147,10 +199,46 @@ swaps = [
         'amount_out': 1800.5,
         'price': 1800.5,
         'tx_hash': '0x...',
-        'block_number': 12345678
+        'block_number': 12345678,
+        'trade_size_usd': trade_size_usd,  # Optional
+        'trade_size_bin': db.classify_trade_size(trade_size_usd),  # Optional
+        'swap_direction': 'BUY',  # Optional
+        'is_sandwich_victim': False,  # Optional
+        'is_arbitrage': False  # Optional
     }
 ]
 db.insert_dex_swaps(swaps)
+
+# Insert CEX liquidity snapshot
+snapshots = [{
+    'time': datetime.now(),
+    'exchange': 'binance',
+    'symbol': 'BTC/USDT',
+    'depth_0_5_pct': 2500000.0,
+    'depth_1_pct': 8000000.0,
+    'depth_2_pct': 25000000.0,
+    'bid_ask_spread_bps': db.calculate_bid_ask_spread_bps(42500.50, 42501.50),
+    'top_bid': 42500.50,
+    'top_ask': 42501.50
+}]
+db.insert_cex_liquidity(snapshots)
+
+# Insert DEX pool state
+states = [{
+    'time': datetime.now(),
+    'pool_address': '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
+    'chain': 'ethereum',
+    'dex': 'uniswap-v3',
+    'reserve0': 125000000.0,
+    'reserve1': 42000.0,
+    'sqrt_price_x96': 1234567890123456789012345678,
+    'tick': -199820,
+    'liquidity': 987654321098765432109876,
+    'tvl_usd': 250000000.0,
+    'price': 2972.97,
+    'block_number': 18500000
+}]
+db.insert_pool_states(states)
 
 # Get DEX prices for a pair
 dex_prices = db.get_dex_prices(
@@ -169,6 +257,22 @@ db.log_ingestion(
 )
 
 db.close()
+```
+
+## Folder Structure
+
+```
+database/
+├── __init__.py              # Python package marker
+├── db_client.py             # Main database client
+├── db_init.py               # Initialization helpers
+├── docker-compose.yml       # PostgreSQL + Adminer containers
+├── init-db.sql              # Complete database schema
+├── start-db.sh              # Database startup script
+├── test_schema.py           # Schema testing
+├── pyproject.toml           # Python dependencies
+├── uv.lock                  # Dependency lock file
+└── DATABASE.md              # This file (complete documentation)
 ```
 
 ## Integration with Data Collection Services

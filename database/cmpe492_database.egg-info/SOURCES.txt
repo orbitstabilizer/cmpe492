@@ -1,9 +1,0 @@
-README.md
-db_client.py
-db_init.py
-pyproject.toml
-cmpe492_database.egg-info/PKG-INFO
-cmpe492_database.egg-info/SOURCES.txt
-cmpe492_database.egg-info/dependency_links.txt
-cmpe492_database.egg-info/requires.txt
-cmpe492_database.egg-info/top_level.txt
