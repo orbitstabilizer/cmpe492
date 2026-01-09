@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: cmpe492-postgres
+    environment:
+      POSTGRES_USER: cmpe492
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: crypto_exchange
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cmpe492_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cmpe492"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: cmpe492-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - cmpe492_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  cmpe492_network:
+    driver: bridge
