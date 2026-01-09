@@ -164,7 +164,7 @@ func newFunction(normalizedSymbols []string, shmData *ShmLayout, savePeriod int)
 	defer dbWriter.Close()
 
 	go func() {
-		tick10ms := time.NewTicker(savePeriod * time.Millisecond)
+		tick10ms := time.NewTicker(time.Millisecond * time.Duration(savePeriod))
 		defer tick10ms.Stop()
 		for {
 			select {
