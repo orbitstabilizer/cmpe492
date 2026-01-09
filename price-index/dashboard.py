@@ -4,15 +4,6 @@ from streamlit_autorefresh import st_autorefresh
 
 import os
 
-shm_path = os.getenv("SHM_PATH", ".price_ix.data")
-shm_data = read_shm(shm_path)
-tickers_data = shm_data["tickers"]
-price_indices_data = shm_data["price_indices"]
-
-df_price_index = get_price_indices_df(price_indices_data)
-df_tickers = get_ticker_dfs(tickers_data)
-
-
 def main():
     refresh_interval = st.sidebar.number_input(
         "Auto-Refresh Interval (seconds/10)", min_value=1, max_value=600, value=1, step=1
@@ -40,4 +31,11 @@ def main():
         st.dataframe(df_price_index, height=1000)
 
 if __name__ == "__main__":
+    shm_path = os.getenv("SHM_PATH", ".price_ix.data")
+    shm_data = read_shm(shm_path)
+    tickers_data = shm_data["tickers"]
+    price_indices_data = shm_data["price_indices"]
+
+    df_price_index = get_price_indices_df(price_indices_data)
+    df_tickers = get_ticker_dfs(tickers_data)
     main()

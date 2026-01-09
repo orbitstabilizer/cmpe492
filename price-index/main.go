@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"math"
 	"os"
 	"os/signal"
+	"time"
 
 	"price-index/schema"
 	"price-index/ws"
@@ -15,7 +17,13 @@ import (
 const NUM_SYMBOLS = 128
 
 type TickerBuffer = [schema.NUM_EXCHANGES][NUM_SYMBOLS]schema.TickerData
-type PriceIndexBuffer = [NUM_SYMBOLS]float64
+
+type PriceIndex struct {
+	Val float64
+	Cnt int // number of exchanges contributing to the price index
+}
+
+type PriceIndexBuffer = [NUM_SYMBOLS]PriceIndex
 type ShmLayout struct {
 	Tickers      TickerBuffer
 	PriceIndices PriceIndexBuffer
@@ -41,9 +49,10 @@ func (s *ShmLayout) UpdatePriceIndex(symIx int) {
 		}
 	}
 	if count > 0 {
-		s.PriceIndices[symIx] = (bidSum + askSum) / (2.0 * count)
+		s.PriceIndices[symIx].Val = (bidSum + askSum) / (2.0 * count)
+		s.PriceIndices[symIx].Cnt = int(count)
 	} else {
-		s.PriceIndices[symIx] = math.NaN()
+		s.PriceIndices[symIx].Val = math.NaN()
 	}
 }
 
@@ -56,11 +65,73 @@ func main() {
 	signal.Notify(interrupt, os.Interrupt)
 	shouldClose := false
 
+	saveDb := flag.Bool("save-db", true, "Whether to save price indices to the database")
+	exchangeInfoPath := flag.String("exchange-info", "exchange_info.json", "Path to exchange info JSON file")
+	savePeriod := flag.Int("save-period", 10, "Period (ms) to save price indices to the database")
+	flag.Parse()
+
 	var shmData *ShmLayout
+
+	shmPath := os.Getenv("SHM_PATH")
+	if shmPath == "" {
+		shmPath = ".price_ix.data"
+	}
+	w, err := NewSHMWriter[ShmLayout](shmPath)
+	defer w.Close()
+	if err != nil {
+		panic(err)
+	}
+	shmData = w.Data
+	data, err := os.ReadFile(*exchangeInfoPath)
+	if err != nil {
+		panic(err)
+	}
+
+	var exchangeInfo ExchangeInfo
+	if err := json.Unmarshal(data, &exchangeInfo); err != nil {
+		panic(err)
+	}
+	normalizedSymbols := exchangeInfo.Symbols[0]
+	updateChan := make(chan int, 1)
+	for i := range exchangeInfo.Symbols {
+		if i >= int(schema.NUM_EXCHANGES) {
+			panic("NUM_EXCHANGES too small for exchange symbols")
+		}
+		exchange := schema.Exchange(i)
+		for symIx := range exchangeInfo.Symbols[i] {
+			if symIx >= NUM_SYMBOLS {
+				panic("NUM_SYMBOLS too small for exchange symbols")
+			}
+			shmData.Tickers[exchange][symIx] = schema.TickerData{Bid: math.NaN(), Ask: math.NaN()}
+			shmData.PriceIndices[symIx].Val = math.NaN()
+		}
+		go ws.ConnectExchange(
+			exchange,
+			exchangeInfo.Symbols[exchange],
+			shmData.Tickers[exchange][0:len(exchangeInfo.Symbols[exchange])],
+			&shouldClose,
+			updateChan,
+		)
+	}
+	go func() {
+		for symIx := range updateChan {
+			shmData.UpdatePriceIndex(symIx)
+		}
+	}()
+	if *saveDb {
+		// Connect to database
+		// Connect to database
+		newFunction(normalizedSymbols, shmData, *savePeriod)
+	}
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	<-sigint
+	shouldClose = true
+}
+
+func newFunction(normalizedSymbols []string, shmData *ShmLayout, savePeriod int) {
 	var dbWriter *DatabaseWriter
 
-	// Connect to database
-	// Connect to database
 	connStr := os.Getenv("DB_CONN_STR")
 	if connStr == "" {
 		user := os.Getenv("POSTGRES_USER")
@@ -92,72 +163,23 @@ func main() {
 	}
 	defer dbWriter.Close()
 
-	shmPath := os.Getenv("SHM_PATH")
-	if shmPath == "" {
-		shmPath = ".price_ix.data"
-	}
-	w, err := NewSHMWriter[ShmLayout](shmPath)
-	defer w.Close()
-	if err != nil {
-		panic(err)
-	}
-	shmData = w.Data
-	data, err := os.ReadFile("exchange_info.json")
-	if err != nil {
-		panic(err)
-	}
-
-	var exchangeInfo ExchangeInfo
-	if err := json.Unmarshal(data, &exchangeInfo); err != nil {
-		panic(err)
-	}
-	updateChan := make(chan int, 1)
-	for i := range exchangeInfo.Symbols {
-		if i >= int(schema.NUM_EXCHANGES) {
-			panic("NUM_EXCHANGES too small for exchange symbols")
-		}
-		exchange := schema.Exchange(i)
-		for symIx := range exchangeInfo.Symbols[i] {
-			if symIx >= NUM_SYMBOLS {
-				panic("NUM_SYMBOLS too small for exchange symbols")
-			}
-			shmData.Tickers[exchange][symIx] = schema.TickerData{Bid: math.NaN(), Ask: math.NaN()}
-			shmData.PriceIndices[symIx] = math.NaN()
-		}
-		go ws.ConnectExchange(
-			exchange,
-			exchangeInfo.Symbols[exchange],
-			shmData.Tickers[exchange][0:len(exchangeInfo.Symbols[exchange])],
-			&shouldClose,
-			updateChan,
-		)
-	}
 	go func() {
-		for symIx := range updateChan {
-			shmData.UpdatePriceIndex(symIx)
-			price := shmData.PriceIndices[symIx]
-			if !math.IsNaN(price) {
-				symbol := getSymbolName(symIx, exchangeInfo)
-				_ = dbWriter.InsertPriceIndex(symbol, price, getNumValidExchanges(shmData, symIx))
+		tick10ms := time.NewTicker(savePeriod * time.Millisecond)
+		defer tick10ms.Stop()
+		for {
+			select {
+			case <-tick10ms.C:
+				for symIx := 0; symIx < len(normalizedSymbols); symIx++ {
+					price := shmData.PriceIndices[symIx].Val
+					numEx := shmData.PriceIndices[symIx].Cnt
+					if !math.IsNaN(price) {
+						symbol := normalizedSymbols[symIx]
+						_ = dbWriter.InsertPriceIndex(symbol, price, numEx)
+					}
+				}
 			}
 		}
 	}()
-
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, os.Interrupt)
-	<-sigint
-	shouldClose = true
-}
-
-func getSymbolName(symIx int, info ExchangeInfo) string {
-	// Simple mapping assuming all exchanges have same symbol at same index
-	// In reality, we should probably have a unified symbol list
-	// But taking from first exchange for now
-	if len(info.Symbols) > 0 && symIx < len(info.Symbols[0]) {
-		return info.Symbols[0][symIx]
-	}
-	// fallback
-	return "UNKNOWN"
 }
 
 func getNumValidExchanges(shmData *ShmLayout, symIx int) int {

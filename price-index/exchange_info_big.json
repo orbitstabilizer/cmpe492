@@ -1,0 +1,15 @@
+{
+  "symbols": [
+    ["btcusdt","ethusdt","bnbusdt","xrpusdt","solusdt","usdcusdt","usdeusdt","trxusdt","dogeusdt","adausdt","linkusdt","hypeusdt","xmrusdt","suiusdt","ltcusdt","avaxusdt","daiusdt","hbarusdt","uniusdt"],
+    ["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","USDCUSDT","USDEUSDT","TRXUSDT","DOGEUSDT","ADAUSDT","LINKUSDT","HYPEUSDT","XMRUSDT","SUIUSDT","LTCUSDT","AVAXUSDT","DAIUSDT","HBARUSDT","UNIUSDT"],
+    ["BTC-USDT","ETH-USDT","BNB-USDT","XRP-USDT","SOL-USDT","USDC-USDT","USDE-USDT","TRX-USDT","DOGE-USDT","ADA-USDT","LINK-USDT","HYPE-USDT","XMR-USDT","SUI-USDT","LTC-USDT","AVAX-USDT","DAI-USDT","HBAR-USDT","UNI-USDT"],
+    ["BTC_USDT","ETH_USDT","BNB_USDT","XRP_USDT","SOL_USDT","USDC_USDT","USDE_USDT","TRX_USDT","DOGE_USDT","ADA_USDT","LINK_USDT","HYPE_USDT","XMR_USDT","SUI_USDT","LTC_USDT","AVAX_USDT","DAI_USDT","HBAR_USDT","UNI_USDT"],
+    ["btcusdt","ethusdt","bnbusdt","xrpusdt","solusdt","usdcusdt","usdeusdt","trxusdt","dogeusdt","adausdt","linkusdt","hypeusdt","xmrusdt","suiusdt","ltcusdt","avaxusdt","daiusdt","hbarusdt","uniusdt"],
+    ["BTC-USDT","ETH-USDT","BNB-USDT","XRP-USDT","SOL-USDT","USDC-USDT","USDE-USDT","TRX-USDT","DOGE-USDT","ADA-USDT","LINK-USDT","HYPE-USDT","XMR-USDT","SUI-USDT","LTC-USDT","AVAX-USDT","DAI-USDT","HBAR-USDT","UNI-USDT"],
+    ["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","USDCUSDT","USDEUSDT","TRXUSDT","DOGEUSDT","ADAUSDT","LINKUSDT","HYPEUSDT","XMRUSDT","SUIUSDT","LTCUSDT","AVAXUSDT","DAIUSDT","HBARUSDT","UNIUSDT"],
+    ["BTC-USDT","ETH-USDT","BNB-USDT","XRP-USDT","SOL-USDT","USDC-USDT","USDE-USDT","TRX-USDT","DOGE-USDT","ADA-USDT","LINK-USDT","HYPE-USDT","XMR-USDT","SUI-USDT","LTC-USDT","AVAX-USDT","DAI-USDT","HBAR-USDT","UNI-USDT"]
+  ],
+  "exchanges": [
+    "BINANCE", "BYBIT", "COINBASE", "GATEIO", "HTX", "KUCOIN", "MEXC", "OKX"
+  ]
+}
