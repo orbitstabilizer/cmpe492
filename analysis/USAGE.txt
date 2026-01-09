@@ -5,12 +5,13 @@ This folder contains all analysis tools for CEX vs DEX market microstructure res
 
 📁 Files Overview
 -----------------
-- correlation.py         : Lead-lag analysis, Granger causality tests
+- symbol_mapper.py      : Symbol format conversion (WETH→eth, WBTC→btc) ⭐
+- correlation.py        : Lead-lag analysis, Granger causality tests
 - deviation_calculator.py: Price deviation and arbitrage detection
-- slippage.py           : DEX slippage analysis (theoretical vs actual)
-- volume_analysis.py    : Volume distribution across exchanges/protocols
-- reporting.py          : Data quality reports and statistics
-- run_analysis.py       : Main executable script (USE THIS!)
+- slippage.py          : DEX slippage analysis (theoretical vs actual)
+- volume_analysis.py   : Volume distribution across exchanges/protocols
+- reporting.py         : Data quality reports and statistics
+- run_analysis.py      : Main executable script (USE THIS!)
 
 
 🚀 Quick Start
@@ -112,8 +113,21 @@ python run_analysis.py all --symbol BTC/USDT --hours 24
 from analysis import (
     PriceDeviationCalculator,
     LeadLagAnalyzer,
-    VolumeAnalyzer
+    VolumeAnalyzer,
+    SymbolMapper
 )
+
+# Symbol mapping (handles format conversion)
+mapper = SymbolMapper()
+
+# DEX tokens → CEX format
+print(mapper.normalize_token_symbol('WETH'))   # → 'eth'
+print(mapper.normalize_token_symbol('WBTC'))   # → 'btc'
+print(mapper.normalize_token_symbol('BTCB'))   # → 'btc'
+print(mapper.normalize_token_symbol('WBNB'))   # → 'bnb'
+
+# Pool tokens → price_index symbol
+symbol = mapper.match_pool_to_price_index('WETH', 'USDT')  # → 'ethusdt'
 
 # Price deviation
 calculator = PriceDeviationCalculator()
@@ -162,6 +176,12 @@ pandas>=2.0.0          : Data manipulation
    → Verify pool address exists in database
    → Check time range has activity
 
+5. "Symbol format mismatch"
+   → Analysis uses SymbolMapper to handle conversion:
+   → price_index table: "btcusdt" (lowercase, no delimiter)
+   → dex_swaps + tokens: "WBTC", "WETH" (uppercase)
+   → Mapping: WETH→eth, WBTC/BTCB→btc, WBNB→bnb
+
 
 🎯 Research Objectives Mapping
 -------------------------------
@@ -204,4 +224,33 @@ After collecting sufficient data:
 - Check data quality first before running other analyses
 - Results are stored in database for later retrieval
 - Each analyzer has .close() method - always call it
+- Symbol formats are auto-converted: WETH→eth, WBTC/BTCB→btc
+- Pool token order doesn't matter (WETH/USDT = USDT/WETH)
+
+
+🔄 Symbol Format Conversion
+----------------------------
+
+The analysis module handles three different symbol formats:
+
+1. CEX Format (price_index table):
+   - Lowercase, no delimiter: "btcusdt", "ethusdt", "bnbusdt"
+
+2. DEX Format (tokens table):
+   - Uppercase: "WBTC", "WETH", "WBNB", "BTCB"
+   - Includes wrapped versions
+
+3. Display Format (user-facing):
+   - With slash: "BTC/USDT", "ETH/USDT", "BNB/USDT"
+
+Automatic Mappings:
+- WETH, ETH → eth
+- WBTC, BTCB, BTC → btc
+- WBNB, BNB → bnb
+- USDT → usdt
+
+Example:
+  DEX Pool: WBTC/USDT
+  → Normalized: btcusdt
+  → Query: SELECT * FROM price_index WHERE symbol = 'btcusdt'
 

@@ -100,7 +100,7 @@ RECONNECT:
 		log.Printf("[%s] 📍 Subscribed to %s swaps (%s)", listener.config.Name, dexName, programID[:8]+"...")
 	}
 
-	log.Printf("[%s] ✅ Subscribed to Jupiter, Raydium, Orca, Meteora, Lifinity, Phoenix, and Pump.fun swap events", listener.config.Name)
+	log.Printf("[%s] Subscribed to Jupiter, Raydium, Orca, Meteora, Lifinity, Phoenix, and Pump.fun swap events", listener.config.Name)
 
 	// Message reading loop
 	for {

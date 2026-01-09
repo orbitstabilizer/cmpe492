@@ -90,7 +90,7 @@ RECONNECT:
 		goto RECONNECT
 	}
 
-	log.Printf("[%s] ✅ Subscribed to Uniswap V2/V3/V4, Curve, and Balancer Swap events", config.Name)
+	log.Printf("[%s] Subscribed to Uniswap V2/V3/V4, Curve, and Balancer Swap events", config.Name)
 
 	// Message reading loop
 	for {

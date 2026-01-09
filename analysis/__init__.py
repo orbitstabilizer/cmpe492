@@ -7,6 +7,7 @@ from .deviation_calculator import PriceDeviationCalculator, DeviationStats
 from .slippage import SlippageAnalyzer, SlippageResult
 from .volume_analysis import VolumeAnalyzer, VolumeDistribution
 from .reporting import DataQualityReport, StatisticsReport
+from .symbol_mapper import SymbolMapper
 
 __all__ = [
     'LeadLagAnalyzer',
@@ -18,5 +19,6 @@ __all__ = [
     'VolumeAnalyzer',
     'VolumeDistribution',
     'DataQualityReport',
-    'StatisticsReport'
+    'StatisticsReport',
+    'SymbolMapper'
 ]

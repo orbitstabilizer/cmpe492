@@ -19,4 +19,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-py-modules = ["correlation", "reporting", "deviation_calculator", "run_analysis"]
+py-modules = ["correlation", "reporting", "deviation_calculator", "run_analysis", "symbol_mapper", "slippage", "volume_analysis"]

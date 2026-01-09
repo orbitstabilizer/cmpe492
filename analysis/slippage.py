@@ -42,7 +42,7 @@ class SlippageAnalyzer:
     def __init__(self):
         """Initialize slippage analyzer"""
         self.db = get_database_client()
-        logger.info("✅ Initialized SlippageAnalyzer")
+        logger.info("Initialized SlippageAnalyzer")
     
     def calculate_uniswap_v2_theoretical_slippage(
         self,
@@ -256,7 +256,7 @@ class SlippageAnalyzer:
             self.db.conn.commit()
             cursor.close()
             
-            logger.info(f"✅ Stored slippage analysis for {result.pool_address}")
+            logger.info(f"Stored slippage analysis for {result.pool_address}")
             return True
             
         except Exception as e:
@@ -380,5 +380,5 @@ if __name__ == "__main__":
     #     logger.info(f"  Worst Slippage: {result.worst_slippage_bps:.2f} bps")
     
     analyzer.close()
-    logger.info("✅ Done!")
+    logger.info("Done!")
 

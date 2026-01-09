@@ -26,7 +26,7 @@ class DataQualityReport:
     
     def __init__(self):
         self.db = get_database_client()
-        logger.info("✅ Initialized DataQualityReport")
+        logger.info("Initialized DataQualityReport")
     
     def get_data_coverage(self) -> Dict:
         """Get data coverage statistics"""
@@ -137,7 +137,7 @@ class StatisticsReport:
     
     def __init__(self):
         self.db = get_database_client()
-        logger.info("✅ Initialized StatisticsReport")
+        logger.info("Initialized StatisticsReport")
     
     def get_cex_statistics(self, symbol: str, hours: int = 24) -> Dict:
         """Get CEX price statistics"""
@@ -151,10 +151,10 @@ class StatisticsReport:
                 SELECT 
                     symbol,
                     COUNT(*) as samples,
-                    AVG(price) as mean_price,
-                    MIN(price) as min_price,
-                    MAX(price) as max_price,
-                    STDDEV(price) as std_dev,
+                    AVG(price_index) as mean_price,
+                    MIN(price_index) as min_price,
+                    MAX(price_index) as max_price,
+                    STDDEV(price_index) as std_dev,
                     AVG(std_dev) as mean_spread
                 FROM price_index
                 WHERE symbol = %s
@@ -247,7 +247,7 @@ class ResultsGenerator:
         self.db = get_database_client()
         self.quality = DataQualityReport()
         self.stats = StatisticsReport()
-        logger.info("✅ Initialized ResultsGenerator")
+        logger.info("Initialized ResultsGenerator")
     
     def generate_section_data(self) -> Dict:
         """Generate all data needed for report Results section"""
@@ -274,7 +274,7 @@ class ResultsGenerator:
             with open(output_path, 'w') as f:
                 json.dump(results, f, indent=2)
             
-            logger.info(f"✅ Exported results to {output_path}")
+            logger.info(f"Exported results to {output_path}")
             return True
         
         except Exception as e:
@@ -300,4 +300,4 @@ if __name__ == "__main__":
     generator.export_json('/tmp/cmpe492_results.json')
     
     generator.close()
-    logger.info("✅ Report generation complete!")
+    logger.info("Report generation complete!")

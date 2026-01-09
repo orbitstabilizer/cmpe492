@@ -175,6 +175,6 @@ func CreateDefaultConfig() error {
 		return fmt.Errorf("failed to write config.json: %w", err)
 	}
 
-	log.Println("✅ Created default config.json with 7 EVM chains")
+	log.Println("Created default config.json with 7 EVM chains")
 	return nil
 }

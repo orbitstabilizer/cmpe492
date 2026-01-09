@@ -14,6 +14,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from database.db_init import get_database_client
+from analysis.symbol_mapper import SymbolMapper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,8 +49,9 @@ class LeadLagAnalyzer:
             window_size: Number of observations for moving correlation (seconds)
         """
         self.db = get_database_client()
+        self.mapper = SymbolMapper()
         self.window_size = window_size
-        logger.info(f"✅ Initialized LeadLagAnalyzer (window={window_size}s)")
+        logger.info(f"Initialized LeadLagAnalyzer (window={window_size}s)")
     
     def get_cex_prices(self, symbol: str, start_time: datetime, 
                        end_time: datetime, interval: int = 60) -> Dict:
@@ -57,7 +59,7 @@ class LeadLagAnalyzer:
         Get CEX prices within time range
         
         Args:
-            symbol: Trading pair (e.g., "BTC/USDT")
+            symbol: Trading pair in display format (e.g., "BTC/USDT", "ETH/USDT")
             start_time: Start datetime
             end_time: End datetime
             interval: Aggregation interval in seconds
@@ -66,17 +68,26 @@ class LeadLagAnalyzer:
             Dictionary with timestamps and prices
         """
         try:
+            # Convert display symbol to price_index format
+            # "BTC/USDT" -> "btcusdt", "ETH/USDT" -> "ethusdt"
+            if '/' in symbol:
+                base, quote = symbol.split('/')
+                price_index_symbol = self.mapper.create_price_index_symbol(base, quote)
+            else:
+                # Already in price_index format
+                price_index_symbol = symbol.lower()
+            
             # Get price index data
             cursor = self.db.conn.cursor()
             
             cursor.execute("""
-                SELECT time, price, std_dev
+                SELECT time, price_index, std_dev
                 FROM price_index
                 WHERE symbol = %s 
                   AND time >= %s 
                   AND time <= %s
                 ORDER BY time ASC
-            """, (symbol, start_time, end_time))
+            """, (price_index_symbol, start_time, end_time))
             
             rows = cursor.fetchall()
             cursor.close()
@@ -303,7 +314,7 @@ class LeadLagAnalyzer:
         Full analysis for a trading pair
         
         Args:
-            symbol: Trading pair (e.g., "BTC/USDT")
+            symbol: Trading pair (e.g., "BTC/USDT", "ETH/USDT")
             hours: Historical period
         
         Returns:
@@ -312,32 +323,175 @@ class LeadLagAnalyzer:
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(hours=hours)
         
-        # Get CEX prices
+        # Get CEX prices (handles symbol normalization)
         cex_data = self.get_cex_prices(symbol, start_time, end_time)
         if not cex_data:
-            logger.warning(f"No data for {symbol}")
+            logger.warning(f"No CEX data for {symbol}")
             return None
         
         cex_prices = cex_data['prices']
         cex_times = cex_data['times']
         
-        # Calculate volatility
+        logger.info(f"CEX prices type: {type(cex_prices)}, length: {len(cex_prices) if hasattr(cex_prices, '__len__') else 'N/A'}")
+        
+        # Calculate CEX volatility
         cex_vol = np.std(np.diff(cex_prices) / np.array(cex_prices[:-1])) if len(cex_prices) > 1 else 0
         
-        # TODO: Map symbol to DEX token pair
-        # For now, return partial result
+        # Parse symbol and find DEX pool
+        if '/' not in symbol:
+            logger.error(f"Symbol must be in format BASE/QUOTE (e.g., BTC/USDT)")
+            return None
+        
+        base, quote = symbol.split('/')
+        
+        # Find DEX pool with matching tokens directly from dex_swaps
+        cursor = self.db.conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT ds.pool_address, COUNT(*) as swap_count
+            FROM dex_swaps ds
+            LEFT JOIN tokens t_in ON ds.token_in = t_in.address
+            LEFT JOIN tokens t_out ON ds.token_out = t_out.address
+            WHERE (
+                (t_in.symbol IN (%s, %s) AND t_out.symbol = %s)
+                OR (t_out.symbol IN (%s, %s) AND t_in.symbol = %s)
+            )
+            AND ds.time >= %s
+            AND ds.time <= %s
+            GROUP BY ds.pool_address
+            ORDER BY swap_count DESC
+            LIMIT 1
+        """, (
+            base.upper(), f"W{base.upper()}", quote.upper(),
+            base.upper(), f"W{base.upper()}", quote.upper(),
+            start_time, end_time
+        ))
+        
+        pool_row = cursor.fetchone()
+        cursor.close()
+        
+        if not pool_row:
+            logger.warning(f"No DEX pool found for {symbol}")
+            # Return partial result with CEX data only
+            return CorrelationResult(
+                symbol=symbol,
+                period=f"{hours}h",
+                cex_dex_correlation=0.0,
+                dex_leading=False,
+                lead_lag_periods=0,
+                lead_lag_seconds=0.0,
+                cex_volatility=float(cex_vol),
+                dex_volatility=0.0,
+                price_deviation_mean=0.0,
+                price_deviation_std=0.0
+            )
+        
+        pool_address = pool_row[0]
+        logger.info(f"Analyzing pool {pool_address[:10]}... for {symbol}")
+        
+        # Get token addresses for this pool
+        cursor = self.db.conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT token_in, token_out
+            FROM dex_swaps
+            WHERE pool_address = %s
+            LIMIT 1
+        """, (pool_address,))
+        
+        token_row = cursor.fetchone()
+        cursor.close()
+        
+        if not token_row:
+            logger.warning(f"No tokens found for pool {pool_address}")
+            return CorrelationResult(
+                symbol=symbol,
+                period=f"{hours}h",
+                cex_dex_correlation=0.0,
+                dex_leading=False,
+                lead_lag_periods=0,
+                lead_lag_seconds=0.0,
+                cex_volatility=float(cex_vol),
+                dex_volatility=0.0,
+                price_deviation_mean=0.0,
+                price_deviation_std=0.0
+            )
+        
+        token_pair = (token_row[0], token_row[1])
+        
+        # Determine chain based on pool
+        cursor = self.db.conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT chain
+            FROM dex_swaps
+            WHERE pool_address = %s
+            LIMIT 1
+        """, (pool_address,))
+        chain_row = cursor.fetchone()
+        cursor.close()
+        chain = chain_row[0] if chain_row else "ethereum"
+        
+        # Get DEX prices
+        dex_data = self.get_dex_prices(token_pair, start_time, end_time, chain)
+        if not dex_data or len(dex_data.get('prices', [])) < 2:
+            logger.warning(f"Insufficient DEX data for pool {pool_address}")
+            return CorrelationResult(
+                symbol=symbol,
+                period=f"{hours}h",
+                cex_dex_correlation=0.0,
+                dex_leading=False,
+                lead_lag_periods=0,
+                lead_lag_seconds=0.0,
+                cex_volatility=float(cex_vol),
+                dex_volatility=0.0,
+                price_deviation_mean=0.0,
+                price_deviation_std=0.0
+            )
+        
+        dex_prices = dex_data['prices']
+        
+        logger.info(f"DEX prices type: {type(dex_prices)}, length: {len(dex_prices) if hasattr(dex_prices, '__len__') else 'N/A'}")
+        
+        # Calculate DEX volatility
+        dex_vol = np.std(np.diff(dex_prices) / np.array(dex_prices[:-1])) if len(dex_prices) > 1 else 0
+        
+        # Calculate correlation and lead-lag
+        if len(cex_prices) >= 10 and len(dex_prices) >= 10:
+            # Resample to common timeline
+            min_len = min(len(cex_prices), len(dex_prices))
+            cex_sample = np.array(cex_prices[:min_len], dtype=float)
+            dex_sample = np.array(dex_prices[:min_len], dtype=float)
+            
+            # Calculate correlation (stack as rows)
+            if min_len > 1:
+                correlation = np.corrcoef(np.vstack([cex_sample, dex_sample]))[0, 1]
+            else:
+                correlation = 0.0
+            lead_lag_periods, max_corr = self.calculate_lead_lag(list(cex_sample), list(dex_sample))
+            
+            # Calculate price deviations
+            deviations = [(d - c) / c * 100 for c, d in zip(cex_sample, dex_sample) if c > 0]
+            dev_mean = np.mean(deviations) if deviations else 0.0
+            dev_std = np.std(deviations) if deviations else 0.0
+        else:
+            correlation = 0.0
+            lead_lag_periods = 0
+            dev_mean = 0.0
+            dev_std = 0.0
+        
         result = CorrelationResult(
             symbol=symbol,
             period=f"{hours}h",
-            cex_dex_correlation=0.0,
-            dex_leading=False,
-            lead_lag_periods=0,
-            lead_lag_seconds=0.0,
+            cex_dex_correlation=float(correlation),
+            dex_leading=lead_lag_periods < 0,
+            lead_lag_periods=abs(lead_lag_periods),
+            lead_lag_seconds=float(abs(lead_lag_periods) * 60),  # Assuming 60s intervals
             cex_volatility=float(cex_vol),
-            dex_volatility=0.0,
-            price_deviation_mean=0.0,
-            price_deviation_std=0.0
+            dex_volatility=float(dex_vol),
+            price_deviation_mean=float(dev_mean),
+            price_deviation_std=float(dev_std)
         )
+        
+        # Save to database
+        self.save_correlation(result)
         
         return result
     
@@ -368,7 +522,7 @@ class LeadLagAnalyzer:
             self.db.conn.commit()
             cursor.close()
             
-            logger.info(f"✅ Saved correlation for {result.symbol}")
+            logger.info(f"Saved correlation for {result.symbol}")
             return True
         
         except Exception as e:
@@ -386,7 +540,7 @@ class SlippageAnalyzer:
     
     def __init__(self):
         self.db = get_database_client()
-        logger.info("✅ Initialized SlippageAnalyzer")
+        logger.info("Initialized SlippageAnalyzer")
     
     def calculate_slippage(self, amount_in: float, amount_out: float,
                           spot_price: float) -> float:
@@ -486,4 +640,4 @@ if __name__ == "__main__":
     
     analyzer.close()
     slippage_analyzer.close()
-    logger.info("✅ Analysis complete!")
+    logger.info("Analysis complete!")

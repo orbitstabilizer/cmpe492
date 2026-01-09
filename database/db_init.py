@@ -43,7 +43,7 @@ def get_database_client(**kwargs):
     
     db = CryptoExchangeDB(**connection_params)
     if db.health_check():
-        logger.info("✅ Connected to PostgreSQL database")
+        logger.info("Connected to PostgreSQL database")
         return db
     else:
         raise ConnectionError("Failed to connect to PostgreSQL database")
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     
     try:
         db = get_database_client()
-        print(f"✅ Database health check: {db.health_check()}")
+        print(f"Database health check: {db.health_check()}")
         db.close()
     except Exception as e:
         print(f"❌ Error: {e}")

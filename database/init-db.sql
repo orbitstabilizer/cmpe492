@@ -98,14 +98,17 @@ CREATE INDEX idx_price_deviations_symbol_time ON price_deviations (symbol, time 
 
 -- Lead-lag correlation table
 CREATE TABLE IF NOT EXISTS correlation_analysis (
-    analysis_date DATE NOT NULL,
+    time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     symbol VARCHAR(20) NOT NULL,
-    lag_hours INT NOT NULL,
-    correlation DECIMAL(5, 4),
-    granger_p_value DECIMAL(10, 8),
-    sample_size INT,
-    cex_leads BOOLEAN,
-    PRIMARY KEY (analysis_date, symbol, lag_hours)
+    period VARCHAR(10) NOT NULL,
+    cex_dex_correlation DECIMAL(10, 8),
+    dex_leading BOOLEAN,
+    lead_lag_periods INT,
+    lead_lag_seconds DECIMAL(10, 2),
+    cex_volatility DECIMAL(15, 10),
+    dex_volatility DECIMAL(15, 10),
+    price_deviation_mean DECIMAL(15, 10),
+    price_deviation_std DECIMAL(15, 10)
 );
 
 -- Slippage modeling results

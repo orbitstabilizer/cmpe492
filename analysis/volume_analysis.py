@@ -41,7 +41,7 @@ class VolumeAnalyzer:
     def __init__(self):
         """Initialize volume analyzer"""
         self.db = get_database_client()
-        logger.info("✅ Initialized VolumeAnalyzer")
+        logger.info("Initialized VolumeAnalyzer")
     
     def get_cex_volume(
         self,
@@ -217,7 +217,7 @@ class VolumeAnalyzer:
             dex_by_protocol=dex_data['by_protocol']
         )
         
-        logger.info(f"✅ Volume distribution for {symbol}: CEX {cex_pct:.1f}% / DEX {dex_pct:.1f}%")
+        logger.info(f"Volume distribution for {symbol}: CEX {cex_pct:.1f}% / DEX {dex_pct:.1f}%")
         return result
     
     def get_trade_size_distribution(
@@ -359,5 +359,5 @@ if __name__ == "__main__":
     #     logger.info(f"  DEX by Chain: {result.dex_by_chain}")
     
     analyzer.close()
-    logger.info("✅ Done!")
+    logger.info("Done!")
 

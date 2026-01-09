@@ -48,7 +48,7 @@ def run_data_quality_check():
     logger.info(f"  End: {coverage['dex']['end_time']}")
     
     report.close()
-    logger.info("\n✅ Data quality check complete")
+    logger.info("\nData quality check complete")
 
 
 def run_deviation_analysis(pool_address: str, hours: int = 24):
@@ -78,7 +78,7 @@ def run_deviation_analysis(pool_address: str, hours: int = 24):
         logger.warning("❌ No data available for analysis")
     
     calculator.close()
-    logger.info("\n✅ Deviation analysis complete")
+    logger.info("\nDeviation analysis complete")
 
 
 def run_correlation_analysis(symbol: str, hours: int = 24):
@@ -104,7 +104,7 @@ def run_correlation_analysis(symbol: str, hours: int = 24):
         logger.warning("❌ No data available for analysis")
     
     analyzer.close()
-    logger.info("\n✅ Correlation analysis complete")
+    logger.info("\nCorrelation analysis complete")
 
 
 def run_statistics_report(symbol: str, hours: int = 24):
@@ -134,7 +134,7 @@ def run_statistics_report(symbol: str, hours: int = 24):
             logger.info(f"     Swaps: {pool['swaps']:,}, Volume: ${pool['total_volume']:,.2f}")
     
     report.close()
-    logger.info("\n✅ Statistics report complete")
+    logger.info("\nStatistics report complete")
 
 
 def run_volume_analysis(symbol: str, hours: int = 24):
@@ -174,7 +174,7 @@ def run_volume_analysis(symbol: str, hours: int = 24):
         logger.info(f"  DEX HHI: {concentration['dex_herfindahl_index']:.0f} ({concentration['dex_concentration']})")
     
     analyzer.close()
-    logger.info("\n✅ Volume analysis complete")
+    logger.info("\nVolume analysis complete")
 
 
 def main():
@@ -234,7 +234,7 @@ def main():
             print()
         
         logger.info("=" * 60)
-        logger.info("✅ ALL ANALYSES COMPLETE")
+        logger.info("ALL ANALYSES COMPLETE")
         logger.info("=" * 60)
         
         return 0

@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from database.db_init import get_database_client
+from analysis.symbol_mapper import SymbolMapper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,7 +45,8 @@ class PriceDeviationCalculator:
     def __init__(self):
         """Initialize deviation calculator"""
         self.db = get_database_client()
-        logger.info("✅ Initialized PriceDeviationCalculator")
+        self.mapper = SymbolMapper()
+        logger.info("Initialized PriceDeviationCalculator")
     
     def calculate_deviation(self, cex_price: float, dex_price: float) -> float:
         """
@@ -125,10 +127,20 @@ class PriceDeviationCalculator:
                 token0_symbol = swap[6]
                 token1_symbol = swap[7]
                 
-                # Construct symbol (e.g., "ETH/USDT")
+                # Map DEX symbols to CEX format (e.g., WETH/USDT -> ethusdt)
+                price_index_symbol = self.mapper.match_pool_to_price_index(
+                    token0_symbol, 
+                    token1_symbol
+                )
+                
+                if not price_index_symbol:
+                    logger.warning(f"Cannot map pool {token0_symbol}/{token1_symbol} to price index")
+                    continue
+                
+                # Construct display symbol (e.g., "ETH/USDT")
                 symbol = f"{token0_symbol}/{token1_symbol}"
                 
-                # Find closest CEX price within time window
+                # Find closest CEX price within time window using normalized symbol
                 cursor.execute("""
                     SELECT time, price_index
                     FROM price_index
@@ -137,7 +149,7 @@ class PriceDeviationCalculator:
                     ORDER BY ABS(EXTRACT(EPOCH FROM (time - %s)))
                     LIMIT 1
                 """, (
-                    symbol,
+                    price_index_symbol,  # Use normalized symbol like "ethusdt"
                     swap_time - timedelta(seconds=max_time_diff_seconds),
                     swap_time + timedelta(seconds=max_time_diff_seconds),
                     swap_time
@@ -172,7 +184,7 @@ class PriceDeviationCalculator:
                         })
             
             cursor.close()
-            logger.info(f"✅ Matched {len(matched_pairs)} DEX swaps with CEX prices")
+            logger.info(f"Matched {len(matched_pairs)} DEX swaps with CEX prices")
             return matched_pairs
             
         except Exception as e:
@@ -252,7 +264,7 @@ class PriceDeviationCalculator:
             self.db.conn.commit()
             cursor.close()
             
-            logger.info(f"✅ Stored {len(deviations)} deviation records")
+            logger.info(f"Stored {len(deviations)} deviation records")
             return len(deviations)
             
         except Exception as e:
@@ -376,5 +388,5 @@ if __name__ == "__main__":
     #     logger.info(f"  Arbitrage Opportunities: {stats.arbitrage_opportunities}")
     
     calculator.close()
-    logger.info("✅ Done!")
+    logger.info("Done!")
 

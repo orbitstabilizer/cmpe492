@@ -40,7 +40,7 @@ class CryptoExchangeDB:
         """Connect to database"""
         try:
             self.conn = psycopg2.connect(**self.connection_params)
-            logger.info("✅ Connected to PostgreSQL")
+            logger.info("Connected to PostgreSQL")
         except psycopg2.Error as e:
             logger.error(f"❌ Connection failed: {e}")
             raise
@@ -99,7 +99,7 @@ class CryptoExchangeDB:
                     for t in tickers
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} CEX ticker records")
+                logger.info(f"Inserted {len(values)} CEX ticker records")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert CEX tickers: {e}")
@@ -184,7 +184,7 @@ class CryptoExchangeDB:
                     for idx in indices
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} price index records")
+                logger.info(f"Inserted {len(values)} price index records")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert price index: {e}")
@@ -234,7 +234,7 @@ class CryptoExchangeDB:
                     for s in swaps
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} DEX swap records")
+                logger.info(f"Inserted {len(values)} DEX swap records")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert DEX swaps: {e}")
@@ -327,7 +327,7 @@ class CryptoExchangeDB:
                     for d in deviations
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} price deviation records")
+                logger.info(f"Inserted {len(values)} price deviation records")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert price deviations: {e}")
@@ -367,7 +367,7 @@ class CryptoExchangeDB:
                     for s in snapshots
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} CEX liquidity snapshots")
+                logger.info(f"Inserted {len(values)} CEX liquidity snapshots")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert CEX liquidity: {e}")
@@ -440,7 +440,7 @@ class CryptoExchangeDB:
                     for s in states
                 ]
                 execute_values(cur, query, values)
-                logger.info(f"✅ Inserted {len(values)} pool state records")
+                logger.info(f"Inserted {len(values)} pool state records")
                 return len(values)
         except Exception as e:
             logger.error(f"Failed to insert pool states: {e}")
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     db = CryptoExchangeDB()
     
     if db.health_check():
-        print("✅ Database is healthy")
+        print("Database is healthy")
     else:
         print("❌ Database health check failed")
     
