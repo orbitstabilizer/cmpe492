@@ -78,7 +78,6 @@ func NewDatabaseInsertSwapHandler() *DatabaseInsertSwapHandler {
 	if err != nil {
 		panic(err)
 	}
-	defer dbWriter.Close()
 	return &DatabaseInsertSwapHandler{dbWriter: dbWriter}
 }
 
