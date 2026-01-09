@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS timescaledb;
 CREATE TABLE IF NOT EXISTS cex_tickers (
     time TIMESTAMPTZ NOT NULL,
     exchange VARCHAR(50) NOT NULL,
-    symbol VARCHAR(20) NOT NULL,
+    symbol VARCHAR(255) NOT NULL,
     bid DECIMAL(20, 8) NOT NULL,
     ask DECIMAL(20, 8) NOT NULL,
     mid_price DECIMAL(20, 8) GENERATED ALWAYS AS ((bid + ask) / 2) STORED,
@@ -21,7 +21,7 @@ CREATE INDEX idx_cex_tickers_exchange_symbol_time ON cex_tickers (exchange, symb
 -- Price Index table (aggregated CEX data)
 CREATE TABLE IF NOT EXISTS price_index (
     time TIMESTAMPTZ NOT NULL,
-    symbol VARCHAR(20) NOT NULL,
+    symbol VARCHAR(255) NOT NULL,
     price_index DECIMAL(20, 8) NOT NULL,
     num_exchanges INT NOT NULL,
     std_dev DECIMAL(20, 8)
@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
     pool_address VARCHAR(66) NOT NULL,
     token_in VARCHAR(66) NOT NULL,
     token_out VARCHAR(66) NOT NULL,
-    amount_in DECIMAL(40, 8) NOT NULL,
-    amount_out DECIMAL(40, 8) NOT NULL,
-    price DECIMAL(20, 8) NOT NULL,
+    amount_in DECIMAL(100, 18) NOT NULL,
+    amount_out DECIMAL(100, 18) NOT NULL,
+    price DECIMAL(100, 18) NOT NULL,
     tx_hash VARCHAR(66),
     block_number BIGINT,
     trade_size_usd DECIMAL(20, 8),
@@ -57,7 +57,7 @@ CREATE INDEX idx_dex_swaps_tokens ON dex_swaps (token_in, token_out, time DESC);
 -- Token metadata table
 CREATE TABLE IF NOT EXISTS tokens (
     address VARCHAR(66) PRIMARY KEY,
-    symbol VARCHAR(20),
+    symbol VARCHAR(255),
     name VARCHAR(255),
     decimals INT,
     chain VARCHAR(50),

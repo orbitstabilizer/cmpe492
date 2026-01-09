@@ -1,0 +1,67 @@
+x-common-env: &db-env
+  POSTGRES_USER: cmpe492
+  POSTGRES_PASSWORD: password123
+  POSTGRES_DB: crypto_exchange
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: cmpe492-postgres
+    environment: *db-env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cmpe492_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cmpe492 -d crypto_exchange" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cmpe492-cloudbeaver
+    ports:
+      - "8080:8978"
+    volumes:
+      - cloudbeaver_data:/opt/cloudbeaver/workspace
+    networks:
+      - cmpe492_network
+    depends_on:
+      - postgres
+
+  price-index:
+    build:
+      context: ./price-index
+    container_name: cmpe492-price-index
+    environment: *db-env
+    networks:
+      - cmpe492_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dex-prices:
+    build:
+      context: ./dex-prices
+    container_name: cmpe492-dex-prices
+    environment: *db-env
+    networks:
+      - cmpe492_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  cloudbeaver_data:
+
+
+networks:
+  cmpe492_network:
+    driver: bridge

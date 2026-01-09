@@ -35,7 +35,7 @@ func NewEVMListener(config ChainConfig) (*EVMListener, error) {
 		config:  config,
 		client:  client,
 		cache:   cache,
-		handler: NewLogSwapHandler(),
+		handler: NewDatabaseInsertSwapHandler(),
 	}, nil
 }
 

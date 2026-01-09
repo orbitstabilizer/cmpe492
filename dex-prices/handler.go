@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 )
 
 // SwapData represents a decoded swap event from any chain (EVM or Solana)
@@ -42,49 +43,82 @@ type SwapHandler interface {
 	HandleSwap(swap SwapData)
 }
 
-// LogSwapHandler is a simple handler that logs swap events to console
-type LogSwapHandler struct{}
+// DatabaseInsertSwapHandler logs swap events to console and writes to DB
+type DatabaseInsertSwapHandler struct {
+	dbWriter *DexDatabaseWriter
+}
 
-// NewLogSwapHandler creates a new log-based swap handler
-func NewLogSwapHandler() *LogSwapHandler {
-	return &LogSwapHandler{}
+// NewDatabaseInsertSwapHandler creates a new log-based swap handler with DB connection
+func NewDatabaseInsertSwapHandler() *DatabaseInsertSwapHandler {
+	connStr := os.Getenv("DB_CONN_STR")
+	if connStr == "" {
+		user := os.Getenv("POSTGRES_USER")
+		if user == "" {
+			panic("Required environment variable missing: POSTGRES_USER")
+		}
+		password := os.Getenv("POSTGRES_PASSWORD")
+		if password == "" {
+			panic("Required environment variable missing: POSTGRES_PASSWORD")
+		}
+		dbname := os.Getenv("POSTGRES_DB")
+		if dbname == "" {
+			panic("Required environment variable missing: POSTGRES_DB")
+		}
+		host := os.Getenv("POSTGRES_HOST")
+		if host == "" {
+			panic("Required environment variable missing: POSTGRES_HOST")
+		}
+		port := os.Getenv("POSTGRES_PORT")
+		if port == "" {
+			panic("Required environment variable missing: POSTGRES_PORT")
+		}
+		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbname)
+	}
+	dbWriter, err := NewDexDatabaseWriter(connStr)
+	if err != nil {
+		panic(err)
+	}
+	defer dbWriter.Close()
+	return &DatabaseInsertSwapHandler{dbWriter: dbWriter}
 }
 
 // HandleSwap logs the swap event to console
-func (h *LogSwapHandler) HandleSwap(swap SwapData) {
-	// Format fee string if provided
-	var feeStr string
-	if swap.Fee != nil {
-		feeStr = fmt.Sprintf(" | Fee: %.2f%%", *swap.Fee)
+func (h *DatabaseInsertSwapHandler) HandleSwap(swap SwapData) {
+	// Convert big.Int to float64 (naive conversion for now)
+	amountIn, _ := new(big.Float).SetInt(swap.AmountIn).Float64()
+	amountOut, _ := new(big.Float).SetInt(swap.AmountOut).Float64()
+
+	// Calculate price (simple division)
+	var price float64
+	if amountIn > 0 {
+		price = amountOut / amountIn
 	}
 
-	// Format pair/pool identifier
-	var pairStr string
-	if swap.Token1.Symbol != "" {
-		pairStr = swap.Token0.Symbol + "/" + swap.Token1.Symbol
-	} else if swap.PoolID != "" {
-		pairStr = swap.PoolID // Full pool ID
-	} else {
-		pairStr = swap.PoolAddress // Full pool address
+	// Insert swap
+	dbSwap := SwapEvent{
+		Chain:       swap.ChainName,
+		Dex:         swap.Protocol,
+		PoolAddress: swap.PoolAddress,
+		TokenIn:     swap.TokenIn.Address,
+		TokenOut:    swap.TokenOut.Address,
+		AmountIn:    amountIn,
+		AmountOut:   amountOut,
+		Price:       price,
+		TxHash:      swap.TxHash,
+		BlockNumber: int64(swap.BlockNumber),
+	}
+	err := h.dbWriter.InsertSwap(dbSwap)
+	if err != nil {
+		log.Printf("⚠ Failed to write swap to DB: %v", err)
 	}
 
-	// Format swap direction
-	var swapStr string
-	if swap.TokenIn.Symbol != "" && swap.TokenOut.Symbol != "" {
-		swapStr = fmt.Sprintf("In: %s %s -> Out: %s %s",
-			swap.AmountIn.String(), swap.TokenIn.Symbol,
-			swap.AmountOut.String(), swap.TokenOut.Symbol)
-	} else {
-		swapStr = fmt.Sprintf("In: %s -> Out: %s", swap.AmountIn.String(), swap.AmountOut.String())
+	// Upsert Tokens
+	if swap.TokenIn.Address != "" {
+		// Name might be missing in TokenInfo, using empty string or Symbol as fallback if needed.
+		// Casting Decimals to int.
+		_ = h.dbWriter.UpsertToken(swap.TokenIn.Address, swap.TokenIn.Symbol, "", int(swap.TokenIn.Decimals), swap.ChainName)
 	}
-
-	// Log the formatted swap with full addresses and hashes
-	log.Printf("[%s] Swap (%s)%s | %s | %s | To: %s | Tx: %s",
-		swap.ChainName,
-		swap.Protocol,
-		feeStr,
-		pairStr,
-		swapStr,
-		swap.Recipient,
-		swap.TxHash)
+	if swap.TokenOut.Address != "" {
+		_ = h.dbWriter.UpsertToken(swap.TokenOut.Address, swap.TokenOut.Symbol, "", int(swap.TokenOut.Decimals), swap.ChainName)
+	}
 }

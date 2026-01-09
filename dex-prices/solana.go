@@ -47,7 +47,7 @@ func NewSolanaListener(config ChainConfig) *SolanaListener {
 	return &SolanaListener{
 		config:  config,
 		cache:   NewCache(config.ChainID),
-		handler: NewLogSwapHandler(),
+		handler: NewDatabaseInsertSwapHandler(),
 	}
 }
 

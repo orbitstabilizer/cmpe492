@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"os"
 	"os/signal"
@@ -56,6 +57,41 @@ func main() {
 	shouldClose := false
 
 	var shmData *ShmLayout
+	var dbWriter *DatabaseWriter
+
+	// Connect to database
+	// Connect to database
+	connStr := os.Getenv("DB_CONN_STR")
+	if connStr == "" {
+		user := os.Getenv("POSTGRES_USER")
+		if user == "" {
+			panic("Required environment variable missing: POSTGRES_USER")
+		}
+		password := os.Getenv("POSTGRES_PASSWORD")
+		if password == "" {
+			panic("Required environment variable missing: POSTGRES_PASSWORD")
+		}
+		dbname := os.Getenv("POSTGRES_DB")
+		if dbname == "" {
+			panic("Required environment variable missing: POSTGRES_DB")
+		}
+		host := os.Getenv("POSTGRES_HOST")
+		if host == "" {
+			panic("Required environment variable missing: POSTGRES_HOST")
+		}
+		port := os.Getenv("POSTGRES_PORT")
+		if port == "" {
+			panic("Required environment variable missing: POSTGRES_PORT")
+		}
+		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbname)
+	}
+	var err error
+	dbWriter, err = NewDatabaseWriter(connStr)
+	if err != nil {
+		panic(err)
+	}
+	defer dbWriter.Close()
+
 	w, err := NewSHMWriter[ShmLayout](".price_ix.data")
 	defer w.Close()
 	if err != nil {
@@ -95,6 +131,11 @@ func main() {
 	go func() {
 		for symIx := range updateChan {
 			shmData.UpdatePriceIndex(symIx)
+			price := shmData.PriceIndices[symIx]
+			if !math.IsNaN(price) {
+				symbol := getSymbolName(symIx, exchangeInfo)
+				_ = dbWriter.InsertPriceIndex(symbol, price, getNumValidExchanges(shmData, symIx), 0.0)
+			}
 		}
 	}()
 
@@ -102,4 +143,26 @@ func main() {
 	signal.Notify(sigint, os.Interrupt)
 	<-sigint
 	shouldClose = true
+}
+
+func getSymbolName(symIx int, info ExchangeInfo) string {
+	// Simple mapping assuming all exchanges have same symbol at same index
+	// In reality, we should probably have a unified symbol list
+	// But taking from first exchange for now
+	if len(info.Symbols) > 0 && symIx < len(info.Symbols[0]) {
+		return info.Symbols[0][symIx]
+	}
+	// fallback
+	return "UNKNOWN"
+}
+
+func getNumValidExchanges(shmData *ShmLayout, symIx int) int {
+	count := 0
+	for exchIx := 0; exchIx < int(schema.NUM_EXCHANGES); exchIx++ {
+		ticker := shmData.Tickers[exchIx][symIx]
+		if !math.IsNaN(ticker.Bid) && !math.IsNaN(ticker.Ask) {
+			count++
+		}
+	}
+	return count
 }
