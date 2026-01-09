@@ -2,7 +2,9 @@ import streamlit as st
 from ffi import get_ticker_dfs,get_price_indices_df, Symbols, read_shm
 from streamlit_autorefresh import st_autorefresh
 
-shm_path = ".price_ix.data"
+import os
+
+shm_path = os.getenv("SHM_PATH", ".price_ix.data")
 shm_data = read_shm(shm_path)
 tickers_data = shm_data["tickers"]
 price_indices_data = shm_data["price_indices"]

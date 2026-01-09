@@ -4,6 +4,7 @@ x-common-env: &db-env
   POSTGRES_DB: crypto_exchange
   POSTGRES_HOST: postgres
   POSTGRES_PORT: 5432
+  SHM_PATH: /shm/price_ix.data
 
 services:
   postgres:
@@ -40,11 +41,28 @@ services:
       context: ./price-index
     container_name: cmpe492-price-index
     environment: *db-env
+    volumes:
+      - shm_data:/shm
     networks:
       - cmpe492_network
     depends_on:
       postgres:
         condition: service_healthy
+
+  dashboard:
+    build:
+      context: ./price-index
+      dockerfile: Dockerfile.dashboard
+    container_name: cmpe492-dashboard
+    environment: *db-env
+    volumes:
+      - shm_data:/shm
+    ports:
+      - "8501:8501"
+    networks:
+      - cmpe492_network
+    depends_on:
+      - price-index
 
   dex-prices:
     build:
@@ -60,6 +78,7 @@ services:
 volumes:
   postgres_data:
   cloudbeaver_data:
+  shm_data:
 
 
 networks:

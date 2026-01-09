@@ -92,7 +92,11 @@ func main() {
 	}
 	defer dbWriter.Close()
 
-	w, err := NewSHMWriter[ShmLayout](".price_ix.data")
+	shmPath := os.Getenv("SHM_PATH")
+	if shmPath == "" {
+		shmPath = ".price_ix.data"
+	}
+	w, err := NewSHMWriter[ShmLayout](shmPath)
 	defer w.Close()
 	if err != nil {
 		panic(err)

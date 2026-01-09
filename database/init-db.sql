@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS price_index (
     time TIMESTAMPTZ NOT NULL,
     symbol VARCHAR(255) NOT NULL,
     price_index DECIMAL(20, 8) NOT NULL,
-    num_exchanges INT NOT NULL,
-    std_dev DECIMAL(20, 8)
+    num_exchanges INT NOT NULL
 );
 
 SELECT create_hypertable('price_index', 'time', if_not_exists => TRUE);
