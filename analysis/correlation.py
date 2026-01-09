@@ -144,11 +144,25 @@ class LeadLagAnalyzer:
                 logger.warning(f"No DEX swaps found for {token_in}→{token_out}")
                 return {}
             
+            # Extract prices and check if they need to be inverted
+            raw_prices = [float(row[1]) for row in rows]
+            
+            # Detect if prices are inverted (should be close to CEX price, not tiny values)
+            # If median price < 1, it's likely inverted (e.g., USDT/BNB instead of BNB/USDT)
+            median_price = np.median(raw_prices) if raw_prices else 0
+            
+            # Invert prices if they seem to be the wrong way around
+            if median_price < 10:  # Threshold: if < $10, likely inverted
+                corrected_prices = [1.0 / p if p > 0 else 0 for p in raw_prices]
+                logger.info(f"Inverted DEX prices (median was {median_price:.6f}, now {np.median([p for p in corrected_prices if p > 0]):.2f})")
+            else:
+                corrected_prices = raw_prices
+            
             prices = {
                 'times': [row[0] for row in rows],
-                'prices': [row[1] for row in rows],
-                'amounts_in': [row[2] for row in rows],
-                'amounts_out': [row[3] for row in rows]
+                'prices': corrected_prices,
+                'amounts_in': [float(row[2]) for row in rows],
+                'amounts_out': [float(row[3]) for row in rows]
             }
             
             return prices
