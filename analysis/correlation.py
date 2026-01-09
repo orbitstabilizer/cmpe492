@@ -12,11 +12,8 @@ from dataclasses import dataclass
 import json
 import sys
 
-try:
-    from database import get_database_client
-except ImportError:
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    from database import get_database_client
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from database.db_init import get_database_client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -181,6 +178,73 @@ class LeadLagAnalyzer:
         except Exception as e:
             logger.error(f"Error calculating correlation: {e}")
             return 0.0
+    
+    def granger_causality_test(
+        self,
+        cex_prices: List[float],
+        dex_prices: List[float],
+        max_lag: int = 10
+    ) -> Dict:
+        """
+        Perform Granger causality test
+        
+        Args:
+            cex_prices: CEX price series
+            dex_prices: DEX price series
+            max_lag: Maximum lag to test
+            
+        Returns:
+            Dictionary with test results
+        """
+        try:
+            from statsmodels.tsa.stattools import grangercausalitytests
+            
+            # Prepare data
+            min_len = min(len(cex_prices), len(dex_prices))
+            if min_len < max_lag + 10:
+                return {'error': 'Insufficient data'}
+            
+            cex = np.array(cex_prices[:min_len])
+            dex = np.array(dex_prices[:min_len])
+            
+            # Remove NaN/inf
+            mask = np.isfinite(cex) & np.isfinite(dex)
+            cex = cex[mask]
+            dex = dex[mask]
+            
+            if len(cex) < max_lag + 10:
+                return {'error': 'Too many invalid values'}
+            
+            # Create dataframe for test (DEX as dependent, CEX as independent)
+            data = np.column_stack([dex, cex])
+            
+            # Run test
+            results = grangercausalitytests(data, max_lag, verbose=False)
+            
+            # Extract p-values for each lag
+            p_values = {}
+            for lag in range(1, max_lag + 1):
+                # Use F-test p-value
+                p_val = results[lag][0]['ssr_ftest'][1]
+                p_values[lag] = p_val
+            
+            # Find minimum p-value (strongest causality)
+            min_p_lag = min(p_values, key=p_values.get)
+            min_p_value = p_values[min_p_lag]
+            
+            return {
+                'cex_granger_causes_dex': min_p_value < 0.05,
+                'min_p_value': min_p_value,
+                'optimal_lag': min_p_lag,
+                'all_p_values': p_values
+            }
+            
+        except ImportError:
+            logger.error("statsmodels not installed. Install with: pip install statsmodels")
+            return {'error': 'statsmodels not installed'}
+        except Exception as e:
+            logger.error(f"Granger causality test failed: {e}")
+            return {'error': str(e)}
     
     def calculate_lead_lag(self, cex_prices: List[float], 
                           dex_prices: List[float],

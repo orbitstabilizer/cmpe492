@@ -12,8 +12,11 @@ requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.24.0",
     "psycopg2-binary>=2.9.0",
-    "python-dotenv>=0.19.0"
+    "python-dotenv>=0.19.0",
+    "statsmodels>=0.14.0",
+    "scipy>=1.10.0",
+    "pandas>=2.0.0"
 ]
 
 [tool.setuptools]
-py-modules = ["correlation", "reporting"]
+py-modules = ["correlation", "reporting", "deviation_calculator", "run_analysis"]

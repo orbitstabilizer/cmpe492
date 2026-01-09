@@ -1,0 +1,207 @@
+CMPE492 Analysis Module Usage Guide
+====================================
+
+This folder contains all analysis tools for CEX vs DEX market microstructure research.
+
+📁 Files Overview
+-----------------
+- correlation.py         : Lead-lag analysis, Granger causality tests
+- deviation_calculator.py: Price deviation and arbitrage detection
+- slippage.py           : DEX slippage analysis (theoretical vs actual)
+- volume_analysis.py    : Volume distribution across exchanges/protocols
+- reporting.py          : Data quality reports and statistics
+- run_analysis.py       : Main executable script (USE THIS!)
+
+
+🚀 Quick Start
+--------------
+
+1. Setup database first:
+   cd ../database
+   ./start-db.sh
+
+2. Install analysis dependencies:
+   cd ../analysis
+   pip install -e .
+   # or with uv:
+   uv pip install -e .
+
+3. Run analysis:
+   python run_analysis.py quality           # Check data coverage
+   python run_analysis.py volume            # Volume distribution
+   python run_analysis.py statistics        # Basic stats
+   python run_analysis.py correlation       # Lead-lag correlation
+   python run_analysis.py all              # Run everything
+
+
+📊 Analysis Types
+-----------------
+
+1. DATA QUALITY CHECK
+   Command: python run_analysis.py quality
+   
+   What it does:
+   - Shows CEX/DEX data coverage
+   - Counts records and symbols
+   - Reports time ranges
+   
+   Use when: Starting analysis, verifying data collection
+
+2. VOLUME DISTRIBUTION
+   Command: python run_analysis.py volume --symbol BTC/USDT --hours 24
+   
+   What it does:
+   - CEX vs DEX volume breakdown
+   - Volume by exchange/chain/protocol
+   - Market concentration (Herfindahl index)
+   
+   Use when: Understanding market structure, comparing venues
+
+3. PRICE DEVIATION ANALYSIS
+   Command: python run_analysis.py deviation --pool 0x88e6... --hours 24
+   
+   What it does:
+   - Matches DEX swaps with CEX prices
+   - Calculates price deviations
+   - Identifies arbitrage opportunities
+   
+   Use when: Detecting arbitrage, analyzing price efficiency
+   Note: Requires pool address (get from database)
+
+4. LEAD-LAG CORRELATION
+   Command: python run_analysis.py correlation --symbol BTC/USDT --hours 24
+   
+   What it does:
+   - Computes CEX-DEX correlation
+   - Cross-correlation function (lead-lag detection)
+   - Granger causality test
+   - Volatility comparison
+   
+   Use when: Understanding price discovery, who leads whom
+
+5. STATISTICS REPORT
+   Command: python run_analysis.py statistics --symbol BTC/USDT
+   
+   What it does:
+   - Basic price statistics
+   - Top pools by volume
+   - Exchange rankings
+   
+   Use when: Overview of market activity
+
+
+🔧 Usage Examples
+-----------------
+
+# Check if data is available
+python run_analysis.py quality
+
+# Analyze BTC volume distribution over 7 days
+python run_analysis.py volume --symbol BTC/USDT --hours 168
+
+# Correlations for ETH over 24h
+python run_analysis.py correlation --symbol ETH/USDT --hours 24
+
+# Full analysis suite
+python run_analysis.py all --symbol BTC/USDT --hours 24
+
+
+📝 Programmatic Usage (In Your Code)
+------------------------------------
+
+from analysis import (
+    PriceDeviationCalculator,
+    LeadLagAnalyzer,
+    VolumeAnalyzer
+)
+
+# Price deviation
+calculator = PriceDeviationCalculator()
+stats = calculator.analyze_pool(pool_address, hours=24)
+print(f"Mean deviation: {stats.mean_deviation:.2f}%")
+calculator.close()
+
+# Volume distribution
+analyzer = VolumeAnalyzer()
+dist = analyzer.analyze_volume_distribution("BTC/USDT", hours=24)
+print(f"CEX: {dist.cex_percentage:.1f}%, DEX: {dist.dex_percentage:.1f}%")
+analyzer.close()
+
+# Lead-lag correlation
+correlation = LeadLagAnalyzer()
+result = correlation.analyze_symbol("ETH/USDT", hours=24)
+print(f"Correlation: {result.cex_dex_correlation:.3f}")
+print(f"Lead/Lag: {result.lead_lag_seconds:.2f}s")
+correlation.close()
+
+
+📦 Dependencies
+---------------
+numpy>=1.24.0          : Numerical computations
+psycopg2-binary>=2.9.0 : Database client
+python-dotenv>=0.19.0  : Environment variables
+statsmodels>=0.14.0    : Granger causality, time series
+scipy>=1.10.0          : Scientific functions
+pandas>=2.0.0          : Data manipulation
+
+
+⚠️ Common Issues
+----------------
+
+1. "No data available"
+   → Check database is running and has data
+   → Run: python run_analysis.py quality
+
+2. "Module not found: statsmodels"
+   → Install: pip install statsmodels
+
+3. "Database connection failed"
+   → Start database: cd ../database && ./start-db.sh
+
+4. "No matched data for pool"
+   → Verify pool address exists in database
+   → Check time range has activity
+
+
+🎯 Research Objectives Mapping
+-------------------------------
+
+From midterm report → Analysis tool:
+
+1. Price Discovery (P1)
+   → correlation.py (lead-lag, Granger causality)
+
+2. Volume Distribution (P2)
+   → volume_analysis.py (CEX/DEX breakdown)
+
+3. Liquidity Structure (P3)
+   → reporting.py (pool statistics)
+   → slippage.py (execution quality)
+
+4. Execution Cost & Slippage (P4)
+   → slippage.py (theoretical vs actual)
+   → deviation_calculator.py (arbitrage costs)
+
+
+📈 Next Steps for Research
+---------------------------
+
+After collecting sufficient data:
+
+1. Run quality check to verify data coverage
+2. Generate volume distribution reports
+3. Analyze price deviations (arbitrage opportunities)
+4. Compute lead-lag correlations
+5. Generate visualizations (separate dashboard)
+6. Write findings in LaTeX report
+
+
+💡 Tips
+-------
+
+- Start with short time periods (--hours 1) for testing
+- Use --symbol BTC/USDT or ETH/USDT (most liquid)
+- Check data quality first before running other analyses
+- Results are stored in database for later retrieval
+- Each analyzer has .close() method - always call it
+

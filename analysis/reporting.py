@@ -11,11 +11,8 @@ from typing import Dict, List, Optional
 from dataclasses import asdict
 import sys
 
-try:
-    from database import get_database_client
-except ImportError:
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    from database import get_database_client
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from database.db_init import get_database_client
 
 logging.basicConfig(
     level=logging.INFO,
