@@ -19,8 +19,12 @@ const NUM_SYMBOLS = 128
 type TickerBuffer = [schema.NUM_EXCHANGES][NUM_SYMBOLS]schema.TickerData
 
 type PriceIndex struct {
-	Val float64
-	Cnt int // number of exchanges contributing to the price index
+	Val         float64
+	Cnt         int // number of exchanges contributing to the price index
+	BidVWAP     float64
+	BidQtyTotal float64
+	AskVWAP     float64
+	AskQtyTotal float64
 }
 
 type PriceIndexBuffer = [NUM_SYMBOLS]PriceIndex
@@ -29,34 +33,114 @@ type ShmLayout struct {
 	PriceIndices PriceIndexBuffer
 }
 
+// initial weights for each exchange used in the exp mov avg VWAP calculation
+var exchangeWeights = [NUM_SYMBOLS][schema.NUM_EXCHANGES]float64{}
+
+func initWeights() {
+	for symIx := 0; symIx < NUM_SYMBOLS; symIx++ {
+		exchangeWeights[symIx] = [schema.NUM_EXCHANGES]float64{
+			0.40,  // BINANCE
+			0.075, // BYBIT
+			0.072, // COINBASE
+			0.074, // GATEIO
+			0.068, // HTX
+			0.070, // KUCOIN
+			0.10,  // MEXC
+			0.05,  // OKX
+		}
+	}
+}
+
 /*
-UpdatePriceIndex recalculates the price index for a given symbol index across all exchanges.
-It computes the average of the mid-prices (average of bid and ask) from all exchanges
-that have valid bid and ask prices for the specified symbol.
-If no valid prices are found, the price index is set to NaN.
+UpdatePriceIndex builds a composite price index for a given symbol across all exchanges.
+
+High-level logic:
+1. Compute a liquidity-weighted composite mid-price using per-exchange weights.
+2. Aggregate bid/ask quantities and notionals to compute side-specific VWAPs.
+3. Adapt per-exchange weights slowly (EMA) based on observed liquidity share.
 */
 func (s *ShmLayout) UpdatePriceIndex(symIx int) {
-	sumPrice := 0.0
-	count := 0.0
+	// Accumulates weighted mid-prices across exchanges
+	weightedMidPrice := 0.0
+	// Sum of weights actually contributing to the index
+	totalWeight := 0.0
+
+	// Aggregate quantities and notionals across all exchanges
+	bidQtyTotal := 0.0
+	askQtyTotal := 0.0
+	bidNotTotal := 0.0
+	askNotTotal := 0.0
+
+	// Number of exchanges with valid bid/ask data (for diagnostics/metadata)
+	numValidExchanges := 0
+
+	// Track total displayed liquidity per exchange for weight adaptation
+	qtyPerExchange := [schema.NUM_EXCHANGES]float64{}
+
+	// First pass:
+	// - Validate exchange data
+	// - Accumulate composite mid-price
+	// - Accumulate global bid/ask liquidity and notionals
 	for exchIx := 0; exchIx < int(schema.NUM_EXCHANGES); exchIx++ {
+		qtyPerExchange[exchIx] = 0.0
 		ticker := s.Tickers[exchIx][symIx]
-		// Check for valid prices and quantities
+
+		// Require finite bid/ask prices and quantities
 		if !math.IsNaN(ticker.Bid) && !math.IsNaN(ticker.Ask) &&
 			!math.IsNaN(ticker.BidQty) && !math.IsNaN(ticker.AskQty) {
 
+			numValidExchanges++
+
+			// Total visible liquidity at top-of-book
 			totalQty := ticker.BidQty + ticker.AskQty
 			if totalQty > 0 {
-				// Calculate VWAP (Volume Weighted Average Price) for this exchange
-				vwap := (ticker.Bid*ticker.BidQty + ticker.Ask*ticker.AskQty) / totalQty
-				sumPrice += vwap
-				count += 1.0
+				// Store per-exchange liquidity for later weight adaptation
+				qtyPerExchange[exchIx] = totalQty
+
+				// Accumulate global bid/ask quantities and notionals
+				bidQtyTotal += ticker.BidQty
+				askQtyTotal += ticker.AskQty
+				bidNotTotal += ticker.BidQty * ticker.Bid
+				askNotTotal += ticker.AskQty * ticker.Ask
+
+				// Mid-price used as the exchange price contribution
+				midPrice := (ticker.Bid + ticker.Ask) / 2
+
+				// Add weighted mid-price to composite index
+				weightedMidPrice += midPrice * exchangeWeights[symIx][exchIx]
+				totalWeight += exchangeWeights[symIx][exchIx]
 			}
 		}
 	}
-	if count > 0 {
-		s.PriceIndices[symIx].Val = sumPrice / count
-		s.PriceIndices[symIx].Cnt = int(count)
+
+	// Second pass:
+	// Adapt per-exchange weights using an EMA of observed liquidity share
+	for exchIx := 0; exchIx < int(schema.NUM_EXCHANGES); exchIx++ {
+		if qtyPerExchange[exchIx] > 0 {
+			// Exchange's fraction of total displayed liquidity
+			qtyRatio := qtyPerExchange[exchIx] / (bidQtyTotal + askQtyTotal)
+
+			// Slow adaptation to avoid sudden regime shifts
+			exchangeWeights[symIx][exchIx] =
+				0.99*exchangeWeights[symIx][exchIx] + 0.01*qtyRatio
+		}
+	}
+
+	// Finalize index values
+	if totalWeight > 0 {
+		// Composite liquidity-weighted mid-price
+		s.PriceIndices[symIx].Val = weightedMidPrice / totalWeight
+
+		// Metadata and diagnostics
+		s.PriceIndices[symIx].Cnt = numValidExchanges
+		s.PriceIndices[symIx].AskQtyTotal = askQtyTotal
+		s.PriceIndices[symIx].BidQtyTotal = bidQtyTotal
+
+		// Side-specific VWAPs across all exchanges
+		s.PriceIndices[symIx].AskVWAP = askNotTotal / askQtyTotal
+		s.PriceIndices[symIx].BidVWAP = bidNotTotal / bidQtyTotal
 	} else {
+		// No usable exchange data
 		s.PriceIndices[symIx].Val = math.NaN()
 	}
 }
@@ -96,6 +180,7 @@ func main() {
 	if err := json.Unmarshal(data, &exchangeInfo); err != nil {
 		panic(err)
 	}
+	initWeights()
 	normalizedSymbols := exchangeInfo.Symbols[0]
 	updateChan := make(chan int, 1)
 	for i := range exchangeInfo.Symbols {
@@ -130,8 +215,7 @@ func main() {
 	}()
 	if *saveDb {
 		// Connect to database
-		// Connect to database
-		newFunction(normalizedSymbols, shmData, *savePeriod)
+		saveToDb(normalizedSymbols, shmData, *savePeriod)
 	}
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
@@ -139,7 +223,7 @@ func main() {
 	shouldClose = true
 }
 
-func newFunction(normalizedSymbols []string, shmData *ShmLayout, savePeriod int) {
+func saveToDb(normalizedSymbols []string, shmData *ShmLayout, savePeriod int) {
 	var dbWriter *DatabaseWriter
 
 	connStr := os.Getenv("DB_CONN_STR")

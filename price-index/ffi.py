@@ -1,6 +1,7 @@
 import mmap
 import ctypes
 import enum
+import os
 import pandas as pd
 import numpy as np
 import json
@@ -12,7 +13,9 @@ class Symbols(enum.IntEnum):
 class Exchange(enum.IntEnum):
     pass
 
-with open("exchange_info.json", "r") as f:
+
+config_path = os.getenv("EXCHANGE_INFO_PATH", "exchange_info.json")
+with open(config_path, "r") as f:
     exchange_info = json.load(f)
     pairs = exchange_info["symbols"][2]
     sb = "class Symbols(enum.IntEnum):\n"
@@ -43,6 +46,10 @@ class PriceIndex(ctypes.Structure):
     _fields_ = [
         ("Val", ctypes.c_double),
         ("Cnt", ctypes.c_int64),
+        ("BidVWAP", ctypes.c_double),
+        ("BidQtyTotal", ctypes.c_double),
+        ("AskVWAP", ctypes.c_double),
+        ("AskQtyTotal", ctypes.c_double),
     ]
 
     def __repr__(self):
