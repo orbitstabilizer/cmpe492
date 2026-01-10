@@ -7,3 +7,5 @@ venv
 snip/.ticker.data
 price-index/.ticker.data
 *.md
+poster/build
+report/build
