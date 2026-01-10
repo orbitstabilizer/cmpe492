@@ -15,6 +15,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application code
 COPY dashboard.py ffi.py exchange_info.json ./
+COPY .streamlit .streamlit
 
 # Expose Streamlit port
 EXPOSE 8501
