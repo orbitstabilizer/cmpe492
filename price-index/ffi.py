@@ -1,6 +1,7 @@
 import mmap
 import ctypes
 import enum
+import os
 import pandas as pd
 import numpy as np
 import json
@@ -12,7 +13,9 @@ class Symbols(enum.IntEnum):
 class Exchange(enum.IntEnum):
     pass
 
-with open("exchange_info.json", "r") as f:
+
+config_path = os.getenv("EXCHANGE_INFO_PATH", "exchange_info.json")
+with open(config_path, "r") as f:
     exchange_info = json.load(f)
     pairs = exchange_info["symbols"][2]
     sb = "class Symbols(enum.IntEnum):\n"
@@ -31,12 +34,26 @@ class TickerData(ctypes.Structure):
     _fields_ = [
         ("Bid", ctypes.c_double),
         ("Ask", ctypes.c_double),
+        ("BidQty", ctypes.c_double),
+        ("AskQty", ctypes.c_double),
     ]
 
     def __repr__(self):
-        return f"TickerData(Bid={self.Bid}, Ask={self.Ask})"
+        return f"TickerData(Bid={self.Bid}, Ask={self.Ask}, BidQty={self.BidQty}, AskQty={self.AskQty})"
 
 
+class PriceIndex(ctypes.Structure):
+    _fields_ = [
+        ("Val", ctypes.c_double),
+        ("Cnt", ctypes.c_int64),
+        ("BidVWAP", ctypes.c_double),
+        ("BidQtyTotal", ctypes.c_double),
+        ("AskVWAP", ctypes.c_double),
+        ("AskQtyTotal", ctypes.c_double),
+    ]
+
+    def __repr__(self):
+        return f"PriceIndex(Val={self.Val}, Cnt={self.Cnt})"
 
 
 
@@ -44,7 +61,7 @@ NUM_SYMBOLS = 128 # preallocated number of symbols
 class ShmLayout(ctypes.Structure):
     _fields_ = [
         ("tickers", TickerData * NUM_SYMBOLS * len(Exchange)),
-        ("price_indices", ctypes.c_double * len(Symbols)),
+        ("price_indices", PriceIndex * len(Symbols)),
     ]
 
     def __getitem__(self, exchange: Exchange):
@@ -76,7 +93,7 @@ def read_shm(path: str):
         data = ShmLayout.from_buffer(mm)
         return {
             "tickers": np.frombuffer(data.tickers, dtype=TickerData * NUM_SYMBOLS * len(Exchange))[:len(symbols)],
-            "price_indices": np.frombuffer(data.price_indices, dtype=ctypes.c_double * len(Symbols)).reshape(-1, 1),
+            "price_indices": np.frombuffer(data.price_indices, dtype=PriceIndex * len(Symbols))[0],
 
         }
 
@@ -92,7 +109,7 @@ symbol_to_value = {
 def get_ticker_dfs(ticker_data):
     return {
         sym.name:
-        pd.DataFrame(ticker_data[0][:, sym.value], index=exchanges, columns=['Bid', 'Ask'], # type: ignore
+        pd.DataFrame(ticker_data[0][:, sym.value], index=exchanges, columns=['Bid', 'Ask', 'BidQty', 'AskQty'], # type: ignore
                         copy=False)
         for sym in Symbols
     }
@@ -100,5 +117,5 @@ def get_ticker_dfs(ticker_data):
 
 def get_price_indices_df(price_indices_data):
     return pd.DataFrame(
-        price_indices_data, index=symbols, columns=['Price Index'], # type: ignore
+        price_indices_data, index=symbols, # type: ignore
                         copy=False)

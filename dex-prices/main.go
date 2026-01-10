@@ -14,7 +14,7 @@ func main() {
 		if err := CreateDefaultConfig(); err != nil {
 			log.Fatalf("❌ Failed to create default config: %v", err)
 		}
-		log.Println("✅ Please edit config.json and restart the program")
+		log.Println("Please edit config.json and restart the program")
 		return
 	}
 

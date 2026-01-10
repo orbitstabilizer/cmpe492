@@ -6,3 +6,6 @@ venv
 .DS_Store
 snip/.ticker.data
 price-index/.ticker.data
+*.md
+*.egg-info
+uv.lock

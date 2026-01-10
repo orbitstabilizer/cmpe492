@@ -35,7 +35,7 @@ func NewEVMListener(config ChainConfig) (*EVMListener, error) {
 		config:  config,
 		client:  client,
 		cache:   cache,
-		handler: NewLogSwapHandler(),
+		handler: NewDatabaseInsertSwapHandler(),
 	}, nil
 }
 
@@ -65,6 +65,7 @@ RECONNECT:
 		"topics": []interface{}{
 			[]string{
 				UniswapV2SwapTopic.Hex(),
+				UniswapV2SyncTopic.Hex(),
 				UniswapV3SwapTopic.Hex(),
 				UniswapV4SwapTopic.Hex(),
 				CurveTokenExchangeTopic.Hex(),
@@ -90,7 +91,7 @@ RECONNECT:
 		goto RECONNECT
 	}
 
-	log.Printf("[%s] ✅ Subscribed to Uniswap V2/V3/V4, Curve, and Balancer Swap events", config.Name)
+	log.Printf("[%s] Subscribed to Uniswap V2/V3/V4, Curve, and Balancer Swap events", config.Name)
 
 	// Message reading loop
 	for {
@@ -138,6 +139,8 @@ func (l *EVMListener) processLog(logData map[string]interface{}) {
 	switch eventSignature {
 	case UniswapV2SwapTopic:
 		l.decodeV2Swap(&logEntry, receipt)
+	case UniswapV2SyncTopic:
+		l.decodeV2Sync(&logEntry, receipt)
 	case UniswapV3SwapTopic:
 		l.decodeV3Swap(&logEntry, receipt)
 	case UniswapV4SwapTopic:
@@ -208,6 +211,34 @@ func (l *EVMListener) decodeV2Swap(logEntry *types.Log, receipt *types.Receipt) 
 	l.handler.HandleSwap(swapData)
 }
 
+// decodeV2Sync processes Uniswap V2 Sync events (Reserves update)
+func (l *EVMListener) decodeV2Sync(logEntry *types.Log, receipt *types.Receipt) {
+	// We need basic info to identify the DEX/Chain
+	// We can try getV2PairInfo, but if it fails, fallback to generic
+	_, err := l.getV2PairInfo(logEntry.Address)
+	dexName := "V2"
+	if err != nil {
+		// Log but proceed with generic name if pair info fails (unlikely if it's a valid pair)
+		// log.Printf("[%s] ⚠ Failed to get pair info for Sync event: %v", l.config.Name, err)
+	}
+
+	var event V2SyncEvent
+	if err := UniswapV2SyncEventABI.UnpackIntoInterface(&event, "Sync", logEntry.Data); err != nil {
+		log.Printf("[%s] ⚠ Failed to unpack V2 Sync event: %v", l.config.Name, err)
+		return
+	}
+
+	l.handler.HandlePoolState(
+		logEntry.Address.Hex(),
+		l.config.Name,
+		dexName,
+		receipt.BlockNumber.Uint64(),
+		receipt.TxHash.Hex(),
+		event.Reserve0,
+		event.Reserve1,
+	)
+}
+
 // decodeV3Swap processes Uniswap V3 swap events
 func (l *EVMListener) decodeV3Swap(logEntry *types.Log, receipt *types.Receipt) {
 	poolInfo, err := l.getV3PoolInfo(logEntry.Address)
@@ -232,34 +263,42 @@ func (l *EVMListener) decodeV3Swap(logEntry *types.Log, receipt *types.Receipt) 
 	var tokenIn, tokenOut TokenInfo
 	var amountIn, amountOut *big.Int
 
+	// In Uniswap V3:
+	// - Positive amount = tokens added to pool (user is SELLING this token = INPUT)
+	// - Negative amount = tokens removed from pool (user is BUYING this token = OUTPUT)
 	if event.Amount0.Sign() > 0 {
+		// Amount0 is positive → user is selling Token0 (input) and buying Token1 (output)
 		tokenIn, tokenOut = poolInfo.Token0Info, poolInfo.Token1Info
 		amountIn = event.Amount0
 		amountOut = new(big.Int).Abs(event.Amount1)
 	} else {
+		// Amount0 is negative → user is buying Token0 (output) and selling Token1 (input)
 		tokenIn, tokenOut = poolInfo.Token1Info, poolInfo.Token0Info
-		amountIn = new(big.Int).Abs(event.Amount0)
-		amountOut = event.Amount1
+		amountIn = event.Amount1
+		amountOut = new(big.Int).Abs(event.Amount0)
 	}
 
 	feePercent := float64(poolInfo.Fee) / 10000.0
 
 	swapData := SwapData{
-		Protocol:    "V3",
-		ChainName:   l.config.Name,
-		ChainType:   "evm",
-		PoolAddress: logEntry.Address.Hex(),
-		Token0:      poolInfo.Token0Info,
-		Token1:      poolInfo.Token1Info,
-		TokenIn:     tokenIn,
-		TokenOut:    tokenOut,
-		AmountIn:    amountIn,
-		AmountOut:   amountOut,
-		Fee:         &feePercent,
-		Sender:      event.Sender.Hex(),
-		Recipient:   event.Recipient.Hex(),
-		TxHash:      receipt.TxHash.Hex(),
-		BlockNumber: receipt.BlockNumber.Uint64(),
+		Protocol:     "V3",
+		ChainName:    l.config.Name,
+		ChainType:    "evm",
+		PoolAddress:  logEntry.Address.Hex(),
+		Token0:       poolInfo.Token0Info,
+		Token1:       poolInfo.Token1Info,
+		TokenIn:      tokenIn,
+		TokenOut:     tokenOut,
+		AmountIn:     amountIn,
+		AmountOut:    amountOut,
+		Fee:          &feePercent,
+		Sender:       event.Sender.Hex(),
+		Recipient:    event.Recipient.Hex(),
+		TxHash:       receipt.TxHash.Hex(),
+		BlockNumber:  receipt.BlockNumber.Uint64(),
+		SqrtPriceX96: event.SqrtPriceX96,
+		Liquidity:    event.Liquidity,
+		Tick:         event.Tick,
 	}
 
 	l.handler.HandleSwap(swapData)
@@ -294,18 +333,21 @@ func (l *EVMListener) decodeV4Swap(logEntry *types.Log, receipt *types.Receipt) 
 	feePercent := float64(event.Fee.Uint64()) / 10000.0
 
 	swapData := SwapData{
-		Protocol:    "V4",
-		ChainName:   l.config.Name,
-		ChainType:   "evm",
-		PoolID:      poolIdHex,
-		PoolAddress: logEntry.Address.Hex(),
-		AmountIn:    amountIn,
-		AmountOut:   amountOut,
-		Fee:         &feePercent,
-		Sender:      event.Sender.Hex(),
-		Recipient:   event.Sender.Hex(),
-		TxHash:      receipt.TxHash.Hex(),
-		BlockNumber: receipt.BlockNumber.Uint64(),
+		Protocol:     "V4",
+		ChainName:    l.config.Name,
+		ChainType:    "evm",
+		PoolID:       poolIdHex,
+		PoolAddress:  logEntry.Address.Hex(),
+		AmountIn:     amountIn,
+		AmountOut:    amountOut,
+		Fee:          &feePercent,
+		Sender:       event.Sender.Hex(),
+		Recipient:    event.Sender.Hex(),
+		TxHash:       receipt.TxHash.Hex(),
+		BlockNumber:  receipt.BlockNumber.Uint64(),
+		SqrtPriceX96: event.SqrtPriceX96,
+		Liquidity:    event.Liquidity,
+		Tick:         event.Tick,
 	}
 
 	l.handler.HandleSwap(swapData)
