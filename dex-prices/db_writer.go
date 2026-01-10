@@ -40,11 +40,11 @@ func NewDexDatabaseWriter(connStr string) (*DexDatabaseWriter, error) {
 	return &DexDatabaseWriter{db: db}, nil
 }
 
-func (w *DexDatabaseWriter) InsertSwap(swap SwapEvent, tradeSizeUSD *float64) error {
+func (w *DexDatabaseWriter) InsertSwap(swap SwapEvent) error {
 	query := `
         INSERT INTO dex_swaps (time, chain, dex, pool_address, token_in, token_out,
-                               amount_in, amount_out, price, tx_hash, block_number, trade_size_usd)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                               amount_in, amount_out, price, tx_hash, block_number)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `
 	_, err := w.db.Exec(query,
 		time.Now(),
@@ -58,7 +58,6 @@ func (w *DexDatabaseWriter) InsertSwap(swap SwapEvent, tradeSizeUSD *float64) er
 		swap.Price,
 		swap.TxHash,
 		swap.BlockNumber,
-		tradeSizeUSD,
 	)
 
 	if err != nil {
@@ -86,16 +85,15 @@ func (w *DexDatabaseWriter) GetLatestPrice(symbol string) (float64, error) {
 	return price, nil
 }
 
-func (w *DexDatabaseWriter) UpsertToken(address, symbol, name string, decimals int, chain string) error {
+func (w *DexDatabaseWriter) UpsertToken(address, symbol string, decimals int, chain string) error {
 	query := `
-        INSERT INTO tokens (address, symbol, name, decimals, chain)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO tokens (address, symbol, decimals, chain)
+        VALUES ($1, $2, $3, $4)
         ON CONFLICT (address) DO UPDATE SET
             symbol = EXCLUDED.symbol,
-            name = EXCLUDED.name,
             decimals = EXCLUDED.decimals
     `
-	_, err := w.db.Exec(query, address, symbol, name, decimals, chain)
+	_, err := w.db.Exec(query, address, symbol, decimals, chain)
 	return err
 }
 

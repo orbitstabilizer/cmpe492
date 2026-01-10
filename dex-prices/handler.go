@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/big"
 	"os"
-	"strings"
 )
 
 // SwapData represents a decoded swap event from any chain (EVM or Solana)
@@ -114,33 +113,30 @@ func (h *DatabaseInsertSwapHandler) HandleSwap(swap SwapData) {
 	amountIn = toHuman(swap.AmountIn, swap.TokenIn.Decimals)
 	amountOut = toHuman(swap.AmountOut, swap.TokenOut.Decimals)
 
-	// Calculate price (AmountOut / AmountIn) -> This is the execution price
+	// Calculate price as exchange rate (how many output tokens per input token)
 	var price float64
-	if amountIn > 0 {
+	if amountIn > amountOut {
+		price = amountIn / amountOut
+	} else {
 		price = amountOut / amountIn
 	}
 
-	// Calculate Trade Size in USD
-	var tradeSizeUSD *float64
-	if swap.TokenOut.Symbol != "" {
-		// Try to find price for output token
-		// Assumption: Output token is usually the "quote" in a user's mind or we just value based on it
-		// Normalize symbol: price-index usually stores as "btcusdt"
-		symbol := strings.ToLower(swap.TokenOut.Symbol)
+	// Debug logging for suspicious prices
+	if price > 1e7 {
+		log.Printf("⚠️ HIGH PRICE DETECTED: %.18f", price)
+		log.Printf("   TokenIn: %s (decimals: %d)", swap.TokenIn.Symbol, swap.TokenIn.Decimals)
+		log.Printf("   TokenOut: %s (decimals: %d)", swap.TokenOut.Symbol, swap.TokenOut.Decimals)
+		log.Printf("   AmountIn (raw): %s", swap.AmountIn.String())
+		log.Printf("   AmountOut (raw): %s", swap.AmountOut.String())
+		log.Printf("   AmountIn (human): %.18f", amountIn)
+		log.Printf("   AmountOut (human): %.18f", amountOut)
+		log.Printf("   Pool: %s", swap.PoolAddress)
+		log.Printf("   TxHash: %s", swap.TxHash)
 
-		// If symbol is stablecoin-like, assume $1 (optimization)
-		if symbol == "usdt" || symbol == "usdc" || symbol == "dai" {
-			usd := amountOut
-			tradeSizeUSD = &usd
-		} else {
-			// Try fetching 'symbol' + 'usdt'
-			querySymbol := symbol + "usdt"
-			cexPrice, err := h.dbWriter.GetLatestPrice(querySymbol)
-			if err == nil && cexPrice > 0 {
-				usd := amountOut * cexPrice
-				tradeSizeUSD = &usd
-			}
-		}
+		// Sanity check: if AmountIn raw is huge but decimals is small (like USDT=6),
+		// the raw amount might actually be in the other token's units
+		log.Printf("   ⚠️ POSSIBLE ISSUE: Raw amounts may be using wrong token decimals!")
+		log.Printf("   Suggestion: Check if AmountIn/AmountOut are swapped in the EVM parser")
 	}
 
 	// Insert swap
@@ -156,17 +152,17 @@ func (h *DatabaseInsertSwapHandler) HandleSwap(swap SwapData) {
 		TxHash:      swap.TxHash,
 		BlockNumber: int64(swap.BlockNumber),
 	}
-	err := h.dbWriter.InsertSwap(dbSwap, tradeSizeUSD)
+	err := h.dbWriter.InsertSwap(dbSwap)
 	if err != nil {
 		log.Printf("⚠ Failed to write swap to DB: %v", err)
 	}
 
 	// Upsert Tokens
 	if swap.TokenIn.Address != "" {
-		_ = h.dbWriter.UpsertToken(swap.TokenIn.Address, swap.TokenIn.Symbol, "", int(swap.TokenIn.Decimals), swap.ChainName)
+		_ = h.dbWriter.UpsertToken(swap.TokenIn.Address, swap.TokenIn.Symbol, int(swap.TokenIn.Decimals), swap.ChainName)
 	}
 	if swap.TokenOut.Address != "" {
-		_ = h.dbWriter.UpsertToken(swap.TokenOut.Address, swap.TokenOut.Symbol, "", int(swap.TokenOut.Decimals), swap.ChainName)
+		_ = h.dbWriter.UpsertToken(swap.TokenOut.Address, swap.TokenOut.Symbol, int(swap.TokenOut.Decimals), swap.ChainName)
 	}
 
 	// Prepare Pool Info

@@ -267,21 +267,20 @@ class CryptoExchangeDB:
     
     # ==================== Token Operations ====================
     
-    def upsert_token(self, address: str, symbol: str, name: str, decimals: int, 
+    def upsert_token(self, address: str, symbol: str, decimals: int, 
                      chain: str = "ethereum", logo_url: str = None) -> bool:
         """Insert or update token metadata"""
         query = """
-            INSERT INTO tokens (address, symbol, name, decimals, chain, logo_url)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO tokens (address, symbol, decimals, chain, logo_url)
+            VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (address) DO UPDATE SET
                 symbol = EXCLUDED.symbol,
-                name = EXCLUDED.name,
                 decimals = EXCLUDED.decimals,
                 logo_url = EXCLUDED.logo_url
         """
         try:
             with self.get_cursor() as cur:
-                cur.execute(query, (address, symbol, name, decimals, chain, logo_url))
+                cur.execute(query, (address, symbol, decimals, chain, logo_url))
                 return True
         except Exception as e:
             logger.error(f"Failed to upsert token: {e}")
@@ -289,7 +288,7 @@ class CryptoExchangeDB:
     
     def get_token(self, address: str) -> Optional[Dict]:
         """Get token metadata"""
-        query = "SELECT address, symbol, name, decimals, chain FROM tokens WHERE address = %s"
+        query = "SELECT address, symbol, decimals, chain FROM tokens WHERE address = %s"
         with self.get_cursor() as cur:
             cur.execute(query, (address,))
             result = cur.fetchone()
@@ -297,9 +296,8 @@ class CryptoExchangeDB:
                 return {
                     'address': result[0],
                     'symbol': result[1],
-                    'name': result[2],
-                    'decimals': result[3],
-                    'chain': result[4]
+                    'decimals': result[2],
+                    'chain': result[3]
                 }
             return None
     

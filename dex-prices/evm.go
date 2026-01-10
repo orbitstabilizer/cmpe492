@@ -263,14 +263,19 @@ func (l *EVMListener) decodeV3Swap(logEntry *types.Log, receipt *types.Receipt) 
 	var tokenIn, tokenOut TokenInfo
 	var amountIn, amountOut *big.Int
 
+	// In Uniswap V3:
+	// - Positive amount = tokens added to pool (user is SELLING this token = INPUT)
+	// - Negative amount = tokens removed from pool (user is BUYING this token = OUTPUT)
 	if event.Amount0.Sign() > 0 {
+		// Amount0 is positive → user is selling Token0 (input) and buying Token1 (output)
 		tokenIn, tokenOut = poolInfo.Token0Info, poolInfo.Token1Info
 		amountIn = event.Amount0
 		amountOut = new(big.Int).Abs(event.Amount1)
 	} else {
+		// Amount0 is negative → user is buying Token0 (output) and selling Token1 (input)
 		tokenIn, tokenOut = poolInfo.Token1Info, poolInfo.Token0Info
-		amountIn = new(big.Int).Abs(event.Amount0)
-		amountOut = event.Amount1
+		amountIn = event.Amount1
+		amountOut = new(big.Int).Abs(event.Amount0)
 	}
 
 	feePercent := float64(poolInfo.Fee) / 10000.0

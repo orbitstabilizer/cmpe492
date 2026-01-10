@@ -1,6 +1,18 @@
 -- Create TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
+-- Clean up existing tables to ensure a fresh start
+DROP MATERIALIZED VIEW IF EXISTS dex_volume_1h CASCADE;
+DROP TABLE IF EXISTS dex_swaps CASCADE;
+DROP TABLE IF EXISTS price_index CASCADE;
+DROP TABLE IF EXISTS tokens CASCADE;
+DROP TABLE IF EXISTS pools CASCADE;
+DROP TABLE IF EXISTS price_deviations CASCADE;
+DROP TABLE IF EXISTS correlation_analysis CASCADE;
+DROP TABLE IF EXISTS slippage_analysis CASCADE;
+DROP TABLE IF EXISTS dex_pool_state CASCADE;
+CREATE DATABASE IF NOT EXISTS crypto_exchange;
+
 -- Price Index table (aggregated CEX data)
 CREATE TABLE IF NOT EXISTS price_index (
     time TIMESTAMPTZ NOT NULL,
@@ -23,9 +35,11 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
     amount_in DECIMAL(100, 18) NOT NULL,
     amount_out DECIMAL(100, 18) NOT NULL,
     price DECIMAL(100, 18) NOT NULL,
+    token_in_symbol VARCHAR(50),
+    token_out_symbol VARCHAR(50),
+    action VARCHAR(10),
     tx_hash VARCHAR(66),
-    block_number BIGINT,
-    trade_size_usd DECIMAL(20, 8)
+    block_number BIGINT
 );
 
 SELECT create_hypertable('dex_swaps', 'time', if_not_exists => TRUE);
@@ -36,10 +50,8 @@ CREATE INDEX idx_dex_swaps_tokens ON dex_swaps (token_in, token_out, time DESC);
 CREATE TABLE IF NOT EXISTS tokens (
     address VARCHAR(66) PRIMARY KEY,
     symbol VARCHAR(255),
-    name VARCHAR(255),
     decimals INT,
     chain VARCHAR(50),
-    logo_url VARCHAR(500),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -101,22 +113,6 @@ CREATE TABLE IF NOT EXISTS slippage_analysis (
 SELECT create_hypertable('slippage_analysis', 'time', if_not_exists => TRUE);
 CREATE INDEX idx_slippage_analysis_dex_pair_time ON slippage_analysis (dex, token_pair, time DESC);
 
--- CEX orderbook depth/liquidity snapshot table
-CREATE TABLE IF NOT EXISTS cex_liquidity_snapshot (
-    time TIMESTAMPTZ NOT NULL,
-    exchange VARCHAR(50) NOT NULL,
-    symbol VARCHAR(20) NOT NULL,
-    depth_0_5_pct DECIMAL(30, 8),
-    depth_1_pct DECIMAL(30, 8),
-    depth_2_pct DECIMAL(30, 8),
-    bid_ask_spread_bps INT,
-    top_bid DECIMAL(20, 8),
-    top_ask DECIMAL(20, 8)
-);
-
-SELECT create_hypertable('cex_liquidity_snapshot', 'time', if_not_exists => TRUE);
-CREATE INDEX idx_cex_liquidity_snapshot ON cex_liquidity_snapshot (exchange, symbol, time DESC);
-
 -- DEX pool state history table
 CREATE TABLE IF NOT EXISTS dex_pool_state (
     time TIMESTAMPTZ NOT NULL,
@@ -128,26 +124,13 @@ CREATE TABLE IF NOT EXISTS dex_pool_state (
     sqrt_price_x96 NUMERIC(78, 0),
     tick INT,
     liquidity NUMERIC(78, 0),
-    price DECIMAL(20, 8),
+    price DECIMAL(100, 18),
     block_number BIGINT,
     triggered_by_tx VARCHAR(66)
 );
 
 SELECT create_hypertable('dex_pool_state', 'time', if_not_exists => TRUE);
 CREATE INDEX idx_pool_state_pool_time ON dex_pool_state (pool_address, time DESC);
-
--- Data ingestion logs (for monitoring)
-CREATE TABLE IF NOT EXISTS data_ingestion_logs (
-    id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMPTZ DEFAULT NOW(),
-    service_name VARCHAR(100),
-    event_type VARCHAR(100),
-    status VARCHAR(50),
-    message TEXT,
-    records_processed INT
-);
-
-CREATE INDEX idx_ingestion_logs_service_timestamp ON data_ingestion_logs (service_name, timestamp DESC);
 
 -- Materialized view for volume rollups (performance optimization)
 CREATE MATERIALIZED VIEW IF NOT EXISTS dex_volume_1h
@@ -160,7 +143,6 @@ SELECT
     COUNT(*) as swap_count,
     SUM(amount_in) as total_amount_in,
     SUM(amount_out) as total_amount_out,
-    SUM(trade_size_usd) as total_volume_usd,
     AVG(price) as avg_price
 FROM dex_swaps
 GROUP BY bucket, chain, dex, pool_address;

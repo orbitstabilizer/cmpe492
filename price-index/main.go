@@ -161,9 +161,13 @@ func newFunction(normalizedSymbols []string, shmData *ShmLayout, savePeriod int)
 	if err != nil {
 		panic(err)
 	}
-	defer dbWriter.Close()
 
 	go func() {
+		defer dbWriter.Close()
+
+		// Track last inserted values to avoid redundant inserts
+		lastInserted := make(map[int]PriceIndex)
+
 		tick10ms := time.NewTicker(time.Millisecond * time.Duration(savePeriod))
 		defer tick10ms.Stop()
 		for {
@@ -174,7 +178,13 @@ func newFunction(normalizedSymbols []string, shmData *ShmLayout, savePeriod int)
 					numEx := shmData.PriceIndices[symIx].Cnt
 					if !math.IsNaN(price) {
 						symbol := normalizedSymbols[symIx]
-						_ = dbWriter.InsertPriceIndex(symbol, price, numEx)
+
+						// Only insert if price or numExchanges changed
+						lastVal, exists := lastInserted[symIx]
+						if !exists || lastVal.Val != price || lastVal.Cnt != numEx {
+							_ = dbWriter.InsertPriceIndex(symbol, price, numEx)
+							lastInserted[symIx] = PriceIndex{Val: price, Cnt: numEx}
+						}
 					}
 				}
 			}
