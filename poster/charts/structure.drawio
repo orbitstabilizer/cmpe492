@@ -1,0 +1,46 @@
+<mxfile host="65bd71144e">
+    <diagram id="cex-dex-pipeline" name="Page-1">
+        <mxGraphModel dx="583" dy="462" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="3" value="DEX Swap Listener&lt;br&gt;Uniswap V2/V3 swaps" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;align=center;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="40" width="240" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="CEX Price Index&lt;br&gt;Connected to 8 Exchanges" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;align=center;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="40" width="240" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="PostgreSQL + TimescaleDB&#10;(time-series storage)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;align=center;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="180" width="280" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="T50vktJTg0uDtMV6qhRL-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#000000;" parent="1" source="6" target="T50vktJTg0uDtMV6qhRL-10" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Analysis Engine&lt;div&gt;(deviation, lead-lag, slippage)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;align=center;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="320" width="280" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.786;entryY=-0.012;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#000000;" parent="1" source="3" target="5" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="210" as="sourcePoint"/>
+                        <mxPoint x="450" y="160" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.207;entryY=-0.037;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#000000;" parent="1" source="4" target="5" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="210" as="sourcePoint"/>
+                        <mxPoint x="450" y="160" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="10" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#000000;" parent="1" source="5" target="6" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="210" as="sourcePoint"/>
+                        <mxPoint x="450" y="160" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="T50vktJTg0uDtMV6qhRL-10" value="Web Interface" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;align=center;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="460" width="280" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -19,6 +19,7 @@
 \usepackage[numbers]{natbib}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
+\usepackage{ragged2e}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
@@ -86,14 +87,44 @@
 
   \begin{block}{Motivation \& Problem}
 
-    Centralized exchanges (CEXs) provide deep liquidity and low-latency orderbooks, while
+    Centralized exchanges (CEXs) provide deep liquidity and low-latency order books, while
     decentralized exchanges (DEXs) execute on-chain via AMMs with self-custody and transparency.
     These structural differences create measurable gaps in \textbf{price discovery}, \textbf{execution quality},
     and \textbf{transaction costs}.
 
     \vspace{0.6em}
     \textbf{Goal:} Build an end-to-end system that monitors CEX and DEX venues in real time and quantifies:
-    deviation dynamics, lead--lag behavior, and slippage characteristics.
+    deviation dynamics, lead-lag behavior, and slippage characteristics.
+
+  \end{block}
+
+  \begin{block}{AMM vs Order Book}
+
+    \justifying
+    Uniswap v2 follows a constant-product curve over the full price range, while Uniswap v3 introduces \textbf{ticks} and \textbf{concentrated liquidity}.
+
+    \vspace{0.25em}
+    \centering
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[height=10.8cm,keepaspectratio]{charts/uniswap.png}
+      \vspace{0.25em}
+      \parbox[c][1.1cm][c]{\linewidth}{%
+        \centering\scriptsize
+        \textbf{AMM curve}\\
+        Uniswap v2/v3
+      }
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[height=10.8cm,keepaspectratio]{charts/orderbook.png}
+      \vspace{0.25em}
+      \parbox[c][1.1cm][c]{\linewidth}{%
+        \centering\scriptsize
+        \textbf{CEX order book}\\
+        Binance BTC/USDT
+      }
+    \end{minipage}
 
   \end{block}
 
@@ -115,16 +146,12 @@
 
   \end{block}
 
-  \begin{alertblock}{Contributions}
+  \begin{block}{References}
 
-    \begin{itemize}
-      \item \textbf{Multi-exchange CEX price index} (volume-weighted reference price)
-      \item \textbf{Real-time DEX swap capture} (Uniswap V2/V3 on Ethereum/BSC)
-      \item \textbf{Deviation \& lead--lag analysis} between CEX index and DEX execution
-      \item \textbf{Slippage characterization} (theoretical AMM impact + empirical distributions)
-    \end{itemize}
+    \nocite{lehar2021dex,kaiko2024dex,capponi2024slippage}
+    \footnotesize{\bibliographystyle{plainnat}\bibliography{poster}}
 
-  \end{alertblock}
+  \end{block}
 
 \end{column}
 
@@ -139,62 +166,50 @@
     \vspace{0.6em}
     \begin{figure}
       \centering
-      \begin{tikzpicture}[node distance=1.2cm]
-        \tikzstyle{box}=[draw, rounded corners, align=center, minimum height=1.0cm, minimum width=5.2cm]
-        % Parallel streams
-        \node[box] (cex) {CEX WebSocket Collectors\\(8 exchanges)};
-        \node[box, below=of cex] (index) {CEX Price Index\\(VW mid-price)};
-
-        \node[box, right=2.2cm of cex] (dex) {DEX Listener\\Uniswap V2/V3 swaps};
-
-        % Shared storage
-        \node[box, below=1.3cm of index, xshift=1.1cm] (db) {PostgreSQL + TimescaleDB\\(time-series storage)};
-
-        % Join + analytics
-        \node[box, below=of db] (analysis) {Join \& Analysis\\(deviation, lead--lag, slippage)};
-
-        % Edges
-        \draw[->] (cex) -- (index);
-        \draw[->] (index) -- (db);
-        \draw[->] (dex) -- (db);
-        \draw[->] (db) -- (analysis);
-      \end{tikzpicture}
+      \includegraphics[width=0.92\linewidth,height=15.0cm,keepaspectratio]{charts/structure.png}
       \caption{High-level architecture (schematic).}
     \end{figure}
 
   \end{block}
 
-  \begin{block}{Methodology (Core Metrics)}
+  \begin{block}{Price Index (CEX Reference Price)}
 
-    \textbf{CEX reference price (index):}
+    We compute a robust CEX reference price by aggregating best bid/ask quotes from 8 exchanges.
+    Each exchange contributes with a weight \(w_i(t)\) that is \textbf{adapted via EMA} based on
+    observed top-of-book liquidity share (using bid/ask quantities).
+
+    \vspace{0.2em}
     \[
-      \text{price\_index}(t)=\frac{\sum_i \text{mid}_i(t)\cdot \text{vol}_i}{\sum_i \text{vol}_i},
-      \quad \text{mid}_i(t)=\frac{\text{bid}_i(t)+\text{ask}_i(t)}{2}
+      \textbf{price\_index}(t)=\frac{\sum_i \text{mid}_i(t)\cdot w_i(t)}{\sum_i w_i(t)},
+      \qquad \text{mid}_i(t)=\frac{\text{bid}_i(t)+\text{ask}_i(t)}{2}
     \]
 
-    \textbf{Deviation per DEX trade:}
-    \[
-      \text{deviation}=\frac{\text{DEX\_price}-\text{CEX\_index}}{\text{CEX\_index}}\times 100\%
-    \]
-
-    \textbf{Lead--lag:} cross-correlation of log returns over lags $\tau \in [-60s, +60s]$.
-
-    \textbf{Slippage (V2 theoretical):}
-    \[
-      \Delta y = y-\frac{xy}{x+\Delta x}, \quad
-      \text{slippage}=\left|1-\frac{\Delta y/\Delta x}{y/x}\right|
-    \]
+    In addition to the composite mid-price, we record \textbf{side VWAPs} and aggregated bid/ask quantities
+    (\texttt{bid\_vwap}, \texttt{ask\_vwap}, \texttt{bid\_qty\_total}, \texttt{ask\_qty\_total}) for diagnostics.
 
   \end{block}
 
-  \begin{block}{Implementation}
-    \begin{itemize}
-      \item \textbf{Collectors:} Go (\texttt{price-index/}, \texttt{dex-prices/})
-      \item \textbf{Storage:} PostgreSQL 16 + TimescaleDB (\texttt{database/})
-      \item \textbf{Analysis:} Python (\texttt{analysis/})
-      \item \textbf{Dashboard:} Streamlit (\texttt{price-index/dashboard.py})
-      \item \textbf{Analysis runner:} \texttt{analysis/run\_analysis.py} (deviation, lead--lag, slippage, volume)
-    \end{itemize}
+  \begin{block}{Analysis Metrics (Deviation, Lead-lag, Slippage)}
+
+    \heading{1) Price Deviation (per DEX swap)}
+    \[
+      \textbf{deviation}=\frac{\text{DEX\_price}-\text{CEX\_index}}{\text{CEX\_index}}\times 100\%
+    \]
+
+    \heading{2) Lead-lag (price discovery)}
+    Using log returns \(r(t)=\log p(t)-\log p(t-1)\), we compute cross-correlation over lags \(\tau\):
+    \[
+      \textbf{CCF}(\tau)=\text{Corr}\big(r_{\text{CEX}}(t),\; r_{\text{DEX}}(t+\tau)\big)
+    \]
+
+    \heading{3) Slippage (Uniswap V2 theoretical)}
+    For reserves \((x,y)\) and input \(\Delta x\):
+    \[
+      \Delta y = y-\frac{xy}{x+\Delta x},
+      \qquad
+      \textbf{slippage}=\left|1-\frac{\Delta y/\Delta x}{y/x}\right|
+    \]
+
   \end{block}
 
 \end{column}
@@ -203,7 +218,7 @@
 
 \begin{column}{\colwidth}
 
-  \begin{block}{Results (Placeholders)}
+  \begin{block}{Results}
 
     \begin{figure}
       \centering
@@ -213,25 +228,17 @@
 
     \begin{figure}
       \centering
-      \fbox{\parbox{0.92\linewidth}{\centering Placeholder: Lead--lag CCF plot\\(peak lag and correlation per pair)}}
-      \caption{Lead--lag cross-correlation (placeholder).}
+      \includegraphics[width=0.92\linewidth,height=12.0cm,keepaspectratio]{charts/pi_swaps.png}
+      \caption{Price index vs DEX swaps for BNB/USDT.}
     \end{figure}
 
     \begin{figure}
       \centering
-      \fbox{\parbox{0.92\linewidth}{\centering Placeholder: Slippage vs trade size\\(P50/P90/P99)}}
-      \caption{Slippage curves (placeholder).}
+      \includegraphics[width=0.92\linewidth,height=12.0cm,keepaspectratio]{charts/order_dis.png}
+      \caption{BSC v2 WBNB/USDT trade sizes (log-notional): split by side (after dust filtering) reveals unimodal but fat-tailed distributions.}
     \end{figure}
 
   \end{block}
-
-  \begin{alertblock}{Key Findings (Fill with final numbers)}
-    \begin{itemize}
-      \item \textbf{Deviation distribution:} median = \underline{\hspace{1.3cm}} bps, P95 = \underline{\hspace{1.3cm}} bps
-      \item \textbf{Lead--lag:} CEX leads DEX by \underline{\hspace{1.3cm}} seconds (typical), varies by volatility
-      \item \textbf{Slippage:} grows nonlinearly with size; tails dominated by large trades / adverse ordering
-    \end{itemize}
-  \end{alertblock}
 
   \begin{block}{Takeaways}
     \begin{itemize}
@@ -241,12 +248,6 @@
     \end{itemize}
   \end{block}
 
-  \begin{block}{References}
-
-    \nocite{*}
-    \footnotesize{\bibliographystyle{plainnat}\bibliography{poster}}
-
-  \end{block}
 
 \end{column}
 
