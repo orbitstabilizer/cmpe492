@@ -191,33 +191,34 @@ func (h *DatabaseInsertSwapHandler) HandleSwap(swap SwapData) {
 	}
 
 	// Insert Pool State (Snapshot)
-	err = h.dbWriter.InsertPoolState(
-		swap.PoolAddress,
-		swap.ChainName,
-		swap.Protocol,
-		price,
-		int64(swap.BlockNumber),
-		swap.TxHash,
-		swap.Reserve0,
-		swap.Reserve1,
-		swap.SqrtPriceX96,
-		swap.Liquidity,
-		swap.Tick,
-	)
-	if err != nil {
-		log.Printf("⚠ Failed to insert pool state: %v", err)
+	// Skip for V2
+	if swap.Protocol != "V2" {
+		err = h.dbWriter.InsertPoolState(
+			swap.PoolAddress,
+			swap.ChainName,
+			swap.Protocol,
+			int64(swap.BlockNumber),
+			swap.TxHash,
+			swap.Reserve0,
+			swap.Reserve1,
+			swap.SqrtPriceX96,
+			swap.Liquidity,
+			swap.Tick,
+		)
+		if err != nil {
+			log.Printf("⚠ Failed to insert pool state: %v", err)
+		}
 	}
 }
 
 // HandlePoolState processes and stores pool reserve updates (e.g. Uniswap V2 Sync)
 func (h *DatabaseInsertSwapHandler) HandlePoolState(poolAddress, chain, dex string, blockNumber uint64, txHash string, reserve0, reserve1 *big.Int) {
 	// Insert simple pool state update (reserves only)
-	// We pass 0 for price and nil for V3 fields
+	// We pass nil for V3 fields
 	err := h.dbWriter.InsertPoolState(
 		poolAddress,
 		chain,
 		dex,
-		0, // Price unknown from Sync alone
 		int64(blockNumber),
 		txHash,
 		reserve0,

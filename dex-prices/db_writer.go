@@ -113,17 +113,16 @@ func (w *DexDatabaseWriter) UpsertPool(poolAddress, chain, dex, token0, token1 s
 
 func (w *DexDatabaseWriter) InsertPoolState(
 	poolAddress, chain, dex string,
-	price float64,
 	blockNumber int64,
 	txHash string,
 	reserve0, reserve1, sqrtPriceX96, liquidity, tick *big.Int,
 ) error {
 	query := `
         INSERT INTO dex_pool_state (
-            time, pool_address, chain, dex, price, block_number, triggered_by_tx,
+            time, pool_address, chain, dex, block_number, triggered_by_tx,
             reserve0, reserve1, sqrt_price_x96, liquidity, tick
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `
 
 	// Helper to convert *big.Int to something driver handles (string for numeric)
@@ -147,7 +146,6 @@ func (w *DexDatabaseWriter) InsertPoolState(
 		poolAddress,
 		chain,
 		dex,
-		price,
 		blockNumber,
 		txHash,
 		toNum(reserve0),

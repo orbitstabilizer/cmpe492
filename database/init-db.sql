@@ -123,7 +123,6 @@ CREATE TABLE IF NOT EXISTS dex_pool_state (
     sqrt_price_x96 NUMERIC(78, 0),
     tick INT,
     liquidity NUMERIC(78, 0),
-    price DECIMAL(100, 18),
     block_number BIGINT,
     triggered_by_tx VARCHAR(66)
 );
@@ -164,6 +163,7 @@ DROP VIEW IF EXISTS dex_trades;
 
 CREATE VIEW dex_trades AS
 SELECT
+    ds.time,
     CASE
         WHEN t1.symbol = 'USDT' THEN 'buy'
         ELSE 'sell'
