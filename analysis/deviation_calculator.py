@@ -87,14 +87,18 @@ class PriceDeviationCalculator:
         try:
             cursor = self.db.conn.cursor()
             
-            # Get DEX swaps
+            # Get DEX swaps with trade size calculation
             cursor.execute("""
                 SELECT 
                     ds.time,
                     ds.price as dex_price,
                     ds.amount_in,
                     ds.amount_out,
-                    ds.trade_size_usd,
+                    CASE 
+                         WHEN (ds.token_in = p.token0_address AND t0.symbol = 'USDT') THEN ds.amount_in
+                         WHEN (ds.token_in = p.token1_address AND t1.symbol = 'USDT') THEN ds.amount_in
+                         ELSE ds.amount_out
+                    END as trade_size_usd,
                     ds.tx_hash,
                     t0.symbol as token0_symbol,
                     t1.symbol as token1_symbol

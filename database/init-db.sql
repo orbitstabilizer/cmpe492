@@ -17,7 +17,11 @@ CREATE TABLE IF NOT EXISTS price_index (
     time TIMESTAMPTZ NOT NULL,
     symbol VARCHAR(255) NOT NULL,
     price_index DECIMAL(20, 8) NOT NULL,
-    num_exchanges INT NOT NULL
+    num_exchanges INT NOT NULL,
+    bid_vwap DECIMAL(20, 8),
+    ask_vwap DECIMAL(20, 8),
+    bid_qty_total DECIMAL(20, 8),
+    ask_qty_total DECIMAL(20, 8)
 );
 
 SELECT create_hypertable('price_index', 'time', if_not_exists => TRUE);
@@ -34,9 +38,6 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
     amount_in DECIMAL(100, 18) NOT NULL,
     amount_out DECIMAL(100, 18) NOT NULL,
     price DECIMAL(100, 18) NOT NULL,
-    token_in_symbol VARCHAR(50),
-    token_out_symbol VARCHAR(50),
-    action VARCHAR(10),
     tx_hash VARCHAR(66),
     block_number BIGINT
 );

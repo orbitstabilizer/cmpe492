@@ -156,7 +156,7 @@ func main() {
 
 	saveDb := flag.Bool("save-db", true, "Whether to save price indices to the database")
 	exchangeInfoPath := flag.String("exchange-info", "exchange_info.json", "Path to exchange info JSON file")
-	savePeriod := flag.Int("save-period", 10, "Period (ms) to save price indices to the database")
+	savePeriod := flag.Int("save-period", 100, "Period (ms) to save price indices to the database")
 	flag.Parse()
 
 	var shmData *ShmLayout
@@ -259,26 +259,24 @@ func saveToDb(normalizedSymbols []string, shmData *ShmLayout, savePeriod int) {
 	go func() {
 		defer dbWriter.Close()
 
-		// Track last inserted values to avoid redundant inserts
-		lastInserted := make(map[int]PriceIndex)
-
-		tick10ms := time.NewTicker(time.Millisecond * time.Duration(savePeriod))
-		defer tick10ms.Stop()
+		tickMs := time.NewTicker(time.Millisecond * time.Duration(savePeriod))
+		defer tickMs.Stop()
 		for {
 			select {
-			case <-tick10ms.C:
+			case <-tickMs.C:
 				for symIx := 0; symIx < len(normalizedSymbols); symIx++ {
-					price := shmData.PriceIndices[symIx].Val
-					numEx := shmData.PriceIndices[symIx].Cnt
-					if !math.IsNaN(price) {
+					priceIdx := shmData.PriceIndices[symIx]
+					if !math.IsNaN(priceIdx.Val) {
 						symbol := normalizedSymbols[symIx]
-
-						// Only insert if price or numExchanges changed
-						lastVal, exists := lastInserted[symIx]
-						if !exists || lastVal.Val != price || lastVal.Cnt != numEx {
-							_ = dbWriter.InsertPriceIndex(symbol, price, numEx)
-							lastInserted[symIx] = PriceIndex{Val: price, Cnt: numEx}
-						}
+						_ = dbWriter.InsertPriceIndex(
+							symbol,
+							priceIdx.Val,
+							priceIdx.Cnt,
+							priceIdx.BidVWAP,
+							priceIdx.AskVWAP,
+							priceIdx.BidQtyTotal,
+							priceIdx.AskQtyTotal,
+						)
 					}
 				}
 			}

@@ -154,8 +154,7 @@ class StatisticsReport:
                     AVG(price_index) as mean_price,
                     MIN(price_index) as min_price,
                     MAX(price_index) as max_price,
-                    STDDEV(price_index) as std_dev,
-                    AVG(std_dev) as mean_spread
+                    STDDEV(price_index) as std_dev
                 FROM price_index
                 WHERE symbol = %s
                   AND time >= %s
@@ -176,7 +175,6 @@ class StatisticsReport:
                 'min_price': float(row[3]) if row[3] else 0,
                 'max_price': float(row[4]) if row[4] else 0,
                 'std_dev': float(row[5]) if row[5] else 0,
-                'mean_spread': float(row[6]) if row[6] else 0,
                 'period_hours': hours
             }
         

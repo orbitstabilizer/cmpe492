@@ -61,6 +61,8 @@ class VolumeAnalyzer:
             Dictionary of exchange -> volume
         """
         try:
+            # Check if cex_tickers table exists, if not return empty
+            # Simply try/except the query
             cursor = self.db.conn.cursor()
             
             cursor.execute("""
@@ -82,7 +84,9 @@ class VolumeAnalyzer:
             return result
             
         except Exception as e:
-            logger.error(f"Error getting CEX volume: {e}")
+            # Likely table doesn't exist
+            # logger.warning(f"CEX volume data unavailable: {e}")
+            self.db.conn.rollback()
             return {}
     
     def get_dex_volume(
@@ -123,14 +127,19 @@ class VolumeAnalyzer:
             # Volume by chain
             cursor.execute("""
                 SELECT 
-                    chain,
-                    SUM(trade_size_usd) as volume
-                FROM dex_swaps
-                WHERE (token_in = ANY(%s) OR token_out = ANY(%s))
-                  AND time >= %s
-                  AND time <= %s
-                  AND trade_size_usd IS NOT NULL
-                GROUP BY chain
+                    ds.chain,
+                    SUM(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    ) as volume
+                FROM dex_swaps ds
+                LEFT JOIN tokens tin ON ds.token_in = tin.address
+                WHERE (ds.token_in = ANY(%s) OR ds.token_out = ANY(%s))
+                  AND ds.time >= %s
+                  AND ds.time <= %s
+                GROUP BY ds.chain
             """, (token_addresses, token_addresses, start_time, end_time))
             
             by_chain = {row[0]: float(row[1]) for row in cursor.fetchall()}
@@ -138,14 +147,19 @@ class VolumeAnalyzer:
             # Volume by protocol
             cursor.execute("""
                 SELECT 
-                    dex,
-                    SUM(trade_size_usd) as volume
-                FROM dex_swaps
-                WHERE (token_in = ANY(%s) OR token_out = ANY(%s))
-                  AND time >= %s
-                  AND time <= %s
-                  AND trade_size_usd IS NOT NULL
-                GROUP BY dex
+                    ds.dex,
+                    SUM(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    ) as volume
+                FROM dex_swaps ds
+                LEFT JOIN tokens tin ON ds.token_in = tin.address
+                WHERE (ds.token_in = ANY(%s) OR ds.token_out = ANY(%s))
+                  AND ds.time >= %s
+                  AND ds.time <= %s
+                GROUP BY ds.dex
             """, (token_addresses, token_addresses, start_time, end_time))
             
             by_protocol = {row[0]: float(row[1]) for row in cursor.fetchall()}
@@ -241,15 +255,30 @@ class VolumeAnalyzer:
             
             cursor.execute("""
                 SELECT 
-                    trade_size_bin,
+                    FLOOR(LOG(GREATEST(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    , 1))) as bin_log,
                     COUNT(*) as count,
-                    SUM(trade_size_usd) as total_volume,
-                    AVG(trade_size_usd) as avg_size
-                FROM dex_swaps
-                WHERE pool_address = %s
-                  AND time >= %s
-                  AND trade_size_bin IS NOT NULL
-                GROUP BY trade_size_bin
+                    SUM(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    ) as total_volume,
+                    AVG(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    ) as avg_size
+                FROM dex_swaps ds
+                LEFT JOIN tokens tin ON ds.token_in = tin.address
+                WHERE ds.pool_address = %s
+                  AND ds.time >= %s
+                GROUP BY bin_log
             """, (pool_address, cutoff_time))
             
             rows = cursor.fetchall()
@@ -288,34 +317,44 @@ class VolumeAnalyzer:
             cursor = self.db.conn.cursor()
             
             # CEX concentration
-            cursor.execute("""
-                SELECT 
-                    exchange,
-                    SUM(base_volume) as volume
-                FROM cex_tickers
-                WHERE time >= %s
-                  AND base_volume IS NOT NULL
-                GROUP BY exchange
-            """, (cutoff_time,))
-            
-            cex_volumes = [float(row[1]) for row in cursor.fetchall()]
-            total_cex = sum(cex_volumes)
-            
-            if total_cex > 0:
-                cex_shares = [(v / total_cex) ** 2 for v in cex_volumes]
-                cex_hhi = sum(cex_shares) * 10000  # Scale to 0-10000
-            else:
+            try:
+                cursor.execute("""
+                    SELECT 
+                        exchange,
+                        SUM(base_volume) as volume
+                    FROM cex_tickers
+                    WHERE time >= %s
+                      AND base_volume IS NOT NULL
+                    GROUP BY exchange
+                """, (cutoff_time,))
+                
+                cex_volumes = [float(row[1]) for row in cursor.fetchall()]
+                total_cex = sum(cex_volumes)
+                
+                if total_cex > 0:
+                    cex_shares = [(v / total_cex) ** 2 for v in cex_volumes]
+                    cex_hhi = sum(cex_shares) * 10000  # Scale to 0-10000
+                else:
+                    cex_hhi = 0.0
+            except Exception:
+                # Table likely missing
+                self.db.conn.rollback()
                 cex_hhi = 0.0
             
             # DEX concentration
             cursor.execute("""
                 SELECT 
-                    dex,
-                    SUM(trade_size_usd) as volume
-                FROM dex_swaps
-                WHERE time >= %s
-                  AND trade_size_usd IS NOT NULL
-                GROUP BY dex
+                    ds.dex,
+                    SUM(
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END
+                    ) as volume
+                FROM dex_swaps ds
+                LEFT JOIN tokens tin ON ds.token_in = tin.address
+                WHERE ds.time >= %s
+                GROUP BY ds.dex
             """, (cutoff_time,))
             
             dex_volumes = [float(row[1]) for row in cursor.fetchall()]
