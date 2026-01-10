@@ -6,7 +6,7 @@ showWarningOnDirectExecution = false
 headless           = true
 runOnSave          = false
 address            = "127.0.0.1"
-port               = 8080
+port               = 8501
 # If you’re reverse-proxying (e.g. nginx), disable CORS here
 enableCORS         = false
 enableXsrfProtection = false

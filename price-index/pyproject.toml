@@ -10,4 +10,7 @@ dependencies = [
     "sqlalchemy>=2.0.45",
     "streamlit-autorefresh>=1.0.1",
     "streamlit>=1.51.0",
+    "plotly>=5.15.0",
+    "plotly-express",
+    "numpy>=1.24.3",
 ]

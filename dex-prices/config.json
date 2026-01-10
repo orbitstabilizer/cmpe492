@@ -62,8 +62,8 @@
       "chainId": 1,
       "name": "Ethereum",
       "chainType": "evm",
-      "rpcWs": "wss://ethereum-rpc.publicnode.com",
-      "rpcHttp": "https://ethereum-rpc.publicnode.com",
+      "rpcWs": "wss://eth.drpc.org",
+      "rpcHttp": "https://eth.drpc.org",
       "nativeToken": {
         "address": "0x0000000000000000000000000000000000000000",
         "symbol": "ETH",
