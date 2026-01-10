@@ -11,7 +11,6 @@ DROP TABLE IF EXISTS price_deviations CASCADE;
 DROP TABLE IF EXISTS correlation_analysis CASCADE;
 DROP TABLE IF EXISTS slippage_analysis CASCADE;
 DROP TABLE IF EXISTS dex_pool_state CASCADE;
-CREATE DATABASE IF NOT EXISTS crypto_exchange;
 
 -- Price Index table (aggregated CEX data)
 CREATE TABLE IF NOT EXISTS price_index (
