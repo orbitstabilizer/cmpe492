@@ -9,3 +9,5 @@ price-index/.ticker.data
 *.md
 poster/build
 report/build
+*.egg-info
+uv.lock

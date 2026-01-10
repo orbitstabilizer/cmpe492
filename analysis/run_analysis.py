@@ -177,6 +177,42 @@ def run_volume_analysis(symbol: str, hours: int = 24):
     logger.info("\nVolume analysis complete")
 
 
+def run_slippage_analysis(pool_address: str, hours: int = 24):
+    """Run slippage analysis"""
+    logger.info("=" * 60)
+    logger.info("SLIPPAGE ANALYSIS")
+    logger.info("=" * 60)
+    logger.info(f"Pool: {pool_address}")
+    
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(hours=hours)
+    
+    analyzer = SlippageAnalyzer()
+    result = analyzer.analyze_pool_slippage(pool_address, start_time, end_time)
+    
+    if result:
+        logger.info(f"\n📉 Slippage Results for {result.pool_address}:")
+        logger.info(f"  Total Swaps: {result.total_swaps:,}")
+        logger.info(f"  Avg Slippage: {result.avg_slippage_bps:.2f} bps")
+        logger.info(f"  Median Slippage: {result.median_slippage_bps:.2f} bps")
+        logger.info(f"  P95 Slippage: {result.p95_slippage_bps:.2f} bps")
+        logger.info(f"  Worst Slippage: {result.worst_slippage_bps:.2f} bps")
+        
+        if result.slippage_by_size:
+            logger.info("\n  Slippage by Trade Size:")
+            for size, error in result.slippage_by_size.items():
+                logger.info(f"    {size.title()}: {error:.2f} bps")
+                
+        # Store results
+        if analyzer.store_slippage_analysis(result):
+            logger.info("\n  ✅ Results stored in database")
+    else:
+        logger.warning("❌ No data available for analysis")
+    
+    analyzer.close()
+    logger.info("\nSlippage analysis complete")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Run analysis on collected CEX/DEX data'
@@ -184,7 +220,7 @@ def main():
     
     parser.add_argument(
         'analysis_type',
-        choices=['quality', 'deviation', 'correlation', 'statistics', 'volume', 'all'],
+        choices=['quality', 'deviation', 'correlation', 'statistics', 'volume', 'slippage', 'all'],
         help='Type of analysis to run'
     )
     
@@ -196,7 +232,7 @@ def main():
     
     parser.add_argument(
         '--pool',
-        help='DEX pool address for deviation analysis'
+        help='DEX pool address for deviation/slippage analysis'
     )
     
     parser.add_argument(
@@ -219,6 +255,14 @@ def main():
                 return 1
             elif args.pool:
                 run_deviation_analysis(args.pool, args.hours)
+                print()
+        
+        if args.analysis_type == 'slippage' or args.analysis_type == 'all':
+            if not args.pool and args.analysis_type == 'slippage':
+                logger.error("❌ --pool required for slippage analysis")
+                return 1
+            elif args.pool:
+                run_slippage_analysis(args.pool, args.hours)
                 print()
         
         if args.analysis_type == 'correlation' or args.analysis_type == 'all':

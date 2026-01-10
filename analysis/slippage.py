@@ -134,12 +134,15 @@ class SlippageAnalyzer:
                         ds.amount_in,
                         ds.amount_out,
                         ds.price as execution_price,
-                        ds.trade_size_usd,
-                        ds.trade_size_bin,
+                        CASE 
+                            WHEN tin.symbol = 'USDT' THEN ds.amount_in 
+                            ELSE ds.amount_out 
+                        END as trade_size_usd,
                         ps.reserve0,
                         ps.reserve1,
                         ps.price as pool_price
                     FROM dex_swaps ds
+                    LEFT JOIN tokens tin ON ds.token_in = tin.address
                     LEFT JOIN LATERAL (
                         SELECT reserve0, reserve1, price
                         FROM dex_pool_state
@@ -169,13 +172,20 @@ class SlippageAnalyzer:
             for swap in swaps:
                 time = swap[0]
                 amount_in = float(swap[1])
-                amount_out = float(swap[2])
                 execution_price = float(swap[3])
-                trade_size_usd = float(swap[4]) if swap[4] else None
-                trade_size_bin = swap[5]
-                reserve0 = float(swap[6]) if swap[6] else None
-                reserve1 = float(swap[7]) if swap[7] else None
-                pool_price = float(swap[8]) if swap[8] else None
+                trade_size_usd = float(swap[4]) if swap[4] else 0.0
+                
+                # Determine bin dynamically
+                trade_size_bin = 'small'
+                if trade_size_usd >= 100000:
+                    trade_size_bin = 'whale'
+                elif trade_size_usd >= 10000:
+                    trade_size_bin = 'large'
+                elif trade_size_usd >= 1000:
+                    trade_size_bin = 'medium'
+                    
+                reserve0 = float(swap[5]) if swap[5] else None
+                pool_price = float(swap[7]) if swap[7] else None
                 
                 # Calculate slippage if we have pool state
                 if pool_price and pool_price > 0:
@@ -186,7 +196,7 @@ class SlippageAnalyzer:
                     slippages.append(abs(slippage_bps))
                     
                     # Group by size
-                    if trade_size_bin and trade_size_bin in slippage_by_size:
+                    if trade_size_bin in slippage_by_size:
                         slippage_by_size[trade_size_bin].append(abs(slippage_bps))
             
             if not slippages:

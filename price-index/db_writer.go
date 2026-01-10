@@ -27,48 +27,16 @@ func NewDatabaseWriter(connStr string) (*DatabaseWriter, error) {
 	return &DatabaseWriter{db: db}, nil
 }
 
-func (w *DatabaseWriter) InsertPriceIndex(symbol string, price float64, numExchanges int) error {
+func (w *DatabaseWriter) InsertPriceIndex(symbol string, price float64, numExchanges int, bidVWAP, askVWAP, bidQtyTotal, askQtyTotal float64) error {
 	query := `
-        INSERT INTO price_index (time, symbol, price_index, num_exchanges)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO price_index (time, symbol, price_index, num_exchanges, bid_vwap, ask_vwap, bid_qty_total, ask_qty_total)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `
-	_, err := w.db.Exec(query, time.Now(), symbol, price, numExchanges)
+	_, err := w.db.Exec(query, time.Now(), symbol, price, numExchanges, bidVWAP, askVWAP, bidQtyTotal, askQtyTotal)
 	if err != nil {
 		return fmt.Errorf("failed to insert price index: %w", err)
 	}
 	return nil
-}
-
-func (w *DatabaseWriter) InsertTickers(tickers []TickerData) error {
-	if len(tickers) == 0 {
-		return nil
-	}
-
-	tx, err := w.db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	stmt, err := tx.Prepare(`
-        INSERT INTO cex_tickers (time, exchange, symbol, bid, ask)
-        VALUES ($1, $2, $3, $4, $5)
-    `)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	now := time.Now()
-	for _, ticker := range tickers {
-		_, err := stmt.Exec(now, ticker.Exchange, ticker.Symbol, ticker.Bid, ticker.Ask)
-		if err != nil {
-			log.Printf("⚠ Failed to insert ticker: %v", err)
-			continue
-		}
-	}
-
-	return tx.Commit()
 }
 
 type TickerData struct {
