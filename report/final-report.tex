@@ -156,7 +156,7 @@ Slippage and transaction cost decomposition on Uniswap show that costs are drive
 
 \textbf{Objective}: derive a robust reference price from multiple CEX sources that represents the consensus market price.
 
-\textbf{Approach}: for each monitored pair, we maintain real-time bid and ask updates from multiple exchanges. At time $t$, we compute the mid-price for exchange $i$ as:
+\textbf{Approach}: for each monitored pair, we maintain real-time best bid/ask prices and top-of-book quantities from multiple exchanges via WebSocket connections. At time $t$, we compute the mid-price for exchange $i$ as:
 \begin{equation}
 \text{mid\_price}_i(t) = \frac{\text{bid}_i(t) + \text{ask}_i(t)}{2}
 \end{equation}
@@ -166,7 +166,7 @@ We then compute a volume-weighted index:
 \text{price\_index}(t) = \frac{\sum_{i=1}^{N} \text{mid\_price}_i(t) \times \text{volume}_i}{\sum_{i=1}^{N} \text{volume}_i}
 \end{equation}
 
-where $\text{volume}_i$ denotes the 24-hour trading volume on exchange $i$. To reduce sensitivity to bad data, we apply outlier rejection and require a minimum number of contributing exchanges before computing the index.
+where $\text{volume}_i$ denotes an exchange weight. In the implementation, weights are adapted using an exponential moving average (EMA) of observed displayed liquidity share, and side-specific VWAPs and total quantities are computed from aggregated bid/ask notionals and quantities.
 
 \section{DEX Trade Monitoring}
 
@@ -215,7 +215,7 @@ This chapter specifies the functional and non-functional requirements for the CM
 
 \section{Functional Requirements}
 
-\textbf{FR1: CEX data collection.} The system shall maintain real-time WebSocket connections to multiple CEX APIs and ingest bid/ask prices for the monitored pairs (BTC/USDT, ETH/USDT, BNB/USDT). It shall automatically reconnect on disconnections.
+\textbf{FR1: CEX data collection.} The system shall maintain real-time WebSocket connections to multiple CEX APIs and ingest best bid/ask prices and quantities for the monitored pairs. It shall automatically reconnect on disconnections.
 
 \textbf{FR2: Price index calculation.} The system shall compute a multi-exchange reference price per symbol using a volume-weighted mid-price aggregation. The index shall update whenever fresh ticker data arrives.
 
@@ -227,7 +227,7 @@ This chapter specifies the functional and non-functional requirements for the CM
 
 \textbf{FR6: Slippage characterization.} The system shall compute theoretical AMM price impact (V2 constant product; V3 concentrated liquidity when available) and build empirical slippage distributions from historical swaps.
 
-\textbf{FR7: Storage and querying.} The system shall store time-series data for tickers, index values, and swaps into a database optimized for time-series queries, supporting both real-time visualization and retrospective analysis.
+\textbf{FR7: Storage and querying.} The system shall store time-series data for the price index, DEX swaps, and derived analytics into a database optimized for time-series queries, supporting both real-time visualization and retrospective analysis.
 
 \textbf{FR8: Visualization.} The system shall provide a dashboard that displays real-time price index values and supports visualization of deviations, lead--lag results, and slippage curves as data becomes available.
 
@@ -248,9 +248,9 @@ This chapter specifies the functional and non-functional requirements for the CM
 
 The system stores market data in PostgreSQL with TimescaleDB hypertables for time-series efficiency. The core time-series tables are:
 \begin{itemize}
-    \item \texttt{cex\_tickers}: raw bid/ask (and optionally volume) observations per exchange and symbol.
-    \item \texttt{price\_index}: aggregated reference price per symbol with metadata such as number of exchanges.
+    \item \texttt{price\_index}: aggregated reference price per symbol with metadata such as number of exchanges, side VWAPs, and aggregated bid/ask quantities.
     \item \texttt{dex\_swaps}: decoded on-chain swaps with execution price and trade metadata.
+    \item \texttt{dex\_pool\_state}: pool state snapshots (e.g., Uniswap V3 tick, sqrtPriceX96, liquidity) captured as historical time-series.
     \item \texttt{price\_deviations}: deviation measurements between DEX execution price and CEX reference price.
     \item \texttt{slippage\_analysis}, \texttt{correlation\_analysis}: derived analytics tables used by the analysis engine.
 \end{itemize}
@@ -261,6 +261,7 @@ Metadata tables store token and pool information:
     \item \texttt{pools}: pool address, chain, DEX identifier, token0/token1, fee tier.
 \end{itemize}
 
+\textbf{Derived views and aggregates.} For convenience and performance, the database includes a \texttt{dex\_trades} view that normalizes swaps into a buy/sell trade format and a continuous aggregate (\texttt{dex\_volume\_1h}) for hourly swap volume rollups.
 \subsection{Entity-Relationship Diagram}
 The ER diagram describes relationships between pools, tokens, swaps and derived analytics.
 
@@ -302,11 +303,11 @@ This section describes the dashboard UI that visualizes the real-time price inde
 \section{Implementation}
 \subsection{CEX Collector (Go)}
 
-The CEX data collector is implemented in \texttt{price-index/}. It maintains concurrent WebSocket connections to multiple exchanges and computes a per-symbol reference price. A Streamlit dashboard reads the latest index values for visualization. The collector targets exchanges including Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX and KuCoin.
+The CEX data collector is implemented in \texttt{price-index/}. It maintains concurrent WebSocket connections to multiple exchanges, continuously updates an in-memory shared-memory layout for live visualization, and computes a per-symbol reference price index. The index values are persisted to TimescaleDB at a configurable interval. The collector targets exchanges including Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX and KuCoin.
 
 \subsection{DEX Collector (Go)}
 
-The DEX listener is implemented in \texttt{dex-prices/}. It connects to EVM chains using RPC endpoints, subscribes to new blocks and swap logs, and parses Uniswap V2 and Uniswap V3 Swap events. Supported chains are configured in \texttt{dex-prices/config.json}; multiple networks are available, and the analysis in this report uses Ethereum and BSC. Token and pool metadata are cached to reduce repetitive on-chain calls.
+The DEX listener is implemented in \texttt{dex-prices/}. It connects to EVM chains using RPC endpoints, subscribes to new blocks and swap logs, and parses Uniswap V2 and Uniswap V3 Swap events. Supported chains are configured in \texttt{dex-prices/config.json}; multiple networks are available, and the analysis in this report uses Ethereum and BSC. The listener persists swap events to \texttt{dex\_swaps}, upserts token and pool metadata, and records pool state snapshots to \texttt{dex\_pool\_state} for historical analysis. Token and pool metadata are cached to reduce repetitive on-chain calls.
 
 \subsection{Database (PostgreSQL + TimescaleDB)}
 
@@ -314,7 +315,7 @@ The database schema is located in \texttt{database/}. TimescaleDB hypertables st
 
 \subsection{Analysis Engine (Python)}
 
-The analysis modules in \texttt{analysis/} provide statistical computation over stored data, including correlation and lead--lag analysis, deviation statistics, and slippage analysis. These modules are designed to be run as batch jobs over historical windows to generate plots and summary tables for the Results chapter.
+The analysis modules in \texttt{analysis/} provide statistical computation over stored data, including price deviation analysis (\texttt{analysis/deviation\_calculator.py}), lead--lag correlation (\texttt{analysis/correlation.py}), slippage analysis (\texttt{analysis/slippage.py}), and volume analysis (\texttt{analysis/volume\_analysis.py}). The script \texttt{analysis/run\_analysis.py} orchestrates end-to-end runs and stores outputs in \texttt{price\_deviations}, \texttt{correlation\_analysis}, and \texttt{slippage\_analysis}.
 
 \section{Testing}
 \subsection{Data Validation and Sanity Checks}
