@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from ffi import get_ticker_dfs,get_price_indices_df, Symbols, read_shm
 from streamlit_autorefresh import st_autorefresh
@@ -15,10 +16,8 @@ def main():
     """,unsafe_allow_html=True)
     st_autorefresh(interval=refresh_interval, limit=None)
 
-    st.title("Price Index")
-    tab_detatiled, tab_price_index = st.tabs(["Detailed View", "Price Index"])
+    tab_detatiled, tab_price_index, tab_orderbook = st.tabs(["Detailed View", "Price Index", "Order Book"])
     with tab_detatiled:
-        st.title("Detailed View")
         # choose symbol index
         symbol_name = st.selectbox("Select Symbol Index", options=[sym.name for sym in Symbols], index=0)
         price_index = float(df_price_index.loc[symbol_name].iloc[0])
@@ -29,6 +28,28 @@ def main():
     with tab_price_index:
         st.title("Price Index Summary")
         st.dataframe(df_price_index, height=1000)
+
+    with tab_orderbook:
+        df = df_tickers[symbol_name]
+        # Asks table
+        asks = df[['Ask', 'AskQty']].rename(columns={'Ask': 'Price', 'AskQty': 'Quantity'}).sort_values('Price', ascending=False)
+
+        st.dataframe(
+            asks.style
+            .apply(lambda _: ['color: red'] * asks.shape[1], axis=1)  # len = number of columns
+            .format({'Price': '{:.2f}', 'Quantity': '{:.4f}'}),
+            height=318
+        )
+
+        # Bids table
+        bids = df[['Bid', 'BidQty']].rename(columns={'Bid': 'Price', 'BidQty': 'Quantity'}).sort_values('Price', ascending=False)
+
+        st.dataframe(
+            bids.style
+            .apply(lambda _: ['color: green'] * bids.shape[1], axis=1)  # len = number of columns
+            .format({'Price': '{:.2f}', 'Quantity': '{:.4f}'}),
+            height=318
+        )
 
 if __name__ == "__main__":
     shm_path = os.getenv("SHM_PATH", ".price_ix.data")
