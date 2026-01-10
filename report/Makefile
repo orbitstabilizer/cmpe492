@@ -1,13 +1,18 @@
-.PHONY: main clean FORCE
+.PHONY: main midterm final clean FORCE
 
-main: report.pdf
+main: midterm final
 
-report.pdf: FORCE
+midterm: FORCE
 	mkdir -p build
-	latexmk -pdflatex='lualatex -interaction nonstopmode' -pdf -outdir=build report.tex
-	cp build/report.pdf .
+	latexmk -pdflatex='lualatex -interaction nonstopmode' -pdf -outdir=build mt-report.tex
+	cp build/mt-report.pdf .
+
+final: FORCE
+	mkdir -p build
+	latexmk -pdflatex='lualatex -interaction nonstopmode' -pdf -outdir=build final-report.tex
+	cp build/final-report.pdf .
 
 clean:
 	latexmk -pdf -C -outdir=build
 	rm -rf build
-	rm -f report.pdf
+	rm -f mt-report.pdf final-report.pdf

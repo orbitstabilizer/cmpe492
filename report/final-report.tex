@@ -1,0 +1,405 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc} % To use Unicode (e.g. Turkish) characters
+\renewcommand{\labelenumi}{(\roman{enumi})}
+\usepackage{amsmath, amsthm, amssymb}
+ % Some extra symbols
+\usepackage[bottom]{footmisc}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{longtable}
+\graphicspath{{figures/}} % Graphics will be here
+
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\begin{document}
+
+% Title Page
+\title{CMPE 492 \\ Analysis of Market Dynamics of Crypto Exchanges: \\ A Comparative Study of CEX and DEX Markets}
+\author{
+Yusuf Akin \\
+Halil Utku \c{C}elik \\
+Cenk Yilmaz \\
+\textbf{Advisor}: Can \"Ozturan
+}
+\date{January 2026}
+\maketitle{}
+\pagenumbering{roman}
+\tableofcontents
+
+\chapter{INTRODUCTION}
+\pagenumbering{arabic}
+
+\section{Background and Motivation}
+
+Centralized exchanges (CEXs) and decentralized exchanges (DEXs) represent two fundamentally different market structures for cryptocurrency trading. CEXs such as Binance, Coinbase and OKX rely on high-throughput off-chain matching engines and orderbook-based price discovery, offering low-latency execution and deep liquidity. In contrast, DEXs such as Uniswap execute trades on-chain through automated market makers (AMMs), enabling self-custody and transparency at the cost of higher latency and execution frictions driven by pool depth, blockchain congestion and Maximal Extractable Value (MEV).
+
+These structural differences create measurable gaps in execution quality and information flow between venues. For liquid pairs, CEXs often dominate price discovery due to their substantially larger trading volume, while DEX prices typically track and converge through arbitrage. For less liquid regimes or during volatile periods, deviations can persist longer, slippage grows nonlinearly with trade size, and on-chain transaction ordering can introduce additional costs beyond theoretical AMM price impact.
+
+This project builds an end-to-end monitoring and analysis system to quantify these dynamics using real-time data streams from both CEX and DEX venues.
+
+\section{Problem Statement and Objectives}
+
+The primary objective is to measure and explain cross-venue market dynamics between CEX and DEX markets for major cryptocurrency pairs. Specifically, we aim to:
+\begin{itemize}
+    \item compute a robust CEX reference price using a multi-exchange price index,
+    \item capture DEX swap executions on Uniswap V2 and Uniswap V3 across Ethereum and BSC,
+    \item quantify price deviation between DEX execution prices and the CEX reference price,
+    \item measure lead--lag relationships to study price discovery and information flow,
+    \item characterize slippage as a function of trade size using both theoretical and empirical approaches.
+\end{itemize}
+
+Our analysis focuses on the pairs BTC/USDT, ETH/USDT and BNB/USDT, using CEX feeds from Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX and KuCoin.
+
+\section{Contributions}
+
+This work makes the following contributions:
+\begin{itemize}
+    \item \textbf{Real-time multi-venue data collection:} A pipeline that streams ticker data from multiple CEX WebSocket APIs and swap events from Uniswap V2/V3 pools on Ethereum and BSC.
+    \item \textbf{CEX price index:} A volume-weighted reference price constructed from multiple exchanges to reduce single-venue noise and anomalies.
+    \item \textbf{Deviation and lead--lag analysis:} Metrics and analysis modules to quantify CEX--DEX deviation distributions and temporal relationships between venues.
+    \item \textbf{Slippage characterization:} A framework combining theoretical AMM price impact with empirical slippage distributions derived from observed trades.
+    \item \textbf{Storage and reporting:} A database-backed design supporting both real-time monitoring and retrospective statistical analysis.
+\end{itemize}
+
+\section{Broad Impact}
+
+This project provides a structured empirical framework for comparing orderbook-based and AMM-based markets using consistent metrics. The results are relevant to researchers studying market microstructure, practitioners designing execution strategies, and liquidity providers evaluating the trade-offs between fee revenue and adverse execution costs. By quantifying deviation dynamics and lead--lag effects, the system supports evidence-based reasoning about where price discovery occurs and how quickly on-chain markets converge to off-chain reference prices.
+
+\section{Ethical Considerations}
+
+Measuring CEX--DEX deviations may highlight temporary inefficiencies that can be exploited via arbitrage. We treat this as ethically acceptable within the context of research transparency: such inefficiencies exist in public markets and are discoverable by capable participants. Moreover, arbitrage activity generally improves price alignment across venues, benefiting market participants through tighter effective spreads and better execution quality over time. We avoid providing prescriptive guidance for exploitation and instead focus on documenting aggregate dynamics and structural causes, including the role of MEV and transaction ordering on on-chain execution costs.
+
+\chapter{PROJECT DEFINITION AND PLANNING}
+\section{Project Definition}
+\textbf{Research objectives.} The project conducts a comparative analysis of cryptocurrency market microstructure across centralized and decentralized venues. Our core research dimensions are:
+\begin{itemize}
+    \item \textbf{Price discovery dynamics:} quantify lead--lag relationships between CEX and DEX price movements via correlation analysis.
+    \item \textbf{Volume distribution:} compare trading activity across venues for the monitored pairs.
+    \item \textbf{Liquidity structure:} compare CEX orderbook depth to DEX pool liquidity and concentrated liquidity structure.
+    \item \textbf{Execution costs:} model and measure slippage as a function of trade size for Uniswap pools.
+    \item \textbf{Infrastructure development:} build a real-time monitoring pipeline enabling continuous data collection and retrospective analysis.
+\end{itemize}
+
+\textbf{Technical scope.} The final system monitors CEX tickers from Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX and KuCoin. On the DEX side, we monitor Uniswap V2 and Uniswap V3 swap events. The DEX collector is designed as a multi-chain listener and is configurable to support additional EVM networks (e.g., Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom, Cronos, zkSync, Polygon zkEVM, Celo) via \texttt{dex-prices/config.json}; however, our empirical analysis focuses on Ethereum and BSC. We analyze BTC/USDT, ETH/USDT and BNB/USDT.
+
+\section{Project Planning}
+\subsection{Project Time and Resource Estimation}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|p{5cm}|l|}
+\hline
+\textbf{Phase} & \textbf{Weeks} & \textbf{Deliverables} & \textbf{Status} \\ \hline
+Infrastructure Setup & 1--3 & CEX WebSocket consumers, DEX listeners & Complete \\ \hline
+Data Pipeline & 4--6 & Price index, storage, stream processing & Complete \\ \hline
+Analysis Implementation & 7--9 & Deviation, correlation, slippage modules & Complete \\ \hline
+Visualization & 10--11 & Dashboard (Streamlit) & Complete \\ \hline
+Documentation & 12 & Final report and system docs & Complete \\ \hline
+\end{tabular}
+\end{center}
+\caption{Project timeline and deliverables}
+\end{table}
+
+\textbf{Effort.} Each team member contributed approximately 15--20 hours per week throughout the semester.
+
+\subsection{Success Criteria}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Criterion} & \textbf{Metric} & \textbf{Target} \\ \hline
+Data Coverage & CEX sources monitored & $\geq 5$ exchanges \\ \hline
+DEX Monitoring & Chains supported & $\geq 2$ (Ethereum, BSC) \\ \hline
+Price Index & Update frequency & $\leq 1$ second lag \\ \hline
+Historical Data & Analysis period & $\geq 30$ days continuous \\ \hline
+Price Deviation & Measurement precision & $\leq 0.01\%$ accuracy \\ \hline
+Slippage Model & Prediction accuracy & $R^2 \geq 0.8$ for major pairs \\ \hline
+System Uptime & Monitoring availability & $\geq 95\%$ during test period \\ \hline
+Sample Size & Trades per pair & $\geq 10{,}000$ DEX trades \\ \hline
+\end{tabular}
+\end{center}
+\caption{Project success criteria and targets}
+\end{table}
+
+\subsection{Risk Analysis}
+\begin{table}[h]
+\begin{center}
+\small
+\begin{tabular}{|p{3cm}|l|l|p{5cm}|}
+\hline
+\textbf{Risk} & \textbf{Impact} & \textbf{Likelihood} & \textbf{Mitigation Strategy} \\ \hline
+RPC rate limits & High & Medium & Multiple providers, request batching, caching \\ \hline
+CEX API downtime & Medium & Medium & Redundant sources, reconnect logic, validation \\ \hline
+Data quality issues & Medium & Medium & Outlier detection, cross-venue checks, logging \\ \hline
+Blockchain congestion & Medium & Medium & Backfilling, time-window matching for indices \\ \hline
+Technical complexity & Medium & High & Modular design, incremental milestones \\ \hline
+\end{tabular}
+\end{center}
+\caption{Risk analysis and mitigation strategies}
+\end{table}
+
+\subsection{Team Work (if applicable)}
+\textbf{Team structure.} The three-member team divided responsibilities across three primary areas: CEX infrastructure (WebSocket connections, aggregation and price index), DEX infrastructure (on-chain monitoring, event parsing and pool tracking), and analysis/visualization (statistical modules and dashboard). We collaborated through a shared repository, consistent interfaces between modules, and iterative integration to ensure that collected data was usable for downstream analysis.
+
+\chapter{RELATED WORK}
+We summarize prior work on price discovery between CEX and DEX venues, liquidity and slippage analysis on AMM-based exchanges, and MEV-driven transaction costs.
+
+Studies on price discovery emphasize that CEX venues typically lead major asset price formation due to their larger trading volumes, but DEXs can contribute to price formation under specific conditions~\cite{alexander2025uniswap,wu2025cex}. Work on DEX market structure highlights that DEXs trade a wider set of assets but with substantially lower volume for established pairs~\cite{lehar2021dex}. Market reports quantify persistent volume and liquidity gaps between venues and provide practical reference metrics for depth comparisons~\cite{kaiko2024dex}.
+
+Slippage and transaction cost decomposition on Uniswap show that costs are driven by both benign price impact and adversarial ordering effects, with MEV significantly affecting execution outcomes especially around large swaps~\cite{capponi2024slippage}. Concentrated liquidity in Uniswap V3 enables capital efficiency but complicates liquidity measurement, motivating frameworks that treat V3 liquidity distribution similarly to an orderbook~\cite{adams2021uniswap,empirica2024liquidity}. Our work builds on these insights by implementing a real-time pipeline that measures deviation, lead--lag and slippage using consistent definitions across CEX and DEX data sources.
+
+\chapter{METHODOLOGY}
+\section{CEX Price Index Calculation}
+
+\textbf{Objective}: derive a robust reference price from multiple CEX sources that represents the consensus market price.
+
+\textbf{Approach}: for each monitored pair, we maintain real-time bid and ask updates from multiple exchanges. At time $t$, we compute the mid-price for exchange $i$ as:
+\begin{equation}
+\text{mid\_price}_i(t) = \frac{\text{bid}_i(t) + \text{ask}_i(t)}{2}
+\end{equation}
+
+We then compute a volume-weighted index:
+\begin{equation}
+\text{price\_index}(t) = \frac{\sum_{i=1}^{N} \text{mid\_price}_i(t) \times \text{volume}_i}{\sum_{i=1}^{N} \text{volume}_i}
+\end{equation}
+
+where $\text{volume}_i$ denotes the 24-hour trading volume on exchange $i$. To reduce sensitivity to bad data, we apply outlier rejection and require a minimum number of contributing exchanges before computing the index.
+
+\section{DEX Trade Monitoring}
+
+\textbf{Objective}: capture DEX trades at transaction level with accurate execution prices.
+
+\textbf{Data source}: we monitor Swap events from Uniswap V2 and Uniswap V3 pools using a configurable multi-chain listener. While the listener supports multiple blockchains through configuration (\texttt{dex-prices/config.json}), the analysis in this report uses Ethereum and BSC, extracting token amounts and timestamps from on-chain logs.
+
+\textbf{Execution price}: for a swap from token0 to token1, execution price is computed from the realized amounts:
+\begin{equation}
+\text{execution\_price} = \frac{\text{amount1Out}}{\text{amount0In}}
+\end{equation}
+
+\section{Price Deviation Measurement}
+
+\textbf{Objective}: quantify deviation between DEX execution prices and the CEX price index.
+
+\textbf{Per-trade deviation}:
+\begin{equation}
+\text{deviation}_i = \frac{\text{DEX\_price}_i - \text{CEX\_price\_index}_i}{\text{CEX\_price\_index}_i} \times 100\%
+\end{equation}
+
+We match each DEX trade to the closest CEX price index value within a small time window around the trade timestamp.
+
+\section{Lead--Lag Correlation Analysis}
+
+\textbf{Objective}: determine the temporal relationship between CEX and DEX price movements.
+
+We compute log return series and evaluate the cross-correlation function across positive and negative lags to identify whether CEX prices lead DEX prices or vice versa~\cite{granger1969causality}.
+
+\section{Slippage Modeling}
+
+\textbf{Objective}: characterize and predict slippage for varying trade sizes.
+
+For Uniswap V2 constant product AMM with reserves $(x, y)$ and input amount $\Delta x$:
+\begin{equation}
+\Delta y = y - \frac{xy}{x + \Delta x}
+\end{equation}
+\begin{equation}
+\text{slippage}_{\text{theoretical}} = \left|1 - \frac{\Delta y / \Delta x}{y / x}\right|
+\end{equation}
+
+We complement theoretical slippage with empirical distributions derived from observed swaps to capture real execution outcomes, including the effects of on-chain congestion and transaction ordering.
+
+\chapter{REQUIREMENTS SPECIFICATION}
+This chapter specifies the functional and non-functional requirements for the CMPE492 CEX--DEX market analysis system. Requirements are stated at the system level and mapped to implemented components in Chapter~\ref{chap:implementation}.
+
+\section{Functional Requirements}
+
+\textbf{FR1: CEX data collection.} The system shall maintain real-time WebSocket connections to multiple CEX APIs and ingest bid/ask prices for the monitored pairs (BTC/USDT, ETH/USDT, BNB/USDT). It shall automatically reconnect on disconnections.
+
+\textbf{FR2: Price index calculation.} The system shall compute a multi-exchange reference price per symbol using a volume-weighted mid-price aggregation. The index shall update whenever fresh ticker data arrives.
+
+\textbf{FR3: DEX swap monitoring.} The system shall monitor Uniswap V2 and Uniswap V3 Swap events on Ethereum and BSC, and extract execution amounts, pool address, transaction hash, block number, and timestamps.
+
+\textbf{FR4: Deviation measurement.} For each DEX swap, the system shall match the trade timestamp to the closest CEX price index within a small time window and compute CEX--DEX deviation.
+
+\textbf{FR5: Lead--lag analysis.} The system shall provide a lead--lag analysis module that can compute cross-correlation across configurable lags and run causality tests when appropriate.
+
+\textbf{FR6: Slippage characterization.} The system shall compute theoretical AMM price impact (V2 constant product; V3 concentrated liquidity when available) and build empirical slippage distributions from historical swaps.
+
+\textbf{FR7: Storage and querying.} The system shall store time-series data for tickers, index values, and swaps into a database optimized for time-series queries, supporting both real-time visualization and retrospective analysis.
+
+\textbf{FR8: Visualization.} The system shall provide a dashboard that displays real-time price index values and supports visualization of deviations, lead--lag results, and slippage curves as data becomes available.
+
+\section{Non-Functional Requirements}
+
+\textbf{NFR1: Performance.} The system shall process continuous real-time data streams without falling behind. Database writes should be batched where appropriate and queries should use time-bucketed access patterns.
+
+\textbf{NFR2: Reliability.} Collectors shall tolerate external failures (temporary exchange downtime, RPC instability) through retries, reconnection, and redundancy.
+
+\textbf{NFR3: Extensibility.} Adding a new symbol or exchange should require configuration changes rather than a full redesign. Multi-chain monitoring should be configurable per chain.
+
+\textbf{NFR4: Reproducibility.} The system shall support reproducible analysis by persisting raw observations and providing deterministic analysis scripts for generating results.
+
+\chapter{DESIGN}
+
+\section{Information Structure}
+\subsection{Database Schema Overview}
+
+The system stores market data in PostgreSQL with TimescaleDB hypertables for time-series efficiency. The core time-series tables are:
+\begin{itemize}
+    \item \texttt{cex\_tickers}: raw bid/ask (and optionally volume) observations per exchange and symbol.
+    \item \texttt{price\_index}: aggregated reference price per symbol with metadata such as number of exchanges.
+    \item \texttt{dex\_swaps}: decoded on-chain swaps with execution price and trade metadata.
+    \item \texttt{price\_deviations}: deviation measurements between DEX execution price and CEX reference price.
+    \item \texttt{slippage\_analysis}, \texttt{correlation\_analysis}: derived analytics tables used by the analysis engine.
+\end{itemize}
+
+Metadata tables store token and pool information:
+\begin{itemize}
+    \item \texttt{tokens}: token addresses, symbols, decimals, chain.
+    \item \texttt{pools}: pool address, chain, DEX identifier, token0/token1, fee tier.
+\end{itemize}
+
+\subsection{Entity-Relationship Diagram}
+The ER diagram describes relationships between pools, tokens, swaps and derived analytics.
+
+\section{Information Flow}
+\subsection{Real-Time Data Flow}
+
+The system runs two primary real-time ingestion streams in parallel:
+\begin{itemize}
+    \item \textbf{CEX stream:} WebSocket tickers from multiple exchanges are aggregated into a per-symbol price index and stored for downstream matching.
+    \item \textbf{DEX stream:} Swap events are captured from EVM nodes and persisted with execution price information and metadata.
+\end{itemize}
+
+Deviation calculation and analysis jobs operate on the persisted time-series to generate results for visualization and reporting.
+
+\subsection{Diagrams}
+Activity and sequence diagrams document the real-time processing steps: ticker ingestion $\rightarrow$ index calculation $\rightarrow$ swap ingestion $\rightarrow$ deviation calculation $\rightarrow$ analysis.
+
+\section{System Design}
+\subsection{Component Architecture}
+
+The system is structured as modular components:
+\begin{itemize}
+    \item \textbf{CEX Collector} (\texttt{price-index/}, Go): maintains multiple WebSocket connections and computes the multi-exchange price index.
+    \item \textbf{DEX Collector} (\texttt{dex-prices/}, Go): subscribes to new blocks and parses Uniswap V2/V3 swap logs on Ethereum and BSC.
+    \item \textbf{Database Layer} (\texttt{database/}): PostgreSQL + TimescaleDB schema and helper clients.
+    \item \textbf{Analysis Engine} (\texttt{analysis/}, Python): correlation/lead--lag, deviation statistics, slippage analysis, and report data generation.
+    \item \textbf{Dashboard} (\texttt{price-index/dashboard.py}, Streamlit): visualization of real-time and historical metrics.
+\end{itemize}
+
+\subsection{Interfaces and Data Contracts}
+
+All components communicate through the database schema (and optionally a shared-memory buffer for live dashboard display). This enables independent operation and simplifies recovery: collectors can restart without breaking analysis jobs as long as data is persisted.
+
+\section{User Interface Design (if applicable)}
+This section describes the dashboard UI that visualizes the real-time price index and analysis outputs.
+
+\chapter{IMPLEMENTATION AND TESTING}
+\label{chap:implementation}
+\section{Implementation}
+\subsection{CEX Collector (Go)}
+
+The CEX data collector is implemented in \texttt{price-index/}. It maintains concurrent WebSocket connections to multiple exchanges and computes a per-symbol reference price. A Streamlit dashboard reads the latest index values for visualization. The collector targets exchanges including Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX and KuCoin.
+
+\subsection{DEX Collector (Go)}
+
+The DEX listener is implemented in \texttt{dex-prices/}. It connects to EVM chains using RPC endpoints, subscribes to new blocks and swap logs, and parses Uniswap V2 and Uniswap V3 Swap events. Supported chains are configured in \texttt{dex-prices/config.json}; multiple networks are available, and the analysis in this report uses Ethereum and BSC. Token and pool metadata are cached to reduce repetitive on-chain calls.
+
+\subsection{Database (PostgreSQL + TimescaleDB)}
+
+The database schema is located in \texttt{database/}. TimescaleDB hypertables store tick-level observations efficiently and enable time-window queries. Adminer provides a lightweight web interface for inspecting tables during development.
+
+\subsection{Analysis Engine (Python)}
+
+The analysis modules in \texttt{analysis/} provide statistical computation over stored data, including correlation and lead--lag analysis, deviation statistics, and slippage analysis. These modules are designed to be run as batch jobs over historical windows to generate plots and summary tables for the Results chapter.
+
+\section{Testing}
+\subsection{Data Validation and Sanity Checks}
+
+Testing focuses on verifying correctness of ingestion and analytics:
+\begin{itemize}
+    \item \textbf{Connectivity tests:} WebSocket and RPC connectivity, reconnection logic.
+    \item \textbf{Schema tests:} database schema validation using \texttt{database/test\_schema.py}.
+    \item \textbf{Data sanity:} range checks for prices and volumes, timestamp recency, and cross-venue consistency checks.
+\end{itemize}
+
+\section{Deployment}
+The system runs locally in development and can be deployed to a server for continuous collection. The database runs via Docker Compose, while collectors and analysis jobs run as long-lived processes or scheduled jobs. The appendix includes operational notes and deployment details.
+
+\chapter{RESULTS}
+\section{Overview}
+This chapter presents results on CEX--DEX price deviations, lead--lag relationships, and slippage behavior for BTC/USDT, ETH/USDT and BNB/USDT across Ethereum and BSC.
+
+\section{Dataset Summary}
+This section summarizes the collection period, number of CEX ticker updates, number of DEX swaps captured, exchange and chain coverage, and any missing-data intervals. Although the DEX listener supports additional networks via configuration, the reported dataset covers Ethereum and BSC.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Item} & \textbf{Value (TBD)} \\ \hline
+Collection period & TBD \\ \hline
+Symbols & BTC/USDT, ETH/USDT, BNB/USDT \\ \hline
+CEX exchanges & Coinbase, MEXC, Binance, Gate.io, OKX, Bybit, HTX, KuCoin \\ \hline
+DEX protocols & Uniswap V2, Uniswap V3 \\ \hline
+Chains & Ethereum, BSC \\ \hline
+\#CEX ticker records & TBD \\ \hline
+\#DEX swaps & TBD \\ \hline
+\hline
+\end{tabular}
+\end{center}
+\caption{Dataset summary (placeholder)}
+\end{table}
+
+\section{CEX--DEX Price Deviation}
+We report deviation distributions (mean, standard deviation, MAD, and percentiles) per symbol, separated by chain and protocol where applicable. We also include time-series plots highlighting periods of persistent deviation and major outliers.
+
+\begin{figure}[h]
+\centering
+\fbox{\parbox{0.9\linewidth}{\centering Placeholder: deviation time-series plot (CEX price index vs. DEX execution price and deviation \%).}}
+\caption{CEX--DEX deviation over time (placeholder)}
+\end{figure}
+
+\section{Lead--Lag Analysis}
+We present cross-correlation function (CCF) plots and the lag value at which correlation peaks, indicating whether CEX prices lead DEX prices and by how much. Statistical testing results (e.g., Granger causality) are also reported where applicable.
+
+\begin{figure}[h]
+\centering
+\fbox{\parbox{0.9\linewidth}{\centering Placeholder: lead--lag cross-correlation plot (CCF) per symbol.}}
+\caption{Lead--lag cross-correlation between CEX and DEX returns (placeholder)}
+\end{figure}
+
+\section{Slippage and Execution Cost}
+We report empirical slippage distributions by trade size bin and compare them with theoretical AMM price impact estimates. Results are summarized with slippage curves (median and tail percentiles).
+
+\begin{figure}[h]
+\centering
+\fbox{\parbox{0.9\linewidth}{\centering Placeholder: slippage vs trade size curve (P50/P90/P99).}}
+\caption{Slippage as a function of trade size (placeholder)}
+\end{figure}
+
+\section{Liquidity Comparison}
+We compare CEX depth at $\pm0.5\%$, $\pm1\%$, and $\pm2\%$ to the effective DEX liquidity around the current price, and report liquidity ratios per symbol.
+
+\section{Dashboard Snapshot}
+We include dashboard screenshots and describe the interaction flow (pair selection, time-range selection, and displayed metrics).
+
+\chapter{CONCLUSION}
+This report presented an end-to-end system for monitoring and analyzing market microstructure differences between centralized and decentralized cryptocurrency exchanges. By combining a multi-exchange CEX price index with on-chain Uniswap V2/V3 trade monitoring across Ethereum and BSC, we enable consistent measurement of price deviations, lead--lag effects, and execution costs for BTC/USDT, ETH/USDT and BNB/USDT.
+
+As final plots and tables are incorporated, the report will quantify how closely DEX execution tracks the CEX reference price, how lead--lag behavior varies across market conditions, and how slippage scales with trade size under real-world conditions.
+
+\section{Limitations and Future Work}
+Key limitations include external dependency reliability (exchange APIs and RPC endpoints), incomplete coverage of on-chain transaction ordering effects, and the need for longer continuous datasets for stronger statistical significance. Future work includes improved MEV classification, broader DEX coverage, deeper liquidity measurement (CEX orderbook snapshots and Uniswap V3 liquidity distribution), and more robust model validation across regimes.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\appendix	
+\chapter{SAMPLE APPENDIX}
+Contents of the appendix.
+
+\end{document}
