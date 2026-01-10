@@ -3,7 +3,7 @@
 First run the exchange clients, which will update the live ticker prices, and price index to shared memory `.price_ix.data`.
 
 ```
-go run .
+go run . 2>> price-index.log
 ```
 
 Then open the streamlit app to view the dashboard:
