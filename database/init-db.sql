@@ -159,3 +159,39 @@ GRANT CONNECT ON DATABASE crypto_exchange TO cmpe492;
 GRANT USAGE ON SCHEMA public TO cmpe492;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO cmpe492;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO cmpe492;
+
+
+DROP VIEW IF EXISTS dex_trades;
+
+CREATE VIEW dex_trades AS
+SELECT
+    CASE
+        WHEN t1.symbol = 'USDT' THEN 'buy'
+        ELSE 'sell'
+    END AS side,
+
+    CASE
+        WHEN t1.symbol = 'USDT'
+            THEN t2.symbol || '/' || t1.symbol
+        ELSE
+            t1.symbol || '/' || t2.symbol
+    END AS symbol_pair,
+
+    CASE
+        WHEN t1.symbol = 'USDT'
+            THEN ds.amount_out      -- bought quantity
+        ELSE
+            ds.amount_in           -- sold quantity
+    END AS quantity,
+
+    CASE
+        WHEN t1.symbol = 'USDT'
+            THEN ds.amount_in       -- USDT spent
+        ELSE
+            ds.amount_out           -- USDT received
+    END AS notional,
+
+    ds.price
+FROM dex_swaps ds
+JOIN tokens t1 ON ds.token_in = t1.address
+JOIN tokens t2 ON ds.token_out = t2.address;
