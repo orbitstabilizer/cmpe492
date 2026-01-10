@@ -36,20 +36,25 @@ that have valid bid and ask prices for the specified symbol.
 If no valid prices are found, the price index is set to NaN.
 */
 func (s *ShmLayout) UpdatePriceIndex(symIx int) {
-	bidSum := 0.0
-	askSum := 0.0
+	sumPrice := 0.0
 	count := 0.0
 	for exchIx := 0; exchIx < int(schema.NUM_EXCHANGES); exchIx++ {
 		ticker := s.Tickers[exchIx][symIx]
-		if !math.IsNaN(ticker.Bid) && !math.IsNaN(ticker.Ask) {
-			midPrice := (ticker.Bid + ticker.Ask) / 2.0
-			bidSum += midPrice
-			askSum += midPrice
-			count += 1.0
+		// Check for valid prices and quantities
+		if !math.IsNaN(ticker.Bid) && !math.IsNaN(ticker.Ask) &&
+			!math.IsNaN(ticker.BidQty) && !math.IsNaN(ticker.AskQty) {
+
+			totalQty := ticker.BidQty + ticker.AskQty
+			if totalQty > 0 {
+				// Calculate VWAP (Volume Weighted Average Price) for this exchange
+				vwap := (ticker.Bid*ticker.BidQty + ticker.Ask*ticker.AskQty) / totalQty
+				sumPrice += vwap
+				count += 1.0
+			}
 		}
 	}
 	if count > 0 {
-		s.PriceIndices[symIx].Val = (bidSum + askSum) / (2.0 * count)
+		s.PriceIndices[symIx].Val = sumPrice / count
 		s.PriceIndices[symIx].Cnt = int(count)
 	} else {
 		s.PriceIndices[symIx].Val = math.NaN()
@@ -102,7 +107,12 @@ func main() {
 			if symIx >= NUM_SYMBOLS {
 				panic("NUM_SYMBOLS too small for exchange symbols")
 			}
-			shmData.Tickers[exchange][symIx] = schema.TickerData{Bid: math.NaN(), Ask: math.NaN()}
+			shmData.Tickers[exchange][symIx] = schema.TickerData{
+				Bid:    math.NaN(),
+				Ask:    math.NaN(),
+				BidQty: math.NaN(),
+				AskQty: math.NaN(),
+			}
 			shmData.PriceIndices[symIx].Val = math.NaN()
 		}
 		go ws.ConnectExchange(

@@ -27,8 +27,10 @@ func (e Exchange) String() string {
 }
 
 type TickerData struct {
-	Bid      float64
-	Ask      float64
+	Bid    float64
+	Ask    float64
+	BidQty float64
+	AskQty float64
 }
 
 type BinanceTicker struct {
@@ -134,41 +136,71 @@ func (t *TickerData) Parse(ticker any) {
 	case *BinanceTicker:
 		bid, _ := strconv.ParseFloat(v.B, 64)
 		ask, _ := strconv.ParseFloat(v.A, 64)
+		bidQty, _ := strconv.ParseFloat(v.BQty, 64)
+		askQty, _ := strconv.ParseFloat(v.AQty, 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *BybitTicker:
 		bid, _ := strconv.ParseFloat(v.Data.B[0][0], 64)
 		ask, _ := strconv.ParseFloat(v.Data.A[0][0], 64)
+		bidQty, _ := strconv.ParseFloat(v.Data.B[0][1], 64)
+		askQty, _ := strconv.ParseFloat(v.Data.A[0][1], 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *CoinbaseTicker:
 		bid, _ := strconv.ParseFloat(v.BestBid, 64)
 		ask, _ := strconv.ParseFloat(v.BestAsk, 64)
+		bidQty, _ := strconv.ParseFloat(v.BestBidSize, 64)
+		askQty, _ := strconv.ParseFloat(v.BestAskSize, 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *GateioTicker:
 		bid, _ := strconv.ParseFloat(v.Result.B, 64)
 		ask, _ := strconv.ParseFloat(v.Result.A, 64)
+		bidQty, _ := strconv.ParseFloat(v.Result.BQ, 64)
+		askQty, _ := strconv.ParseFloat(v.Result.AQ, 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *HTXTicker:
 		t.Bid = v.Tick.Bid
 		t.Ask = v.Tick.Ask
+		t.BidQty = v.Tick.BidSize
+		t.AskQty = v.Tick.AskSize
 	case *KucoinTicker:
 		bid, _ := strconv.ParseFloat(v.Data.BestBid, 64)
 		ask, _ := strconv.ParseFloat(v.Data.BestAsk, 64)
+		bidQty, _ := strconv.ParseFloat(v.Data.BestBidSize, 64)
+		askQty, _ := strconv.ParseFloat(v.Data.BestAskSize, 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *MexcTicker:
 		bid, _ := strconv.ParseFloat(v.Publicbookticker.BidPrice, 64)
 		ask, _ := strconv.ParseFloat(v.Publicbookticker.AskPrice, 64)
+		bidQty, _ := strconv.ParseFloat(v.Publicbookticker.BidQuantity, 64)
+		askQty, _ := strconv.ParseFloat(v.Publicbookticker.AskQuantity, 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	case *OKXTicker:
 		bid, _ := strconv.ParseFloat(v.Data[0].Bids[0][0], 64)
 		ask, _ := strconv.ParseFloat(v.Data[0].Asks[0][0], 64)
+		bidQty, _ := strconv.ParseFloat(v.Data[0].Bids[0][1], 64)
+		askQty, _ := strconv.ParseFloat(v.Data[0].Asks[0][1], 64)
 		t.Bid = bid
 		t.Ask = ask
+		t.BidQty = bidQty
+		t.AskQty = askQty
 	default:
 		// Handle unknown ticker type if necessary
 	}

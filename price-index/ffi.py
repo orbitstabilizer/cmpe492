@@ -31,10 +31,12 @@ class TickerData(ctypes.Structure):
     _fields_ = [
         ("Bid", ctypes.c_double),
         ("Ask", ctypes.c_double),
+        ("BidQty", ctypes.c_double),
+        ("AskQty", ctypes.c_double),
     ]
 
     def __repr__(self):
-        return f"TickerData(Bid={self.Bid}, Ask={self.Ask})"
+        return f"TickerData(Bid={self.Bid}, Ask={self.Ask}, BidQty={self.BidQty}, AskQty={self.AskQty})"
 
 
 class PriceIndex(ctypes.Structure):
@@ -100,7 +102,7 @@ symbol_to_value = {
 def get_ticker_dfs(ticker_data):
     return {
         sym.name:
-        pd.DataFrame(ticker_data[0][:, sym.value], index=exchanges, columns=['Bid', 'Ask'], # type: ignore
+        pd.DataFrame(ticker_data[0][:, sym.value], index=exchanges, columns=['Bid', 'Ask', 'BidQty', 'AskQty'], # type: ignore
                         copy=False)
         for sym in Symbols
     }
