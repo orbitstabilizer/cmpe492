@@ -41,6 +41,21 @@ These structural differences create measurable gaps in execution quality and inf
 
 This project builds an end-to-end monitoring and analysis system to quantify these dynamics using real-time data streams from both CEX and DEX venues.
 
+\subsection{CEX Orderbook Mechanics}
+Most major CEX spot markets use a central limit order book (CLOB). Participants submit \textit{limit orders} (resting bids/asks at specified prices) and \textit{market orders} (immediate execution against the best available opposite-side liquidity). The matching engine typically enforces \textbf{price--time priority}: better prices match first; for equal prices, earlier orders match first. The resulting best bid/ask defines the spread, and the mid-price (average of best bid and best ask) provides a simple reference for fair price estimation.
+
+Orderbook \textbf{market depth} (available quantity at/near the current price) largely determines execution quality: deeper books and tighter spreads yield lower slippage for a given trade size. In practice, this depth is sustained by a combination of professional market makers and broad participation, supported by low-latency infrastructure and high-throughput market data distribution~\cite{hasbrouck2007empirical,binance2024api}.
+
+\subsection{MEV and Transaction Ordering Effects}
+DEX trades are executed via blockchain transactions, which introduces an additional layer of execution cost not present in off-chain CEX matching: \textbf{transaction ordering}. On chains with a public mempool, pending swaps can be observed before inclusion in a block. Specialized actors (MEV ``searchers'') may reorder, insert, or bundle transactions to extract profit, for example through front-running/back-running and sandwich attacks~\cite{wu2025cex}.
+
+For AMM-based DEXs, this matters because the swap price is a deterministic function of pool state and trade size. If an attacker trades just before a victim swap (moving the pool price) and then trades back after, the victim experiences worse execution than predicted by the AMM price impact alone. Empirically, this appears as additional slippage and heavier tails in execution-cost distributions, especially around volatile periods or large trades. In our system, we treat these effects as part of the observed execution outcome and discuss how they can widen CEX--DEX deviations and distort measured slippage beyond theoretical curves.
+
+\subsection{On-Chain Orderbooks: Hyperliquid}
+While many DEXs rely on AMMs, some modern systems implement \textbf{on-chain orderbooks} to approximate CEX-style trading while retaining on-chain settlement. Hyperliquid is a prominent example: it provides rapid block times (sub-second) and integrates order matching into the chain's execution/consensus pipeline, enabling limit-order trading with low user friction~\cite{hyperliquid2024docs,yan2024hyperliquid}.
+
+This design changes the microstructure of decentralized trading. Compared with AMMs, execution quality depends more directly on orderbook depth rather than pool liquidity, and the system can reduce some forms of mempool-based MEV by altering transaction exposure and matching semantics. We include Hyperliquid as context for the broader design space of DEX market structures and to motivate why comparing ``DEX'' venues requires distinguishing AMM-based exchanges from orderbook-based decentralized trading systems.
+
 \section{Problem Statement and Objectives}
 
 The primary objective is to measure and explain cross-venue market dynamics between CEX and DEX markets for major cryptocurrency pairs. Specifically, we aim to:
@@ -103,8 +118,6 @@ Documentation & 12 & Final report and system docs & Complete \\ \hline
 \caption{Project timeline and deliverables}
 \end{table}
 
-\textbf{Effort.} Each team member contributed approximately 15--20 hours per week throughout the semester.
-
 \subsection{Success Criteria}
 \begin{table}[h]
 \begin{center}
@@ -125,7 +138,7 @@ Sample Size & Trades per pair & $\geq 10{,}000$ DEX trades \\ \hline
 \end{table}
 
 \subsection{Risk Analysis}
-\begin{table}[h]
+\begin{table}[H]
 \begin{center}
 \small
 \begin{tabular}{|p{3cm}|l|l|p{5cm}|}
@@ -145,11 +158,23 @@ Technical complexity & Medium & High & Modular design, incremental milestones \\
 \textbf{Team structure.} The three-member team divided responsibilities across three primary areas: CEX infrastructure (WebSocket connections, aggregation and price index), DEX infrastructure (on-chain monitoring, event parsing and pool tracking), and analysis/visualization (statistical modules and dashboard). We collaborated through a shared repository, consistent interfaces between modules, and iterative integration to ensure that collected data was usable for downstream analysis.
 
 \chapter{RELATED WORK}
-We summarize prior work on price discovery between CEX and DEX venues, liquidity and slippage analysis on AMM-based exchanges, and MEV-driven transaction costs.
+\section{Price Discovery Between CEX and DEX}
+Prior work has examined whether price discovery occurs primarily on CEX venues or whether DEX venues contribute meaningfully. Alexander et~al.\ study price discovery and efficiency between Uniswap pools and major centralized exchanges and find that DEXs can contribute to price formation under certain conditions, with behavior varying across pool versions and fee tiers~\cite{alexander2025uniswap}. Wu et~al.\ emphasize that cross-venue latency and market fragmentation create recurring short-lived discrepancies that are resolved by arbitrage activity~\cite{wu2025cex,buterin2014ethereum}.
 
-Studies on price discovery emphasize that CEX venues typically lead major asset price formation due to their larger trading volumes, but DEXs can contribute to price formation under specific conditions~\cite{alexander2025uniswap,wu2025cex}. Work on DEX market structure highlights that DEXs trade a wider set of assets but with substantially lower volume for established pairs~\cite{lehar2021dex}. Market reports quantify persistent volume and liquidity gaps between venues and provide practical reference metrics for depth comparisons~\cite{kaiko2024dex}.
+\section{DEX Market Structure and Liquidity}
+DEX market structure differs from CEXs not only in execution mechanism but also in asset coverage and volume concentration. Lehar and Parlour show that DEXs list many more tokens than major CEXs but handle substantially lower volume for established pairs, and that CEX listings often shift volume away from DEX-only trading~\cite{lehar2021dex}. Market reports similarly quantify persistent volume and liquidity gaps between CEX and DEX venues and provide practical depth and liquidity reference metrics~\cite{kaiko2024dex}.
 
-Slippage and transaction cost decomposition on Uniswap show that costs are driven by both benign price impact and adversarial ordering effects, with MEV significantly affecting execution outcomes especially around large swaps~\cite{capponi2024slippage}. Concentrated liquidity in Uniswap V3 enables capital efficiency but complicates liquidity measurement, motivating frameworks that treat V3 liquidity distribution similarly to an orderbook~\cite{adams2021uniswap,empirica2024liquidity}. Our work builds on these insights by implementing a real-time pipeline that measures deviation, lead--lag and slippage using consistent definitions across CEX and DEX data sources.
+\section{Liquidity and Slippage Analysis}
+Execution costs on AMM-based DEXs depend on local liquidity around the current price and increase nonlinearly with trade size. Empirica's framework highlights how concentrated liquidity affects effective depth and slippage, and motivates comparing Uniswap V3 liquidity distribution to an orderbook-like structure~\cite{empirica2024liquidity}. Related analyses note that for major pairs, CEX books often exhibit deeper liquidity at common depth thresholds, while aggregating multiple DEX pools and fee tiers can narrow the gap~\cite{kaiko2024dex,adams2021uniswap}.
+
+\section{MEV and Transaction Costs}
+Transaction costs on DEXs include both benign price impact and blockchain-specific frictions. Capponi et~al.\ decompose costs on Uniswap V3 and show that adversarial ordering effects can materially affect realized execution, especially for larger swaps~\cite{capponi2024slippage}. Recent work on CEX--DEX extracted value also highlights increasing centralization in the MEV supply chain (searchers/builders), which can affect who captures cross-venue arbitrage profits and under what conditions~\cite{wu2025cex}.
+
+\section{Existing Tools and Platforms}
+Commercial platforms (e.g., Kaiko) offer unified access to depth and market data across venues, while on-chain analytics platforms enable custom DEX queries and capital-flow summaries (e.g., DefiLlama)~\cite{kaiko2024dex,defillama2024tvl}. Open-source tooling demonstrates feasibility of multi-exchange streaming and arbitrage templates, but often targets execution rather than systematic measurement and reporting~\cite{solidquant2024arbitrage}.
+
+\section{Gap in Current Research}
+Despite a growing literature on price efficiency and arbitrage, there is limited work that integrates (i) a robust multi-venue CEX reference price, (ii) transaction-level DEX execution monitoring, and (iii) consistent metrics for deviation, lead--lag, and slippage in an end-to-end system suitable for continuous monitoring and reproducible retrospective analysis. Our project targets this gap by combining real-time data collection, database-backed storage, and a modular analysis engine that produces report-ready outputs.
 
 \chapter{METHODOLOGY}
 \section{CEX Price Index Calculation}
@@ -241,6 +266,29 @@ This chapter specifies the functional and non-functional requirements for the CM
 
 \textbf{NFR4: Reproducibility.} The system shall support reproducible analysis by persisting raw observations and providing deterministic analysis scripts for generating results.
 
+\section{Use Cases}
+This section summarizes representative end-to-end use cases supported by the system.
+
+\subsection{UC1: Monitor Real-Time Price Deviation}
+\textbf{Primary actor}: Research analyst. \textbf{Preconditions}: collectors and database are running.
+The user selects a trading pair and time range in the dashboard. The system displays the current CEX price index, the latest DEX execution price, and the current deviation, together with short-horizon aggregates (e.g., 5-minute and 1-hour averages) to contextualize transient spikes.
+\textbf{Postconditions}: the user can observe real-time alignment between venues and identify abnormal divergence periods.
+
+\subsection{UC2: Analyze Historical Lead--Lag Relationship}
+\textbf{Primary actor}: Research analyst. \textbf{Preconditions}: sufficient historical data is available.
+The user selects a pair and a historical window. The system computes a cross-correlation function over returns and reports the lag at which correlation peaks; when enabled, it also reports statistical testing outputs (e.g., Granger causality p-values) to support interpretation.
+\textbf{Postconditions}: the user obtains a quantitative estimate of information flow direction and characteristic lag.
+
+\subsection{UC3: Estimate Slippage for a Planned Trade}
+\textbf{Primary actor}: DEX trader / bot designer. \textbf{Preconditions}: slippage statistics or models have been generated for the target pool/pair.
+The user inputs trade direction and size and selects a pool. The system returns theoretical AMM price impact from current pool state and empirical slippage ranges from historical trades (e.g., P50/P90/P99) for comparable sizes.
+\textbf{Postconditions}: the user can estimate execution cost before submitting an on-chain transaction.
+
+\subsection{UC4: Compare CEX vs DEX Liquidity}
+\textbf{Primary actor}: Research analyst / liquidity provider. \textbf{Preconditions}: required liquidity data sources are available.
+The user selects a pair and compares CEX depth (aggregated across exchanges) against DEX effective liquidity around the current price. Liquidity ratios are summarized at standardized thresholds (e.g., $\pm 0.5\%$, $\pm 1\%$, $\pm 2\%$) to make the comparison comparable across venues and time.
+\textbf{Postconditions}: the user can evaluate relative execution quality and capital efficiency across venue types.
+
 \chapter{DESIGN}
 
 \section{Information Structure}
@@ -276,8 +324,14 @@ The system runs two primary real-time ingestion streams in parallel:
 
 Deviation calculation and analysis jobs operate on the persisted time-series to generate results for visualization and reporting.
 
-\subsection{Diagrams}
-Activity and sequence diagrams document the real-time processing steps: ticker ingestion $\rightarrow$ index calculation $\rightarrow$ swap ingestion $\rightarrow$ deviation calculation $\rightarrow$ analysis.
+\subsection{Activity Diagram: Real-Time Price Deviation Monitoring}
+The CEX stream continuously ingests best bid/ask updates from multiple venues and updates the reference price index whenever fresh data arrives. The DEX stream ingests on-chain Swap events as new blocks are produced and computes an execution price per trade. For each swap, the system queries the nearest contemporaneous CEX price index value in a narrow time window around the trade timestamp, computes deviation, persists both raw and derived records, and updates aggregate statistics used by the dashboard.
+
+\subsection{Sequence Diagram: Price Index Calculation}
+For a given symbol, the price index module collects per-exchange ticker snapshots, filters stale or anomalous inputs, and computes a volume-weighted reference price using mid-prices. The computed index value is persisted to the database with metadata (e.g., number of contributing venues) and optionally published for real-time visualization.
+
+\subsection{Sequence Diagram: DEX Trade Processing}
+When a swap is observed on-chain, the listener parses event fields, normalizes token amounts, and computes execution price. The system then matches the trade time to the closest CEX index observation, computes deviation, and stores the resulting record. Downstream analysis modules consume these stored observations to compute distributions, correlations, and slippage summaries.
 
 \section{System Design}
 \subsection{Component Architecture}
@@ -296,7 +350,16 @@ The system is structured as modular components:
 All components communicate through the database schema (and optionally a shared-memory buffer for live dashboard display). This enables independent operation and simplifies recovery: collectors can restart without breaking analysis jobs as long as data is persisted.
 
 \section{User Interface Design (if applicable)}
-This section describes the dashboard UI that visualizes the real-time price index and analysis outputs.
+The system provides a Streamlit dashboard for monitoring the price index and inspecting analysis outputs interactively.
+
+\subsection{Dashboard Layout}
+The dashboard header includes trading pair selection, time range selection, and network/protocol filters where applicable. The main area is organized into tabs: (i) real-time monitoring (index vs latest DEX trade and deviation), (ii) lead--lag analysis (CCF plot and summary statistics), (iii) liquidity comparison (depth/liquidity views and ratios), (iv) slippage analysis (slippage curves and percentiles), and (v) volume analysis (time-series and distribution plots).
+
+\subsection{Interaction Patterns}
+Charts support hover tooltips for exact values and timestamps, zooming/drag selection for focusing on sub-periods, and export of plots/data (e.g., CSV, PNG) for reporting. Auto-refresh can be enabled for real-time monitoring while keeping historical analysis views stable.
+
+\subsection{Visual Design Principles}
+Visual encoding is kept consistent across views: CEX series use one primary color, DEX series use another, and deviations are highlighted to emphasize divergence periods. Numerical displays use aligned formatting for readability, and secondary controls are grouped to reduce clutter.
 
 \chapter{IMPLEMENTATION AND TESTING}
 \label{chap:implementation}
